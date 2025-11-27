@@ -1,12 +1,12 @@
 [project]
 name = "slumber"
 version = "0.1.0"
-description = "Add your description here"
+description = "Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings"
 readme = "README.md"
 authors = [
-    { name = "Ali Saberi", email = "ali.saberi@radboudumc.nl" }
+    { name = "Ali Saberi", email = "ali.saberi96@gmail.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 dependencies = []
 
 [project.scripts]
