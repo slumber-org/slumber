@@ -1,17 +1,27 @@
-# Welcome to MkDocs
+# Welcome to SLUMBER
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+SLUMBER (**S**leep **L**ogging and **U**nsupervised **M**onitoring through **B**io**E**lectrical **R**ecordings) is an open-source, Python-based framework designed for conducting sleep studies outside of the laboratory environment.
 
-## Commands
+## Why use SLUMBER?
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+Traditional sleep studies often rely on in-lab supervision and fixed-infrastructure hardware. SLUMBER provides a flexible alternative by offering:
 
-## Project layout
+- Real-time acquisition of physiological signals through wearable devices
+- Automated guidance for study participants through calibration, instructions, and nightly procedures
+- Configurable experimental protocols, including multi-night scheduling and condition assignment
+- Support for stimulus delivery (e.g., sound) during sleep based on incoming physiological data
+- Integrated logging for reproducibility, data auditing, and study validation
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+SLUMBER is intended for researchers who want to run controlled studies in naturalistic (home-based) environments, without direct supervision.
+
+---
+
+## Getting Started
+
+For detailed setup instructions, refer to the [Installation and Setup](tutorial/installation-setup.md) guide.
+
+---
+
+## Documentation Overview
+
+
