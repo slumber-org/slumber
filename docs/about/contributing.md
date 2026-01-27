@@ -1,0 +1,149 @@
+# Contributing to SLUMBER
+
+Thanks for helping improve SLUMBER. Contributions are welcome, including:
+
+- Code changes via pull requests
+- Documentation improvements
+- Bug reports and feature requests
+
+## Setup
+
+### Prerequisites
+
+- **Python**: SLUMBER supports Python **3.10+**; for local development we recommend **Python 3.12+**.
+- **uv**: Install the [uv](https://docs.astral.sh/uv/) package manager.
+
+### Installation
+
+1\. Clone the repository
+
+```bash
+git clone https://github.com/slumber-org/slumber.git
+cd slumber
+```
+
+2\. Install dependencies
+
+```bash
+uv sync
+```
+
+3\. Set up pre-commit hooks
+
+```bash
+uv run pre-commit install
+```
+
+## Git Flow
+
+This project follows [Git Flow](https://davidregalado255.medium.com/what-is-gitflow-b3396770cd42) for branching and releases.
+
+### Branches
+
+- **`main`**: production-ready, stable code (release and hotfix merges only).
+- **`develop`**: integration branch for ongoing work; base for feature and release branches.
+- **`feature/<name>`**: new features branched from `develop`.
+- **`bugfix/<name>`**: non-urgent bug fixes branched from `develop`.
+- **`docs/<name>`**: documentation-only changes branched from `develop`.
+- **`release/<version>`**: stabilization branches cut from `develop` to prepare a release.
+- **`hotfix/<name>`**: urgent production fixes branched from `main` and merged back to both `main` and `develop`.
+
+### Development workflow
+
+1. Update your local `develop` from the remote `develop`.
+2. Create a `feature/`, `bugfix/`, or `docs/` branch from `develop`.
+3. Make your changes and commit them on your branch.
+4. Squash (or fix up) commits as needed, then open a PR from your branch into `develop`.
+
+#### Tips and Conventions
+
+- Commit messages should start with a **capitalized action verb** (imperative) and be descriptive, e.g. `Add logging for debug output`, `Fix crash on empty config`, `Update contributing guide`.
+- Rebase your branch on the latest `develop` to minimize merge conflicts.
+- Make PR titles/descriptions clear and request review from the appropriate reviewer(s).
+- Address review feedback with follow-up commits (e.g. `Address review feedback (round 2)`) and push updates to the same branch.
+- Keep PRs focused; avoid bundling unrelated changes.
+
+## Linting and Formatting
+
+SLUMBER uses [Ruff](https://docs.astral.sh/ruff/) for both linting and code formatting. If you've set up pre-commit hooks, linting and formatting will run automatically before each commit.
+
+### Run the linter
+
+```bash
+uv run ruff check .
+```
+
+Fix issues automatically when possible:
+
+```bash
+uv run ruff check --fix .
+```
+
+### Format code
+
+```bash
+uv run ruff format .
+```
+
+### Pre-commit (manual run)
+
+You can also run all pre-commit checks manually:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+## Documentation
+
+This repo uses [MkDocs](https://www.mkdocs.org/) for documentation.
+
+Serve docs locally:
+
+```bash
+uv run mkdocs serve
+```
+
+### Main documentation sections
+
+The documentation is organized into the following high-level sections:
+
+- **Home**  
+  High-level introduction to SLUMBER and its purpose.
+
+- **Getting Started**  
+  Minimal steps required to install dependencies and run the project for the first time.
+
+- **User Guide**  
+  Usage-focused documentation describing how to work with SLUMBER from a user perspective (e.g., running sessions, configuration, common workflows).
+
+- **Developer Guide**  
+  Information for contributors and developers, including documentation conventions, development setup, testing, and internal design notes.
+
+- **About**  
+  Project background, contributing guidelines, release notes, citation information, and references.
+
+
+### Docstrings
+
+All public modules, functions, classes, and methods should include docstrings. SLUMBER follows the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for docstring formatting.
+
+Where appropriate, API and reference documentation should be generated automatically using **MkDocstrings**. Auto-generated reference documentation is intended to complement narrative documentation, not replace it.
+
+### Writing conventions
+
+- Use **kebab-case** for file names (e.g., `installation-setup.md`)
+- Place files in the appropriate subfolder under `docs/`
+- Use a single top-level heading (`#`) per page
+- Use `##`, `###`, etc. for subsections
+- Use **relative links** when linking between documentation pages
+- Keep paths stable to avoid broken links
+- Use fenced code blocks with a language identifier where possible:
+
+```python
+def example_function():
+    pass
+```
+
+- Keep pages focused and concise
+- Prefer multiple small pages over one very long page
+- Write in clear, direct language

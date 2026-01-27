@@ -20,6 +20,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     {include-group = "lint"},
+    {include-group = "docs"},
     "pre-commit>=4.5.0",
 ]
 lint = [
@@ -31,3 +32,10 @@ docs = [
 
 [tool.uv.dependency-groups]
 dev = {requires-python = ">=3.12"}
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
