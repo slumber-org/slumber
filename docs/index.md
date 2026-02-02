@@ -16,12 +16,12 @@ SLUMBER is intended for researchers who want to run controlled studies in natura
 
 ---
 
-## Getting Started
+## Getting started
 
-For detailed setup instructions, refer to the [Installation and Setup](tutorial/installation-setup.md) guide.
+For detailed setup instructions, refer to the [Installation and Setup](getting-started/installation-setup.md) guide.
 
 ---
 
-## Documentation Overview
+## Documentation overview
 
 

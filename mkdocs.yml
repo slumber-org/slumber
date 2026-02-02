@@ -3,21 +3,14 @@ site_name: SLUMBER
 nav:
   - Home: index.md
 
-  - Tutorial:
-      - Installation and Setup: tutorial/installation-setup.md
-      - Running Your First Session: tutorial/first-session.md
+  - Getting Started:
+      - Installation and Setup: getting-started/installation-setup.md
 
-  - How-To Guides:
-      - Create and Manage Participants: howto/create-manage-participants.md
-      - Set Experimental Conditions: howto/experiment-conditions.md
-
-  - Reference:
-      - Study Configuration Format: reference/config.md
-      - Data Storage Format: reference/storage.md
-
+  - User Guide: 
+      - (coming later)
+  
   - Developer Guide:
-      - Codebase Overview: developer-guide/codebase-overview.md
-      - Architecture: developer-guide/architecture.md
-      - Testing & CI/CD: developer-guide/testing-ci-cd.md
+      - Documentation: developer-guide/documentation.md
 
-  - FAQ: faq.md
+  - About:
+      - (coming later)
