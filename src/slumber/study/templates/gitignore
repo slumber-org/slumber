@@ -1,0 +1,4 @@
+
+# Slumber env files (secrets)
+.env
+.env.*

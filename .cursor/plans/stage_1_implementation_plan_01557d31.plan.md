@@ -1,13 +1,13 @@
 ---
 name: Stage 1 Implementation Plan
-overview: "A task-by-task plan for Stage 1 (core contract: schemas, CLI, plugin system, Supabase database + auth) where each task yields one PR with tests and docs, and refactors/generalizes functionality from the legacy codebase at `/Users/alisaberi/Desktop/Projects/slumber`."
+overview: "A task-by-task plan for Stage 1 (core contract: schemas, CLI, plugin system, Supabase database + auth) where each task yields one PR with tests and docs. Extensions (slumber.ext.*) are out of scope. Implementation refactors/generalizes from the legacy codebase at /Users/alisaberi/Desktop/Projects/slumber."
 todos:
   - id: task-1-core-schemas
     content: Core schemas (Study, Condition, Procedure/Task, DAG) — Pydantic schemas + tests + schema docs; one PR.
     status: completed
   - id: task-2-study-init
     content: Study folder structure and slumber study init — layout, init wizard, .gitignore/.env.example, tests, docs; one PR.
-    status: pending
+    status: completed
   - id: task-3-config-load-validate
     content: Config loading and validation — study discovery, load conditions, validate command, pretty errors, tests, docs; one PR.
     status: pending
@@ -37,7 +37,7 @@ isProject: false
 
 # Stage 1 — Implementation plan (one PR per task)
 
-Stage 1 establishes the core contract: **schemas**, **study folder + init**, **config loading/validation**, **plugin registry**, **Supabase backend** (Postgres + Auth), **CLI** (init, validate, run, doctor, db, auth, participants, sessions, condition sync), **run layout/logging**, and **minimal run + Sentry**. Each task below is scoped to **one meaningful PR** with tests and documentation. Implementation refactors and generalizes behavior from the **legacy repo** at `/Users/alisaberi/Desktop/Projects/slumber`.
+Stage 1 establishes the **core** (single framework package): schemas, study folder + init, config loading/validation, plugin registry, Supabase backend (Postgres + Auth), CLI, condition sync, run layout/logging, and minimal run + Sentry. **Extensions** (`slumber.ext.`*) are out of scope. Each task below is scoped to **one meaningful PR** with tests and documentation. Implementation refactors and generalizes behavior from the **legacy repo** at `/Users/alisaberi/Desktop/Projects/slumber`.
 
 ---
 
@@ -264,7 +264,7 @@ flowchart LR
 
 
 
-- **Task 1** is the base (schemas used everywhere).
+- **Task 1** (schemas) is the foundation — used by all other tasks.
 - **Tasks 2, 4** depend only on Task 1; **Task 3** (load/validate) depends on 1, 2, 4.
 - **Task 5** (DB) is independent of 2–4; **Task 6** (Auth/CRUD) and **Task 7** (condition sync) depend on 5.
 - **Task 8** (CLI/doctor) uses 2, 3, 6.

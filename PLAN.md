@@ -6,7 +6,7 @@ This page tracks the staged refactor from the legacy study codebase into a gener
 
 - **Target repo**: this repository (`slumber-org/slumber`) is the canonical framework.
 - **Researcher-first UX**: study setup should be mostly declarative (YAML), understandable with minimal coding.
-- **Core vs extensions**: core contains only study orchestration + config/schema + plugin APIs; device integrations, heavy ML/processing, visualization, and participant UI live in optional extensions.
+- **Core vs extensions**: **core** is the framework package (schemas, CLI, plugin registry, backend, orchestration, templates); **extensions** (Django-app style) add optional tasks, units, schemas, and dependencies (devices, processing, UI, visualization).
 - **Backbone**: keep `ezmsg` as the processing backbone.
 - **Participant UI**: prioritize a **Python-first UI** with good DX and feature parity with the legacy Qt UI. Recommendation: ship a **NiceGUI** participant UI extension first, while keeping the core UI-agnostic.
 - **Backend**: **Supabase** as the default backend (auth, Postgres, storage, optional realtime). Researchers who prefer not to use the Supabase platform can run **Supabase locally** (CLI for dev, or self-hosted Docker for their own instance).
@@ -35,7 +35,7 @@ The framework helps researchers **set up and run their project** and **ship an i
    - Participant app connects to the researcher’s Supabase backend (cloud or self-hosted) for auth and syncing.
    - Participants **log in** (Supabase Auth); they **read** assigned sessions/conditions from the backend and **upload** run data. Optional local cache for offline runs, syncing when online.
 
-This document’s staged plan below details how the core (schemas, Supabase backend, CLI, plugins) and later stages (UI, devices, sync, packaging) support this workflow.
+This document’s staged plan below details how the core (schemas, Supabase backend, CLI, plugin system, templates) and later stages (extensions: UI, devices, sync, packaging) support this workflow.
 
 ### Backend options (Supabase)
 
@@ -55,25 +55,43 @@ The legacy codebase already demonstrates a useful pattern we’ll preserve:
 - GUI procedures are expressed as an ordered list of **tasks** (instructions, surveys, device steps, calibrations)
 - DAG pipelines are expressed as a list of **components** (units + settings) and **connections** (stream wiring)
 
-## Target architecture (core + plugin extensions)
+## Target architecture (core + extensions)
 
 - **Researcher side**: config-driven study (conditions, participants, sessions); **Supabase** as backend (cloud or local/self-hosted) for dev and prod; CLI and tooling to init, validate, and run studies.
 - **Participant side**: **installed app on participant laptops**; login via **Supabase Auth**; **reads** conditions/participants/sessions from Supabase; **uploads** run data; optional local cache for offline runs with sync when online.
 
-- **Core package (`src/slumber/`)** responsibilities:
-  - **Config schemas** (Pydantic): Study/Condition, Procedure/Task, DAG (units/connections/process_components)
-  - **Backend abstraction**: Supabase client (Postgres, Auth, Storage, optional Realtime); same API whether cloud or local/self-hosted; migrations (Supabase migrations or Alembic against Postgres).
-  - **Authentication**: Supabase Auth for users/participants; session and participant identity aligned with Supabase (e.g. custom claims or `participants` table linked to `auth.users`).
-  - **Plugin API**: discover/register units, tasks, UIs, devices
-  - **Orchestration**: validate/run configs; run directories; logging/audit (via **loguru**); reproducible metadata
-  - **Monitoring (optional)**: **Sentry** integration for error and performance monitoring when a study is run (researcher-run and participant app); opt-in via `SENTRY_DSN` in env; context (study_id, participant_id, session_id) set where available.
-  - **Stable public API** for extension authors
-  - **Packaging/ship**: support for building an installable participant app (e.g. PyInstaller, or `pip` + study bundle) that connects to the researcher’s configured Supabase backend.
-- **Extensions** (initially in-repo modules; may later be split into separate repos):
-  - `slumber.ext.devices.*`: devices (ZMax, Polar, etc.)
-  - `slumber.ext.processing.*`: pipelines (sleep scoring, detectors)
-  - `slumber.ext.ui.nicegui`: participant app + task library
-  - `slumber.ext.visualization.*`: dashboards/plotting
+The framework is organized in two layers (similar in spirit to Django’s core vs apps):
+
+### Package layout
+
+| Layer | Package | Role |
+|-------|---------|------|
+| **Core** | `slumber` (`src/slumber/`) | The framework: config schemas (Study/Condition, Procedure/Task, DAG), plugin registry and discovery (entry points), CLI (study init/validate/run, doctor, auth, participants, sessions, condition sync), backend abstraction (Supabase), orchestration, default study templates, run layout/logging, optional Sentry, packaging. Everything a study needs without extensions. |
+| **Extensions** | `slumber.ext.*` | Optional, self-contained feature sets (Django-app style). Each extension can introduce its own **tasks**, **units**, **schemas**, and **dependencies**. Registered via the core plugin API. |
+
+Dependency direction: **core** ← **each extension**. Extensions depend on core; core does not depend on extensions.
+
+### Core responsibilities (`slumber`)
+
+- **Config schemas** (Pydantic): Study/Condition, Procedure/Task, DAG (units/connections/process_components).
+- **Plugin API**: discover and register units, tasks, UIs, devices (e.g. Python entry points); stable contracts for extension authors.
+- **Backend abstraction**: Supabase client (Postgres, Auth, Storage, optional Realtime); same API whether cloud or local/self-hosted; migrations (Supabase migrations or Alembic against Postgres).
+- **Authentication**: Supabase Auth for users/participants; session and participant identity aligned with Supabase (e.g. custom claims or `participants` table linked to `auth.users`).
+- **Orchestration**: validate/run configs; run directories; logging/audit (via **loguru**); reproducible metadata.
+- **CLI**: study init, validate, run, doctor; backend, auth, participants, sessions, condition sync.
+- **Default templates**: study folder layout, `study.yaml` template, conditions layout.
+- **Monitoring (optional)**: **Sentry** integration for error and performance monitoring when a study is run (researcher-run and participant app); opt-in via `SENTRY_DSN` in env; context (study_id, participant_id, session_id) set where available.
+- **Packaging/ship**: support for building an installable participant app (e.g. PyInstaller, or `pip` + study bundle) that connects to the researcher’s configured Supabase backend.
+
+### Extensions (Django-app style)
+
+Extensions (initially in-repo under `slumber.ext.*`; may later be split into separate repos) are self-contained: each can bring its own **tasks**, **units**, **schemas**, and **dependencies**. Examples:
+
+- **`slumber.ext.devices.zmax`**: ZMax device integration — ZMax-specific tasks (e.g. connection widget), units (data receiver), schemas (device config), and optional pip dependencies.
+- **`slumber.ext.devices.polar`**: Polar device (same pattern).
+- **`slumber.ext.processing.*`**: pipelines (sleep scoring, detectors) — their units and schemas.
+- **`slumber.ext.ui.nicegui`**: participant app shell + task library (instruction, survey, device widgets, etc.).
+- **`slumber.ext.visualization.*`**: dashboards/plotting.
 
 ## Staged refactor plan
 
