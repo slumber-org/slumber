@@ -6,11 +6,12 @@ nav:
   - Getting Started:
       - Installation and Setup: getting-started/installation-setup.md
 
-  - User Guide: 
-      - (coming later)
+  - User Guide:
+      - Overview: user-guide/index.md
   
   - Developer Guide:
-      - (coming later)
+      - Overview: developer-guide/index.md
 
   - About:
       - Contributing: about/contributing.md
+      - Legacy reference: about/legacy-reference.md

@@ -1,0 +1,64 @@
+---
+description: Legacy code reference and migration guidance
+globs: **/*
+alwaysApply: true
+---
+
+# Legacy reference (LD induction study code)
+
+This repository (`slumber-org/slumber`) is the **new canonical framework**.
+
+The original SLUMBER codebase was built for a specific LD (lucid dreaming) induction study and contains a mature end-to-end implementation (devices, `ezmsg` DAG wiring, and a participant-facing GUI). We keep it as a **reference and migration source**, but **do not treat it as the framework baseline**.
+
+## Where the legacy code lives
+
+- Legacy repository: `https://github.com/alitsaberi/slumber`
+- Legacy local path: `/Users/alisaberi/Desktop/Projects/slumber` (for local reference during migration)
+- Notable legacy characteristics:
+  - Participant-facing UI built with **Qt/PySide6**
+  - Study logic expressed largely via **YAML configs** that couple GUI procedures + DAG components
+  - `ezmsg` used as the processing backbone
+
+## CRITICAL: When refactoring or implementing features
+
+**Before refactoring or implementing any feature, you MUST:**
+
+1. **Check the legacy codebase** at `/Users/alisaberi/Desktop/Projects/slumber` for existing implementations
+2. **Search for related functionality** in the legacy code to understand:
+   - What features exist
+   - How they're implemented
+   - What edge cases or important details might be present
+   - What patterns or structures should be preserved
+3. **Compare implementations** to ensure feature parity and that important aspects aren't lost
+4. **Reference legacy code** when defining APIs, schemas, or interfaces to ensure compatibility
+
+**How to check legacy code:**
+- Use `read_file` with absolute paths: `/Users/alisaberi/Desktop/Projects/slumber/path/to/file.py`
+- Use `grep` to search across the legacy codebase: `grep -r "pattern" /Users/alisaberi/Desktop/Projects/slumber`
+- Use `codebase_search` with `target_directories` pointing to the legacy path
+- Browse the legacy directory structure to understand organization
+
+**Example workflow:**
+- If refactoring "task widgets", first check `/Users/alisaberi/Desktop/Projects/slumber/slumber/tasks/` to see what exists
+- If implementing "sleep scoring", check `/Users/alisaberi/Desktop/Projects/slumber/slumber/dag/units/` for legacy implementations
+- If working on "config schemas", review legacy YAML configs in `/Users/alisaberi/Desktop/Projects/slumber/`
+
+## How we use the legacy repo during migration
+
+- **Feature parity checklist**: we validate that the framework covers what the legacy study needed (procedures, surveys, device connection, calibration, sleep scoring, cueing, logging).
+- **Reference implementations**: legacy task widgets and DAG units serve as examples when defining stable extension APIs in the framework.
+- **Config migration**: we'll provide a migration guide mapping legacy `condition_*.yaml` style configs into the framework's Study/Condition format.
+
+## What should (and should not) be ported
+
+- **Port into core** (only if broadly useful):
+  - config schemas and validation patterns
+  - plugin/extension interfaces
+  - logging/audit structures
+  - orchestration primitives (run directories, session metadata)
+- **Port as extensions**:
+  - device integrations (ZMax, Polar, etc.)
+  - heavy processing pipelines (sleep scoring models, detectors)
+  - participant UI implementations (NiceGUI first; Qt may remain as a legacy extension if needed)
+- **Keep legacy-only**:
+  - study-specific copy, instructions, surveys, and tuning parameters that are not generally applicable

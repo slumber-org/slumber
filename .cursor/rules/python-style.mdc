@@ -1,0 +1,49 @@
+---
+description: Python coding style, structure, and DRY guidance
+globs: **/*.py
+alwaysApply: true
+---
+
+## Python style (repo-wide)
+
+- **Structure & boundaries**
+  - Keep **modules, classes, and functions small** and single-purpose; split when responsibilities diverge.
+  - Prefer a **clear module hierarchy** under `src/slumber/` (domain-first), not "mega" modules.
+  - Avoid deep import spaghetti; introduce intermediate modules or interfaces when needed.
+
+- **Naming**
+  - Use **complete, meaningful names**; avoid unclear abbreviations.
+  - Distinguish scope by convention:
+    - **Constants**: `UPPER_SNAKE_CASE`
+    - **Module-private**: leading underscore (e.g. `_parse_header`)
+    - **Instance-private**: `self._field` (do not expose implicitly)
+  - Prefer verbs for functions (`load_records`) and nouns for types (`RecordLoader`).
+
+- **APIs, typing, and docstrings**
+  - Use **type hints** for public functions/classes and non-trivial internals.
+  - Use **Google-style docstrings** (this repo enforces it via Ruff pydocstyle `convention = "google"`).
+  - Docstrings should explain **intent/contract** (Args/Returns/Raises), not restate obvious code.
+
+- **Comments & TODOs**
+  - Write **only necessary comments** (non-obvious rationale, trade-offs, constraints).
+  - Use **`TODO:`** for follow-ups (this repo enforces TODO style; don't use `FIXME`/`XXX`).
+
+- **Utilities placement**
+  - Put cross-cutting helpers in `src/slumber/utils/` (used broadly across the codebase).
+  - If a helper is only used within a specific subsystem, **co-locate** it in that subsystem
+    (e.g. `src/slumber/<submodule>/utils.py` or `src/slumber/<submodule>/utils/`).
+  - Avoid "misc" util dumping; utilities should have a clear, stable purpose.
+
+- **Logging**
+  - Use **loguru** for application logging (`from loguru import logger`). Do not use stdlib `logging` in new code.
+  - **CLI and orchestration**: default log level; expose a **verbose** option (e.g. `-v` / `--verbose`) on CLI commands for increased verbosity.
+  - **Run** (study run / participant app): configure logging from **study settings** via `runs.logging`: a **handlers** list of dicts, each passed as kwargs to loguru `logger.add()` (sink, level, format, rotation, retention, compression, etc.); support placeholders in sink paths (e.g. `run_id`).
+
+- **DRY (including tests)**
+  - Do not duplicate logic; **extract shared code** into reusable helpers/modules when it improves clarity.
+  - In tests, avoid copy/paste setup: prefer **shared fixtures** (`tests/conftest.py`) and parametrization.
+  - Keep fixtures focused and composable; don't build overly generic "god fixtures".
+
+- **Quality bar**
+  - Prefer explicit errors and validated inputs over silent fallbacks.
+  - Keep I/O at the edges; keep core logic pure/testable when practical.
