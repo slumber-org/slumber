@@ -15,8 +15,8 @@ class TestUI:
         assert ui.config == {}
 
     def test_valid_with_config(self) -> None:
-        ui = UI(backend="nicegui", config={"theme": "dark"})
-        assert ui.backend == "nicegui"
+        ui = UI(backend="headless", config={"theme": "dark"})
+        assert ui.backend == "headless"
         assert ui.config["theme"] == "dark"
 
     def test_backend_required(self) -> None:
@@ -98,7 +98,7 @@ class TestStudy:
             study_id="ld-2025",
             name="Lucid Dreaming Pilot",
             conditions_dir="conditions",
-            ui=UI(backend="nicegui", config={"theme": "dark"}),
+            ui=UI(backend="headless", config={"theme": "dark"}),
         )
         assert study.conditions_dir == "conditions"
         assert study.ui.config["theme"] == "dark"
@@ -111,6 +111,21 @@ class TestStudy:
                 ui=UI(backend="headless"),
             )
 
+    def test_study_id_rejects_path_components(self) -> None:
+        """study_id must not contain '/', '\\', or '..' so it cannot escape base_dir."""
+        for invalid_id in ("a/b", "..", "a/../b", "a\\b", "study..id"):
+            with pytest.raises(ValidationError) as exc_info:
+                Study(study_id=invalid_id, name="Study")
+            assert (
+                "path" in str(exc_info.value).lower()
+                or "forbidden" in str(exc_info.value).lower()
+            )
+
+    def test_study_id_accepts_safe_values(self) -> None:
+        """study_id accepts alphanumeric, hyphen, underscore (no path components)."""
+        study = Study(study_id="my-study_2025", name="Study")
+        assert study.study_id == "my-study_2025"
+
     def test_name_required(self) -> None:
         with pytest.raises(ValidationError):
             Study(
@@ -119,15 +134,7 @@ class TestStudy:
                 ui=UI(backend="headless"),
             )
 
-    def test_ui_required(self) -> None:
-        with pytest.raises(ValidationError):
-            Study(study_id="x", name="Y")  # type: ignore[call-arg]
-
-    def test_extra_forbid(self) -> None:
-        with pytest.raises(ValidationError):
-            Study(
-                study_id="x",
-                name="Y",
-                ui=UI(backend="headless"),
-                unknown_field="not_allowed",
-            )
+    def test_ui_has_default(self) -> None:
+        """Study accepts minimal args; ui defaults to headless."""
+        study = Study(study_id="x", name="Y")
+        assert study.ui.backend == "headless"

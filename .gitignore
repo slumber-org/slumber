@@ -11,3 +11,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Slumber env files (secrets)
+.env
+.env.*

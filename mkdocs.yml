@@ -8,6 +8,7 @@ nav:
 
   - User Guide:
       - Overview: user-guide/index.md
+      - Study Setup: user-guide/study-setup.md
   
   - Reference:
       - Schemas: reference/schemas.md

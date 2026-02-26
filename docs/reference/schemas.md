@@ -19,7 +19,7 @@ The study manifest describes a single study: identity, where conditions live, ru
 
 **RunLoggingConfig**: `level` (default `INFO`), `handlers` (list of handler configs; each is kwargs for `logger.add()`). Sink paths may use placeholders (e.g. `run_id`) substituted at run start.
 
-**UI**: `backend` (plugin key, e.g. `headless`, `nicegui`), `config` (optional dict for the backend).
+**UI**: `backend` (plugin key; currently only `headless`), `config` (optional dict for the backend).
 
 Extra keys in the manifest are forbidden.
 

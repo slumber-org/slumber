@@ -1,2 +1,5 @@
 def main() -> None:
-    print("Hello from slumber!")
+    """CLI entry point."""
+    from slumber.cli.main import app
+
+    app()
