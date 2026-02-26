@@ -9,8 +9,8 @@ nav:
   - User Guide:
       - Overview: user-guide/index.md
   
-  - Developer Guide:
-      - Overview: developer-guide/index.md
+  - Reference:
+      - Schemas: reference/schemas.md
 
   - About:
       - Contributing: about/contributing.md

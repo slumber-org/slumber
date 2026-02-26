@@ -27,10 +27,3 @@ For detailed setup instructions, refer to the [Installation and Setup](getting-s
 If you’re new to the framework, start with:
 
 - [Installation and Setup](getting-started/installation-setup.md)
-
-If you’re tracking the framework build-out or contributing:
-
-- [Framework refactor plan](roadmap/framework-refactor-plan.md)
-- [Legacy reference (LD induction study code)](about/legacy-reference.md)
-
-

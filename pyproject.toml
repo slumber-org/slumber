@@ -8,7 +8,9 @@ authors = [
     { name = "Tinke van Buijtene", email = "tinke@kpnmail.nl"}
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "pydantic>=2.12.5",
+]
 
 [project.scripts]
 slumber = "slumber:main"
