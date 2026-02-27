@@ -1,4 +1,4 @@
-"""Study folder initialization: layout, manifest from schema, .gitignore, .env.example."""
+"""Study folder: init, discovery, and load."""
 
 from importlib.resources import as_file, files
 from pathlib import Path
@@ -6,9 +6,10 @@ from pathlib import Path
 import yaml
 
 from slumber.schemas.study import Study
+from slumber.utils.yaml import load_and_validate
 from slumber.utils.yaml import BlankLineDumper
 
-_TEMPLATES_PACKAGE = "slumber.study.templates"
+_TEMPLATES_PACKAGE = "slumber.config.templates"
 
 STUDY_YAML_FILENAME = "study.yaml"
 ENV_EXAMPLE_FILENAME = "env.example"
@@ -76,7 +77,7 @@ def init_study(
 
     with open(study_path / STUDY_YAML_FILENAME, "w", encoding="utf-8") as f:
         yaml.dump(
-            study.model_dump(mode="json"),
+            study.model_dump(mode="json", exclude_computed_fields=True),
             f,
             Dumper=BlankLineDumper,
             sort_keys=False,
@@ -92,3 +93,42 @@ def init_study(
         create_template_file(study_path / f".{GITIGNORE_FILENAME}", GITIGNORE_FILENAME)
 
     return study_path
+
+
+def discover_study_dir(
+    study_dir: Path | None = None,
+) -> Path | None:
+    """Discover the study directory from an explicit path or the current directory.
+
+    When study_dir is given, it must be an existing directory containing
+    study.yaml. When study_dir is None, the current working directory is
+    checked for study.yaml; if present, it is the study dir.
+
+    Args:
+        study_dir: Optional path to the study folder. If None, uses Path.cwd().
+
+    Returns:
+        Path to the study directory if found, None otherwise.
+    """
+    path = (study_dir if study_dir is not None else Path.cwd()).resolve()
+    if not path.is_dir():
+        return None
+    manifest = path / STUDY_YAML_FILENAME
+    return path if manifest.is_file() else None
+
+
+def load_study(study_dir: Path) -> Study:
+    """Load study manifest from a study directory.
+
+    Args:
+        study_dir: Path to the study folder (must contain study.yaml).
+
+    Returns:
+        Study instance; use load_study_conditions(study, study_dir) to load conditions.
+
+    Raises:
+        FileNotFoundError: If study.yaml is missing.
+        pydantic.ValidationError: If the manifest is invalid.
+    """
+    manifest_path = study_dir / STUDY_YAML_FILENAME
+    return load_and_validate(manifest_path, Study)

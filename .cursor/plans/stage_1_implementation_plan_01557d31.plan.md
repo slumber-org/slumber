@@ -10,7 +10,7 @@ todos:
     status: completed
   - id: task-3-config-load-validate
     content: Config loading and validation — study discovery, load conditions, validate command, pretty errors, tests, docs; one PR.
-    status: pending
+    status: completed
   - id: task-4-plugin-registry
     content: Plugin registry (entry points) — units/tasks/ui_backends, built-in headless + minimal task, tests, docs; one PR.
     status: pending

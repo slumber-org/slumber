@@ -8,7 +8,7 @@ from typer.testing import CliRunner
 
 from slumber.cli.main import app
 from slumber.schemas.study import DEFAULT_ASSETS_DIR_NAME, DEFAULT_CONDITIONS_DIR_NAME
-from slumber.study.init import (
+from slumber.config.study import (
     ENV_EXAMPLE_FILENAME,
     STUDY_YAML_FILENAME,
     init_study,
@@ -75,7 +75,7 @@ class TestInitStudy:
         assert env_example.is_file()
         content = env_example.read_text(encoding="utf-8")
         assert "SUPABASE_URL" in content
-        ref = files("slumber.study.templates") / ENV_EXAMPLE_FILENAME
+        ref = files("slumber.config.templates") / ENV_EXAMPLE_FILENAME
         with as_file(ref) as path:
             expected = path.read_text(encoding="utf-8")
         assert content == expected
