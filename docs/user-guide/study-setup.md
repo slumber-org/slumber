@@ -72,7 +72,7 @@ slumber study init --base-dir . --study-id ld-2025 --name "Lucid Dreaming Pilot"
 
 1. `cd` into the study folder.
 2. Add condition YAML files under `conditions/`.
-3. Run `slumber study validate` to check the manifest and conditions.
+3. Run `slumber study validate` to check the manifest and conditions (see [Config loading and validation](config-validation.md)).
 4. When ready, run the study with `slumber study run` (see run documentation).
 
 ## .gitignore and .env.example (inside study folder)
@@ -82,4 +82,4 @@ When you run `slumber study init`, optional files are created **inside the study
 - **`.env.example`** — Template with commented placeholders for `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and optional `SENTRY_DSN`. Copy to `.env` in the study folder (or project root) and fill in values; do not commit `.env`.
 - **`.gitignore`** — Ensures `.env` and `.env.*` (e.g. `.env.dev`, `.env.prod`) are ignored by Git so secrets are never committed.
 
-Templates live in the package under `slumber.study.templates` and are written at init time. Use `--no-env-example` or `--no-gitignore` to skip creating these files.
+Templates live in the package under `slumber.config.templates` and are written at init time. Use `--no-env-example` or `--no-gitignore` to skip creating these files.

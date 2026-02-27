@@ -88,9 +88,8 @@ class Study(BaseModel):
     """Study manifest: metadata, conditions dir, runs, logging, UI.
 
     Loaded from study.yaml. Conditions are loaded from the directory named
-    by conditions_dir (default conditions/). Run layout and run-time logging
-    come from runs and logging. Participant list lives in participants.yaml
-    or database, not in the study manifest.
+    by conditions_dir (default conditions/). Use config.load_study_conditions(study, study_dir)
+    to load and validate condition YAML files from a study folder.
     """
 
     model_config = ConfigDict(extra="forbid")
