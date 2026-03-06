@@ -4,14 +4,61 @@ version = "0.1.0"
 description = "Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings"
 readme = "README.md"
 authors = [
-    { name = "Ali Saberi", email = "ali.saberi96@gmail.com" }
+    { name = "Ali Saberi", email = "ali.saberi96@gmail.com" },
+    { name = "Tinke van Buijtene", email = "tinke@kpnmail.nl"}
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "ezmsg>=3.7.3",
+    "loguru>=0.7.3",
+    "pydantic>=2.12.5",
+    "pyyaml>=6.0.3",
+    "typer>=0.24.1",
+]
 
 [project.scripts]
 slumber = "slumber:main"
 
+[project.entry-points."slumber.tasks"]
+instruction = "slumber.plugins.tasks.instruction:InstructionTask"
+
+[project.entry-points."slumber.ui_backends"]
+headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
+
 [build-system]
 requires = ["uv_build>=0.9.13,<0.10.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    {include-group = "lint"},
+    {include-group = "docs"},
+    {include-group = "test"},
+    "pre-commit>=4.5.0",
+]
+lint = [
+    "ruff>=0.14.6",
+]
+docs = [
+    "mkdocs>=1.6.0",
+]
+test = [
+    "pytest>=9.0.2",
+]
+
+[tool.uv.dependency-groups]
+dev = {requires-python = ">=3.12"}
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+# Enforce a consistent TODO convention:
+# - Use TODO (not FIXME/XXX)
+# - Keep formatting consistent after `TODO:` / `TODO(name):`
+# Note: We intentionally do NOT require authors (TD002) or issue links (TD003).
+extend-select = ["TD001", "TD007"]
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
