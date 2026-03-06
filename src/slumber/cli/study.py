@@ -3,15 +3,11 @@
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import ValidationError
 import typer
+from pydantic import ValidationError
 
-from slumber.config import (
-    discover_study_dir,
-    init_study,
-    load_study,
-    validate_study_plugins,
-)
+from slumber.cli.utils import require_study_dir, StudyDirPath
+from slumber.config import init_study, load_study, validate_study_plugins
 from slumber.utils.errors import format_validation_error
 
 
@@ -89,33 +85,19 @@ def initialize_study(
 
 @study_app.command("validate")
 def validate_study(
-    study_dir: Annotated[
-        Path | None,
-        typer.Option(
-            "--study-dir",
-            "-d",
-            file_okay=False,
-            dir_okay=True,
-            resolve_path=True,
-            help="Path to study folder. If omitted, current directory is used.",
-        ),
-    ] = None,
+    study_dir: StudyDirPath = None,
 ) -> None:
     """Validate study manifest and all condition files in the study folder.
 
     Discovers the study by looking for study.yaml in the current directory
-    (or in --study-dir). Loads the manifest and every condition YAML in
-    conditions_dir; reports validation errors with file paths.
+    (or in --study-dir). Loads .env from the study folder, then the manifest
+    and every condition YAML in conditions_dir; reports validation errors
+    with file paths.
     """
+    study_dir = require_study_dir(study_dir)
 
     try:
-        found = discover_study_dir(study_dir=study_dir)
-    except (ValueError, FileNotFoundError) as e:
-        typer.echo(str(e), err=True)
-        raise typer.Exit(1) from e
-
-    try:
-        study = load_study(found)
+        study = load_study(study_dir)
     except ValidationError as e:
         typer.echo(
             format_validation_error(e),

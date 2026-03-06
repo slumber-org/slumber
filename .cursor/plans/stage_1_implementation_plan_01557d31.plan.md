@@ -16,7 +16,7 @@ todos:
     status: completed
   - id: task-5-supabase-db
     content: Supabase database schema and migrations — Postgres models, migrations, env, tests, docs; one PR.
-    status: pending
+    status: completed
   - id: task-6-auth-crud
     content: Supabase Auth and participant/session CRUD — auth flows, CLI commands, tests, docs; one PR.
     status: pending
