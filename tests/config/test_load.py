@@ -1,4 +1,4 @@
-"""Tests for config load (load_and_validate and load_conditions_from_dir)."""
+"""Tests for load_and_validate (slumber.utils.yaml) with Study and Condition (slumber.schemas)."""
 
 from pathlib import Path
 

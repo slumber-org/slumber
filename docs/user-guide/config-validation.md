@@ -58,18 +58,17 @@ Condition file error: /path/to/study/conditions/control.yaml
   dag: Field required
 ```
 
-Each line after the first lists a field path (or location) and the validation message. Multiple errors for the same file are listed together. This format is produced by the config layer when Pydantic validation fails; the same formatting is used by the `validate` command and can be used programmatically via `slumber.config.format_validation_error()`.
+Each line after the first lists a field path (or location) and the validation message. Multiple errors for the same file are listed together. This format is produced by the config layer when Pydantic validation fails; the same formatting is used by the `validate` command and can be used programmatically via `slumber.utils.errors.format_validation_error()`.
 
 ## Loading config programmatically
 
 You can load and validate config without running the CLI:
 
-- **`slumber.config.discover_study_dir(study_dir=None)`** — Returns the study directory `Path` if found, else `None`. When `study_dir` is omitted, uses the current working directory.
-- **`slumber.config.load_study(study_dir)`** — Loads the manifest and returns a `Study`. Call **`load_study_conditions(study, study_dir)`** to load and validate all condition YAML files (raises `FileNotFoundError` or `ValueError` with path if invalid).
-- **`slumber.config.load_study_conditions(study, study_dir)`** — Loads and returns the list of `Condition` from `study_dir / study.conditions_dir`.
-- **`slumber.config.load_and_validate(path, model)`** — Loads YAML from `path` and validates as the given Pydantic model (e.g. `Study`, `Condition`). From `slumber.utils.yaml`; also exported from `slumber.config`. For a single `study.yaml`: `load_and_validate(manifest_path, Study)`. For a single condition file: `load_and_validate(condition_path, Condition)`.
+- **`slumber.config.discover_study_dir(study_dir=None)`** — Returns the study directory `Path` when it contains `study.yaml`. When `study_dir` is omitted, uses the current working directory. Raises **`ValueError`** if the given path is not a directory; raises **`FileNotFoundError`** if the directory does not contain a study manifest.
+- **`slumber.config.load_study(study_dir)`** — Loads the manifest and returns a `Study` with its path set to `study_dir`. Use **`study.conditions`** to load and validate condition YAML files (raises `FileNotFoundError` or `ValueError` with path if invalid).
+- **`slumber.utils.yaml.load_and_validate(path, model)`** — Loads YAML from `path` and validates as the given Pydantic model (e.g. `Study`, `Condition`). For a single `study.yaml`: `load_and_validate(manifest_path, Study)`. For a single condition file: `load_and_validate(condition_path, Condition)`.
 - **`slumber.config.init_study(base_dir, study_id, ...)`** — Create a new study folder (manifest, conditions/, assets/). From `slumber.config.study`; also exported from `slumber.config`.
-- **`slumber.config.condition.load_conditions_from_dir(conditions_dir)`** — Low-level: load and validate all condition YAML files from a directory path; returns `list[Condition]`. Also exported from `slumber.config`.
-- **`slumber.config.format_validation_error(error, path=..., prefix=...)`** — Formats a Pydantic `ValidationError` with an optional file path for clear, path-specific messages. From `slumber.utils.validation`; also exported from `slumber.config`.
+- **`slumber.schemas.load_conditions_from_dir(conditions_dir)`** — Low-level: load and validate all condition YAML files from a directory path; returns `list[Condition]`.
+- **`slumber.utils.errors.format_validation_error(error, path=..., prefix=...)`** — Formats a Pydantic `ValidationError` with an optional file path for clear, path-specific messages.
 
 All paths are interpreted as in the filesystem; the study manifest’s `conditions_dir` is relative to the study directory.

@@ -8,11 +8,11 @@ import typer
 
 from slumber.config import (
     discover_study_dir,
-    format_validation_error,
     init_study,
     load_study,
-    load_study_conditions,
+    validate_study_plugins,
 )
+from slumber.utils.errors import format_validation_error
 
 
 DEFAULT_STUDY_ID = "new_study"
@@ -107,42 +107,32 @@ def validate_study(
     (or in --study-dir). Loads the manifest and every condition YAML in
     conditions_dir; reports validation errors with file paths.
     """
-    found = discover_study_dir(study_dir=study_dir)
-    if found is None:
-        if study_dir is not None:
-            hint = f" No study.yaml in {study_dir.resolve()}."
-        else:
-            hint = " No study.yaml in current directory."
-        typer.echo(
-            f"Study folder not found.{hint} Run from a study directory or pass --study-dir.",
-            err=True,
-        )
-        raise typer.Exit(1)
+
+    try:
+        found = discover_study_dir(study_dir=study_dir)
+    except (ValueError, FileNotFoundError) as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(1) from e
 
     try:
         study = load_study(found)
     except ValidationError as e:
         typer.echo(
-            format_validation_error(
-                e, path=found / "study.yaml", prefix="Study manifest error"
-            ),
+            format_validation_error(e),
             err=True,
         )
         raise typer.Exit(1) from e
-    except FileNotFoundError as e:
+    except (ValueError, FileNotFoundError) as e:
         typer.echo(str(e), err=True)
         raise typer.Exit(1) from e
 
     try:
-        conditions = load_study_conditions(study, found)
+        validate_study_plugins(study)
     except ValueError as e:
-        typer.echo(str(e), err=True)
-        raise typer.Exit(1) from e
-    except FileNotFoundError as e:
         typer.echo(str(e), err=True)
         raise typer.Exit(1) from e
 
     typer.echo(f"Study: {study.name} ({study.study_id})")
-    typer.echo(f"Conditions: {len(conditions)}")
-    for c in conditions:
+    typer.echo(f"Conditions: {len(study.conditions)}")
+    for c in study.conditions:
         typer.echo(f"  - {c.name}")

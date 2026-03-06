@@ -1,4 +1,4 @@
-"""Tests for study folder init (init_study and slumber study init CLI)."""
+"""Tests for study subcommand (slumber study init) and init_study usage."""
 
 from importlib.resources import as_file, files
 from pathlib import Path
@@ -8,15 +8,11 @@ from typer.testing import CliRunner
 
 from slumber.cli.main import app
 from slumber.schemas.study import DEFAULT_ASSETS_DIR_NAME, DEFAULT_CONDITIONS_DIR_NAME
-from slumber.config.study import (
-    ENV_EXAMPLE_FILENAME,
-    STUDY_YAML_FILENAME,
-    init_study,
-)
+from slumber.config import init_study
 
 
 class TestInitStudy:
-    """Tests for init_study()."""
+    """Tests for init_study() (used by CLI and callers)."""
 
     def test_creates_layout(self, tmp_path: Path) -> None:
         """Init creates study_id dir with study.yaml, conditions/, assets/."""
@@ -25,7 +21,7 @@ class TestInitStudy:
         )
         assert study_path == tmp_path / "my-study"
         assert study_path.is_dir()
-        assert (study_path / STUDY_YAML_FILENAME).is_file()
+        assert (study_path / "study.yaml").is_file()
         assert (study_path / DEFAULT_CONDITIONS_DIR_NAME).is_dir()
         assert (study_path / DEFAULT_ASSETS_DIR_NAME).is_dir()
 
@@ -38,7 +34,7 @@ class TestInitStudy:
             create_env_example=False,
             create_gitignore=False,
         )
-        content = (study_path / STUDY_YAML_FILENAME).read_text(encoding="utf-8")
+        content = (study_path / "study.yaml").read_text(encoding="utf-8")
         assert "study_id: ld-2025" in content
         assert "name: Lucid Dreaming Pilot" in content
         assert "conditions_dir: conditions" in content
@@ -49,7 +45,7 @@ class TestInitStudy:
         study_path = init_study(
             tmp_path, "foo-study", create_env_example=False, create_gitignore=False
         )
-        content = (study_path / STUDY_YAML_FILENAME).read_text(encoding="utf-8")
+        content = (study_path / "study.yaml").read_text(encoding="utf-8")
         assert "name: foo-study" in content
 
     def test_raises_when_dir_exists(self, tmp_path: Path) -> None:
@@ -75,7 +71,7 @@ class TestInitStudy:
         assert env_example.is_file()
         content = env_example.read_text(encoding="utf-8")
         assert "SUPABASE_URL" in content
-        ref = files("slumber.config.templates") / ENV_EXAMPLE_FILENAME
+        ref = files("slumber.config.templates") / "env.example"
         with as_file(ref) as path:
             expected = path.read_text(encoding="utf-8")
         assert content == expected
@@ -136,7 +132,7 @@ class TestStudyInitCLI:
         assert result.exit_code == 0
         study_path = tmp_path / "cli-study"
         assert study_path.is_dir()
-        assert (study_path / STUDY_YAML_FILENAME).is_file()
+        assert (study_path / "study.yaml").is_file()
         assert (study_path / DEFAULT_CONDITIONS_DIR_NAME).is_dir()
         assert (study_path / DEFAULT_ASSETS_DIR_NAME).is_dir()
         assert "Created study at" in result.output
@@ -185,7 +181,7 @@ class TestStudyInitCLI:
             ],
         )
         assert result.exit_code == 0
-        content = (tmp_path / "x" / STUDY_YAML_FILENAME).read_text(encoding="utf-8")
+        content = (tmp_path / "x" / "study.yaml").read_text(encoding="utf-8")
         assert "name: My Study Name" in content
 
     def test_exits_when_dir_exists(self, runner: CliRunner, tmp_path: Path) -> None:

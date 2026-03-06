@@ -1,10 +1,22 @@
 """Study manifest schema: metadata, conditions dir, runs, logging, UI."""
 
-from enum import Enum
-import re
-from typing import Any, ClassVar
+from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+import re
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, ClassVar
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
+
+if TYPE_CHECKING:
+    from slumber.schemas.condition import Condition
 
 
 DEFAULT_CONDITIONS_DIR_NAME = "conditions"
@@ -19,17 +31,16 @@ VALID_RUN_LAYOUT_KEYS: ClassVar[frozenset[str]] = frozenset(
 # study_id must not contain path components so base_dir / study_id cannot escape base_dir
 INVALID_STUDY_ID_SUBSTRINGS: ClassVar[tuple[str, ...]] = ("/", "\\", "..")
 
-
-class UIBackend(str, Enum):
-    HEADLESS = "headless"
+DEFAULT_UI_BACKEND = "headless"
 
 
 class UI(BaseModel):
     """Selected UI backend and its configuration."""
 
-    backend: UIBackend = Field(
-        default=UIBackend.HEADLESS,
-        description="UI backend plugin.",
+    backend: str = Field(
+        default=DEFAULT_UI_BACKEND,
+        min_length=1,
+        description="UI backend plugin key (e.g. 'headless').",
     )
     config: dict[str, Any] = Field(
         default_factory=dict,
@@ -87,12 +98,14 @@ class RunLoggingConfig(BaseModel):
 class Study(BaseModel):
     """Study manifest: metadata, conditions dir, runs, logging, UI.
 
-    Loaded from study.yaml. Conditions are loaded from the directory named
-    by conditions_dir (default conditions/). Use config.load_study_conditions(study, study_dir)
-    to load and validate condition YAML files from a study folder.
+    Loaded from study.yaml. When loaded via config.load_study(), path,
+    manifest_path, and conditions are set from the study directory.
     """
 
     model_config = ConfigDict(extra="forbid")
+
+    _manifest_path: Path | None = PrivateAttr(default=None)
+    _conditions: list["Condition"] = PrivateAttr(default_factory=list)
 
     study_id: str = Field(..., min_length=1, description="Unique study identifier.")
     name: str = Field(..., min_length=1, description="Human-readable study name.")
@@ -128,3 +141,18 @@ class Study(BaseModel):
                     f"(forbidden: {INVALID_STUDY_ID_SUBSTRINGS})."
                 )
         return v
+
+    @property
+    def path(self) -> Path | None:
+        """Study directory when loaded via load_study(); None otherwise."""
+        return self._manifest_path.parent if self._manifest_path else None
+
+    @property
+    def manifest_path(self) -> Path | None:
+        """Path to study.yaml when loaded via load_study(); None otherwise."""
+        return self._manifest_path
+
+    @property
+    def conditions(self) -> list["Condition"]:
+        """Conditions loaded from the study directory (set by load_study())."""
+        return self._conditions

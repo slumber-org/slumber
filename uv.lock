@@ -25,6 +25,15 @@ wheels = [
 ]
 
 [[package]]
+name = "array-api-compat"
+version = "1.14.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/e5/9a12dd1c2b0ad61f3c3ad0fc14b888c65fd735dd9d26805f77317303cbe5/array_api_compat-1.14.0.tar.gz", hash = "sha256:c819ba707f5c507800cb545f7e6348ff1ecc46538381d9ad9b371ffc9cd6d784", size = 106369, upload-time = "2026-02-26T12:02:42.452Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/d3/54cd560804a8c2b898824778e86c13c2a14600bc83532a9c4f69f2f469c3/array_api_compat-1.14.0-py3-none-any.whl", hash = "sha256:ed5af1f9b6595a199c942505f281ec994892556b6efc24679a0501e87a7d6279", size = 60124, upload-time = "2026-02-26T12:02:41.127Z" },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -73,6 +82,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8a/0e/97c33bf5009bdbac74fd2beace167cab3f978feb69cc36f1ef79360d6c4e/exceptiongroup-1.3.1-py3-none-any.whl", hash = "sha256:a7a39a3bd276781e98394987d3a5701d0c4edffb633bb7a5144577f82c773598", size = 16740, upload-time = "2025-11-21T23:01:53.443Z" },
+]
+
+[[package]]
+name = "ezmsg"
+version = "3.7.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "array-api-compat" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/18/bb/8bdf1ea16798b27345ea3c7986181d74537e09c5c592135f7b1f2ed19052/ezmsg-3.7.3.tar.gz", hash = "sha256:298aebfb44a745312484fa7bba0a4d9a4434675643428e59dd5d0d1c84d75d5b", size = 242394, upload-time = "2026-02-11T03:47:20.928Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/9c/e23cfdb6469a4ffbabc4b0a8918a8ebf77294c5ffab35e2a9fb1e43feec0/ezmsg-3.7.3-py3-none-any.whl", hash = "sha256:ea81e6abb7218fb7a1ab1b25bdc907e773a50153a05672834eedae1517d30f7b", size = 119467, upload-time = "2026-02-11T03:47:22.303Z" },
 ]
 
 [[package]]
@@ -672,6 +694,7 @@ name = "slumber"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "ezmsg" },
     { name = "loguru" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -697,6 +720,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ezmsg", specifier = ">=3.7.3" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "pyyaml", specifier = ">=6.0.3" },
