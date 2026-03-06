@@ -1,46 +1,45 @@
-"""Procedure and task schemas (UI-agnostic, plugin-keyed)."""
+"""Procedure and step schemas (UI-agnostic, plugin-keyed).
+
+Component -> Unit (DAG); Step -> Task (procedure). A Step is the spec
+resolved via slumber.tasks to a Task (plugin) class.
+"""
 
 from typing import Any
 
-from pydantic import AliasChoices, BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class Task(BaseModel):
-    """UI-agnostic task specification keyed by plugin type.
+class Step(BaseModel):
+    """Procedure step specification (like Component: plugin key + settings).
 
-    The `type` field is a string key resolved via the slumber.tasks entry
-    point; each task plugin may validate `kwargs` when the config is loaded.
-    """
-
-    type: str = Field(
-        ..., min_length=1, description="Task plugin key (e.g. 'instruction', 'survey')."
-    )
-    title: str = Field(..., min_length=1, description="Human-readable task title.")
-    kwargs: dict[str, Any] = Field(
-        default_factory=dict, description="Plugin-specific task options."
-    )
-
-
-class Procedure(BaseModel):
-    """A sequence of tasks for one phase (e.g. pre_sleep, awakening).
-
-    Procedures are study-specific and defined within each condition.
+    The `task_type` field is a string key resolved via the slumber.tasks
+    entry point; the plugin is a Task class (in slumber.plugins.tasks.base)
+    that validates settings.
     """
 
     model_config = ConfigDict(populate_by_name=True)
 
-    tasks: list[Task] = Field(..., min_length=1, description="Ordered list of tasks.")
-    show_task_list: bool = Field(
-        default=True,
-        validation_alias=AliasChoices("show_task_list", "show_item_list"),
-        description="Whether to show a list of tasks in the UI.",
+    task_type: str = Field(
+        ...,
+        min_length=1,
+        alias="task",
+        description="Task plugin key.",
     )
-    allow_skip_tasks: bool = Field(
-        default=False,
-        description="When true, the current task can be skipped (marked done).",
+    settings: dict[str, Any] | None = Field(
+        default=None,
+        description="Plugin-specific step settings.",
     )
 
+
+class Procedure(BaseModel):
+    """A sequence of steps for one phase (e.g. pre_sleep, awakening).
+
+    Procedures are study-specific and defined within each condition.
+    """
+
+    steps: list[Step] = Field(..., min_length=1, description="Ordered list of steps.")
+
     @property
-    def n_tasks(self) -> int:
-        """Return the number of tasks in this procedure."""
-        return len(self.tasks)
+    def n_steps(self) -> int:
+        """Return the number of steps in this procedure."""
+        return len(self.steps)

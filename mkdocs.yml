@@ -12,6 +12,7 @@ nav:
   
   - Reference:
       - Schemas: reference/schemas.md
+      - Plugins: reference/plugins.md
 
   - About:
       - Contributing: about/contributing.md

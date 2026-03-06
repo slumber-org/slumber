@@ -33,25 +33,22 @@ One condition = named procedures + one DAG. Typically stored in `<study_dir>/<co
 | `procedures` | dict[str, Procedure] | Mapping from procedure name to Procedure (e.g. `pre_sleep`, `awakening`, `post_sleep`, `wbtb`). At least one required. |
 | `dag` | DAG | Processing DAG for this condition (required). |
 
-## Procedure and Task
+## Procedure and Step
 
-Procedures are UI-agnostic: each task is keyed by a **type** string (resolved via the `slumber.tasks` entry point), not by widget class.
+Procedures are UI-agnostic: each step is keyed by a **type** string (resolved via the `slumber.tasks` entry point to a Task plugin), like DAG Component → Unit. Step → Task.
 
-**Task**:
+**Step**:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `type` | string | Task plugin key (e.g. `instruction`, `survey`). |
-| `title` | string | Human-readable task title. |
-| `kwargs` | dict | Plugin-specific options (optional). |
+| `task` | string | Task plugin key (e.g. `instruction`, `survey`). Alias for `task_type`. |
+| `settings` | dict | Plugin-specific settings (optional). |
 
 **Procedure**:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `tasks` | list[Task] | Ordered list of tasks (at least one). |
-| `show_task_list` | bool | Whether to show the task list in the UI. Default: true. (YAML may use `show_item_list` as alias.) |
-| `allow_skip_tasks` | bool | Whether the current task can be skipped. Default: false. |
+| `steps` | list[Step] | Ordered list of steps (at least one). |
 
 ## DAG
 

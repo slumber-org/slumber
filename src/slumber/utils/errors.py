@@ -1,4 +1,6 @@
-"""Validation error formatting for user-facing output."""
+"""Format validation and other errors for CLI/logs."""
+
+from __future__ import annotations
 
 from pathlib import Path
 

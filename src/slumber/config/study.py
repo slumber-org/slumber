@@ -1,19 +1,21 @@
 """Study folder: init, discovery, and load."""
 
+from __future__ import annotations
+
 from importlib.resources import as_file, files
 from pathlib import Path
 
 import yaml
 
+from slumber.schemas.condition import load_conditions_from_dir
 from slumber.schemas.study import Study
-from slumber.utils.yaml import load_and_validate
-from slumber.utils.yaml import BlankLineDumper
+from slumber.utils.yaml import BlankLineDumper, load_and_validate
 
 _TEMPLATES_PACKAGE = "slumber.config.templates"
 
-STUDY_YAML_FILENAME = "study.yaml"
-ENV_EXAMPLE_FILENAME = "env.example"
-GITIGNORE_FILENAME = "gitignore"
+_STUDY_YAML_FILENAME = "study.yaml"
+_ENV_EXAMPLE_FILENAME = "env.example"
+_GITIGNORE_FILENAME = "gitignore"
 
 
 def _load_template(template_name: str) -> str:
@@ -75,7 +77,7 @@ def init_study(
     (study_path / study.conditions_dir).mkdir()
     (study_path / study.assets_dir).mkdir()
 
-    with open(study_path / STUDY_YAML_FILENAME, "w", encoding="utf-8") as f:
+    with open(study_path / _STUDY_YAML_FILENAME, "w", encoding="utf-8") as f:
         yaml.dump(
             study.model_dump(mode="json", exclude_computed_fields=True),
             f,
@@ -86,18 +88,20 @@ def init_study(
 
     if create_env_example:
         create_template_file(
-            study_path / f".{ENV_EXAMPLE_FILENAME}", ENV_EXAMPLE_FILENAME
+            study_path / f".{_ENV_EXAMPLE_FILENAME}", _ENV_EXAMPLE_FILENAME
         )
 
     if create_gitignore:
-        create_template_file(study_path / f".{GITIGNORE_FILENAME}", GITIGNORE_FILENAME)
+        create_template_file(
+            study_path / f".{_GITIGNORE_FILENAME}", _GITIGNORE_FILENAME
+        )
 
     return study_path
 
 
 def discover_study_dir(
     study_dir: Path | None = None,
-) -> Path | None:
+) -> Path:
     """Discover the study directory from an explicit path or the current directory.
 
     When study_dir is given, it must be an existing directory containing
@@ -108,27 +112,45 @@ def discover_study_dir(
         study_dir: Optional path to the study folder. If None, uses Path.cwd().
 
     Returns:
-        Path to the study directory if found, None otherwise.
+        Path to the study directory if found.
+
+    Raises:
+        ValueError: If the study directory is not found or is not a directory.
+        FileNotFoundError: If the study manifest is not found.
     """
     path = (study_dir if study_dir is not None else Path.cwd()).resolve()
     if not path.is_dir():
-        return None
-    manifest = path / STUDY_YAML_FILENAME
-    return path if manifest.is_file() else None
+        raise ValueError(f"{path} is not a directory.")
+
+    manifest = path / _STUDY_YAML_FILENAME
+    if not manifest.is_file():
+        raise FileNotFoundError(
+            f"Study manifest ({_STUDY_YAML_FILENAME}) not found in {path}."
+        )
+
+    return path
 
 
 def load_study(study_dir: Path) -> Study:
     """Load study manifest from a study directory.
 
+    Sets the study's path so that study.conditions loads condition YAML files
+    from that directory.
+
     Args:
         study_dir: Path to the study folder (must contain study.yaml).
 
     Returns:
-        Study instance; use load_study_conditions(study, study_dir) to load conditions.
+        Study instance with path set; use study.conditions to load conditions.
 
     Raises:
         FileNotFoundError: If study.yaml is missing.
         pydantic.ValidationError: If the manifest is invalid.
     """
-    manifest_path = study_dir / STUDY_YAML_FILENAME
-    return load_and_validate(manifest_path, Study)
+    manifest_path = (study_dir / _STUDY_YAML_FILENAME).resolve()
+    study = load_and_validate(manifest_path, Study)
+    study._manifest_path = manifest_path
+    study._conditions = load_conditions_from_dir(
+        study_dir.resolve() / study.conditions_dir
+    )
+    return study

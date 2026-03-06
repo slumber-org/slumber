@@ -13,7 +13,7 @@ todos:
     status: completed
   - id: task-4-plugin-registry
     content: Plugin registry (entry points) — units/tasks/ui_backends, built-in headless + minimal task, tests, docs; one PR.
-    status: pending
+    status: completed
   - id: task-5-supabase-db
     content: Supabase database schema and migrations — Postgres models, migrations, env, tests, docs; one PR.
     status: pending

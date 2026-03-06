@@ -9,6 +9,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "ezmsg>=3.7.3",
     "loguru>=0.7.3",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
@@ -17,6 +18,12 @@ dependencies = [
 
 [project.scripts]
 slumber = "slumber:main"
+
+[project.entry-points."slumber.tasks"]
+instruction = "slumber.plugins.tasks.instruction:InstructionTask"
+
+[project.entry-points."slumber.ui_backends"]
+headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
 
 [build-system]
 requires = ["uv_build>=0.9.13,<0.10.0"]

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
-from slumber.utils.validation import format_validation_error
+from slumber.utils.errors import format_validation_error
 
 
 class _SampleModel(BaseModel):
