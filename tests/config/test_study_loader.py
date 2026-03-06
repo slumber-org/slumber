@@ -1,26 +1,26 @@
-"""Tests for discover_study_dir, init_study, and load_study (slumber.config)."""
+"""Tests for resolve_study_dir, init_study, and load_study (slumber.config)."""
 
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from slumber.config import discover_study_dir, init_study, load_study
+from slumber.config import init_study, load_study, resolve_study_dir
 
 
 class TestDiscoverStudyDir:
-    """Tests for discover_study_dir."""
+    """Tests for resolve_study_dir."""
 
     def test_returns_cwd_when_study_yaml_in_cwd(self, tmp_path: Path) -> None:
         (tmp_path / "study.yaml").write_text("study_id: s\nname: S\n", encoding="utf-8")
         with patch.object(Path, "cwd", return_value=tmp_path):
-            found = discover_study_dir()
+            found = resolve_study_dir()
         assert found == tmp_path
 
     def test_raises_when_no_study_yaml_in_cwd(self, tmp_path: Path) -> None:
         with patch.object(Path, "cwd", return_value=tmp_path):
             with pytest.raises(FileNotFoundError, match="Study manifest"):
-                discover_study_dir()
+                resolve_study_dir()
 
     def test_returns_study_dir_when_explicit_and_has_manifest(
         self, tmp_path: Path
@@ -30,14 +30,14 @@ class TestDiscoverStudyDir:
         (study_dir / "study.yaml").write_text(
             "study_id: my-study\nname: My Study\n", encoding="utf-8"
         )
-        found = discover_study_dir(study_dir=study_dir)
+        found = resolve_study_dir(study_dir=study_dir)
         assert found == study_dir.resolve()
 
     def test_raises_when_explicit_dir_has_no_manifest(self, tmp_path: Path) -> None:
         empty = tmp_path / "empty"
         empty.mkdir()
         with pytest.raises(FileNotFoundError, match="Study manifest"):
-            discover_study_dir(study_dir=empty)
+            resolve_study_dir(study_dir=empty)
 
 
 class TestLoadStudy:

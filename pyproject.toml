@@ -9,10 +9,14 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "alembic>=1.18.4",
+    "python-dotenv>=1.0.0",
     "ezmsg>=3.7.3",
     "loguru>=0.7.3",
+    "psycopg2-binary>=2.9.11",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
+    "sqlmodel>=0.0.37",
     "typer>=0.24.1",
 ]
 

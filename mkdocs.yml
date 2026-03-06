@@ -13,6 +13,7 @@ nav:
   - Reference:
       - Schemas: reference/schemas.md
       - Plugins: reference/plugins.md
+      - Backend (Supabase / Postgres): reference/backend.md
 
   - About:
       - Contributing: about/contributing.md

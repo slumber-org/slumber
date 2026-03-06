@@ -13,7 +13,7 @@ from slumber.utils.yaml import BlankLineDumper, load_and_validate
 
 _TEMPLATES_PACKAGE = "slumber.config.templates"
 
-_STUDY_YAML_FILENAME = "study.yaml"
+_STUDY_MANIFEST_FILE = "study.yaml"
 _ENV_EXAMPLE_FILENAME = "env.example"
 _GITIGNORE_FILENAME = "gitignore"
 
@@ -77,7 +77,7 @@ def init_study(
     (study_path / study.conditions_dir).mkdir()
     (study_path / study.assets_dir).mkdir()
 
-    with open(study_path / _STUDY_YAML_FILENAME, "w", encoding="utf-8") as f:
+    with open(study_path / _STUDY_MANIFEST_FILE, "w", encoding="utf-8") as f:
         yaml.dump(
             study.model_dump(mode="json", exclude_computed_fields=True),
             f,
@@ -99,10 +99,10 @@ def init_study(
     return study_path
 
 
-def discover_study_dir(
+def resolve_study_dir(
     study_dir: Path | None = None,
 ) -> Path:
-    """Discover the study directory from an explicit path or the current directory.
+    """Resolve the study directory from an explicit path or the current directory.
 
     When study_dir is given, it must be an existing directory containing
     study.yaml. When study_dir is None, the current working directory is
@@ -122,10 +122,10 @@ def discover_study_dir(
     if not path.is_dir():
         raise ValueError(f"{path} is not a directory.")
 
-    manifest = path / _STUDY_YAML_FILENAME
+    manifest = path / _STUDY_MANIFEST_FILE
     if not manifest.is_file():
         raise FileNotFoundError(
-            f"Study manifest ({_STUDY_YAML_FILENAME}) not found in {path}."
+            f"Study manifest ({_STUDY_MANIFEST_FILE}) not found in {path}."
         )
 
     return path
@@ -147,7 +147,7 @@ def load_study(study_dir: Path) -> Study:
         FileNotFoundError: If study.yaml is missing.
         pydantic.ValidationError: If the manifest is invalid.
     """
-    manifest_path = (study_dir / _STUDY_YAML_FILENAME).resolve()
+    manifest_path = (study_dir / _STUDY_MANIFEST_FILE).resolve()
     study = load_and_validate(manifest_path, Study)
     study._manifest_path = manifest_path
     study._conditions = load_conditions_from_dir(

@@ -1,11 +1,11 @@
 """Config loading, validation, and study discovery."""
 
 from slumber.config.plugins import validate_study_plugins
-from slumber.config.study import discover_study_dir, init_study, load_study
+from slumber.config.study import init_study, load_study, resolve_study_dir
 
 __all__ = [
-    "discover_study_dir",
     "init_study",
     "load_study",
+    "resolve_study_dir",
     "validate_study_plugins",
 ]
