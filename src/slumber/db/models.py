@@ -6,18 +6,12 @@ auth_user_id (auth.users.id). All tables use created_at/updated_at timestamps.
 
 from __future__ import annotations
 
-from datetime import date, datetime, time
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import (
-    TIMESTAMP,
-    TEXT,
-    Index,
-    UniqueConstraint,
-    text,
-)
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy import TIMESTAMP, TEXT, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, UUID as PG_UUID
 from sqlmodel import Column, Field, SQLModel
 
 from slumber.utils.time import utc_now
@@ -51,18 +45,14 @@ class Study(TimestampMixin, table=True):
 class Condition(TimestampMixin, table=True):
     """Condition for a study: procedures and DAG as JSON.
 
-    Synced from study folder condition YAML files. name is the condition
+    Synced from study folder condition YAML files. id is the condition
     identifier (e.g. condition_1); procedures and dag are stored as JSONB.
     """
 
     __tablename__ = "condition"
-    __table_args__ = (
-        UniqueConstraint("study_id", "name", name="uq_condition_study_name"),
-    )
 
-    id: int | None = Field(default=None, primary_key=True)
+    id: str = Field(..., max_length=255, primary_key=True)
     study_id: str = Field(..., foreign_key="study.id", max_length=255)
-    name: str = Field(..., max_length=255)
     procedures: dict[str, Any] = Field(sa_column=Column(JSONB, nullable=False))
     dag: dict[str, Any] = Field(sa_column=Column(JSONB, nullable=False))
 
@@ -81,7 +71,7 @@ class Participant(TimestampMixin, table=True):
         ),
     )
 
-    id: int | None = Field(default=None, primary_key=True)
+    id: str = Field(..., max_length=255, primary_key=True)
     study_id: str = Field(..., foreign_key="study.id", max_length=255)
     participant_id: str = Field(..., max_length=255, index=True)
     auth_user_id: UUID = Field(
@@ -93,34 +83,29 @@ class Participant(TimestampMixin, table=True):
 class Session(TimestampMixin, table=True):
     """Scheduled session for a participant (optionally tied to a condition).
 
-    scheduled_date and optional time window (min_start_time, max_start_time)
-    identify when the session is planned; start_time/end_time record actual run.
+    earliest_start_at and latest_start_at define the allowed start window
+    (participant may start the session any time in that range). No two sessions
+    for the same participant may have overlapping windows (DB exclusion).
+    start_time/end_time record actual run.
     """
 
     __tablename__ = "session"
     __table_args__ = (
-        UniqueConstraint(
-            "participant_id",
-            "scheduled_date",
-            "min_start_time",
-            "max_start_time",
-            name="uq_session_participant_date_min_max_time",
-        ),
-        Index(
-            "uq_session_participant_date_when_times_null",
-            "participant_id",
-            "scheduled_date",
-            unique=True,
-            postgresql_where=text("min_start_time IS NULL AND max_start_time IS NULL"),
+        ExcludeConstraint(
+            ("participant_id", "="),
+            (func.tstzrange("earliest_start_at", "latest_start_at", "[]"), "&&"),
+            name="uq_session_participant_no_overlap",
+            using="gist",
         ),
     )
 
     id: int | None = Field(default=None, primary_key=True)
-    participant_id: int = Field(foreign_key="participant.id")
-    condition_id: int | None = Field(default=None, foreign_key="condition.id")
-    scheduled_date: date = Field(...)
-    min_start_time: time | None = Field(default=None)
-    max_start_time: time | None = Field(default=None)
+    participant_id: str = Field(..., foreign_key="participant.id", max_length=255)
+    condition_id: str | None = Field(
+        default=None, foreign_key="condition.id", max_length=255
+    )
+    earliest_start_at: datetime = Field(..., sa_type=TIMESTAMP(timezone=True))
+    latest_start_at: datetime = Field(..., sa_type=TIMESTAMP(timezone=True))
     start_time: datetime | None = Field(default=None, sa_type=TIMESTAMP(timezone=True))
     end_time: datetime | None = Field(default=None, sa_type=TIMESTAMP(timezone=True))
 

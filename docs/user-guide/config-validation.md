@@ -4,30 +4,34 @@ This page describes how the framework discovers a study folder, loads the manife
 
 ## Study discovery
 
-The study folder is discovered in one of two ways:
+For commands that accept a study folder:
 
-1. **Current directory** — When you run a command (e.g. `slumber study validate`) **from inside** a study folder, the framework looks for `study.yaml` in the current working directory. If present, that directory is the study folder.
-2. **Explicit path** — You can pass `--study-dir <path>` to point to a study folder from anywhere. The path must be a directory that contains `study.yaml`.
+1. **Explicit path** — Prefer passing `--study-dir <path>` to point to a study folder. The path must be a directory that contains `study.yaml`.
+2. **Environment** — You can set `STUDY_DIR` to the study folder path; the CLI uses it when `--study-dir` is not passed (Typer envvar).
 
-If no study folder is found (no `study.yaml` in cwd and no valid `--study-dir`), commands that need a study will exit with an error and a short hint.
+**`slumber study validate`** validates a single study folder. In practice you will either:
 
-**Typical workflow:** After `slumber study init`, `cd` into the study folder and run subsequent commands from there. Use `--study-dir` when scripting or when you are not in the study directory.
+- run it from inside the study folder and pass `--study-dir .`, or
+- set `STUDY_DIR=/path/to/my-study` and run `slumber study validate`.
+
+Other researcher commands (`participant`, `session`, `db`) do not require a study directory; when they need a study (e.g. participant create, session create/list), they use `--study-id` or `STUDY_ID`.
 
 ## Validate command: `slumber study validate`
 
 Validates the study manifest and all condition files in the study folder.
 
 ```bash
-# From inside the study folder
-slumber study validate
-
-# From anywhere, with explicit path
+# With explicit path
 slumber study validate --study-dir /path/to/my-study
+
+# Or set STUDY_DIR
+export STUDY_DIR=/path/to/my-study
+slumber study validate
 ```
 
 **Behavior:**
 
-- Discovers the study folder (cwd or `--study-dir`).
+- Resolves study folder from `--study-dir` or `STUDY_DIR`; exits with an error if neither is set.
 - Loads and validates `study.yaml` against the Study schema.
 - Loads every `.yaml` and `.yml` file in the manifest’s `conditions_dir` (default `conditions/`) and validates each as a Condition.
 - On success: prints study name, study ID, and the list of condition names.
@@ -37,7 +41,7 @@ slumber study validate --study-dir /path/to/my-study
 
 | Option | Description |
 |--------|-------------|
-| `--study-dir`, `-d` | Path to the study folder. If omitted, the current directory is used. |
+| `--study-dir`, `-d` | Path to the study folder. Recommended; alternatively use `STUDY_DIR`. |
 
 ## Error format
 

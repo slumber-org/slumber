@@ -19,7 +19,7 @@ todos:
     status: completed
   - id: task-6-auth-crud
     content: Supabase Auth and participant/session CRUD — auth flows, CLI commands, tests, docs; one PR.
-    status: pending
+    status: completed
   - id: task-7-condition-sync
     content: Condition sync — push conditions from study folder to Supabase (legacy update_conditions port), tests, docs; one PR.
     status: pending

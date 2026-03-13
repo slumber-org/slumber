@@ -13,7 +13,7 @@ Standard layout:
 | **Study folder** | `<study_id>/study.yaml` | Study manifest: metadata, conditions dir, run layout, logging, UI. Required. |
 | **Study folder** | `<study_id>/conditions/` | One YAML file per condition (e.g. `condition_1.yaml`). |
 | **Study folder** | `<study_id>/assets/` | Optional assets (images, instructions, etc.) referenced by procedures. |
-| **Study folder** | `<study_id>/.env.example` | Optional template listing env variable names (no secrets). Created by init. |
+| **Study folder** | `<study_id>/.env` | Env file created by init from config template (SUPABASE_URL, SUPABASE_ANON_KEY). Gitignored. |
 | **Study folder** | `<study_id>/.gitignore` | Ensures `.env` and `.env.*` are not committed. Created by init. |
 
 Example:
@@ -26,7 +26,7 @@ Example:
 │   │   ├── control.yaml
 │   │   └── treatment.yaml
 │   ├── assets/
-│   ├── .env.example   # template; copy to .env and fill in
+│   ├── .env            # from config template; fill in values (gitignored)
 │   └── .gitignore     # includes .env and .env.*
 ```
 
@@ -49,7 +49,7 @@ The command creates `<base_dir>/<study_id>/` with:
 
 - A template `study.yaml` (study_id, name, `conditions_dir: conditions`, default run layout, logging, and `ui.backend: headless`).
 - Empty `conditions/` and `assets/` directories.
-- **`.env.example`** inside the study folder (commented placeholders for `SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `SENTRY_DSN`), unless `--no-env-example` is used.
+- **`.env`** inside the study folder (from the study env template in config: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `SENTRY_DSN`), unless `--no-env-example` is used.
 - **`.gitignore`** inside the study folder (includes `.env` and `.env.*`), unless `--no-gitignore` is used.
 
 ### Options
@@ -59,7 +59,7 @@ The command creates `<base_dir>/<study_id>/` with:
 | `--base-dir`, `-b` | Base directory (project root); study folder is `<base-dir>/<study-id>/`. Default: `.`. |
 | `--study-id`, `-s` | Study identifier (folder name). If omitted, the command prompts for base dir and study ID. |
 | `--name`, `-n` | Human-readable study name; used in `study.yaml`. Defaults to the study ID. |
-| `--no-env-example` | Do not create `.env.example` inside the study folder. |
+| `--no-env-example` | Do not create `.env` inside the study folder. |
 | `--no-gitignore` | Do not create `.gitignore` inside the study folder. |
 
 Non-interactive example (e.g. for scripts or CI):
@@ -72,14 +72,14 @@ slumber study init --base-dir . --study-id ld-2025 --name "Lucid Dreaming Pilot"
 
 1. `cd` into the study folder.
 2. Add condition YAML files under `conditions/`.
-3. Run `slumber study validate` to check the manifest and conditions (see [Config loading and validation](config-validation.md)).
+3. Run `slumber study validate --study-dir .` (or set `STUDY_DIR`) to check the manifest and conditions (see [Config loading and validation](config-validation.md)).
 4. When ready, run the study with `slumber study run` (see run documentation).
 
-## .gitignore and .env.example (inside study folder)
+## .gitignore and .env (inside study folder)
 
 When you run `slumber study init`, optional files are created **inside the study folder** (`<study_id>/`):
 
-- **`.env.example`** — Template with commented placeholders for `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and optional `SENTRY_DSN`. Copy to `.env` in the study folder (or project root) and fill in values; do not commit `.env`.
+- **`.env`** — Created from the study env template in `slumber.config.templates` (commented placeholders for `SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `SENTRY_DSN`). It does **not** include `DATABASE_URL` or `SUPABASE_SERVICE_ROLE_KEY` (those are for researcher setup; see [Backend](../reference/backend.md)). Fill in values; do not commit `.env`.
 - **`.gitignore`** — Ensures `.env` and `.env.*` (e.g. `.env.dev`, `.env.prod`) are ignored by Git so secrets are never committed.
 
-Templates live in the package under `slumber.config.templates` and are written at init time. Use `--no-env-example` or `--no-gitignore` to skip creating these files.
+Use `--no-env-example` or `--no-gitignore` to skip creating these files.

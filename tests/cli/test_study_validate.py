@@ -68,14 +68,13 @@ class TestStudyValidateCLI:
         (study_path / "conditions" / "control.yaml").write_text(
             minimal_condition_yaml, encoding="utf-8"
         )
-        with (
-            patch.object(Path, "cwd", return_value=study_path),
-            patch(
-                "slumber.config.plugins.get_registry",
-                return_value=_mock_registry_for_validate_success(),
-            ),
+        with patch(
+            "slumber.config.plugins.get_registry",
+            return_value=_mock_registry_for_validate_success(),
         ):
-            result = runner.invoke(app, ["study", "validate"])
+            result = runner.invoke(
+                app, ["study", "validate", "--study-dir", str(study_path)]
+            )
         assert result.exit_code == 0
         assert "v-study" in result.output
         assert "Conditions: 1" in result.output
@@ -90,12 +89,9 @@ class TestStudyValidateCLI:
         (study_path / "conditions" / "c.yaml").write_text(
             minimal_condition_yaml, encoding="utf-8"
         )
-        with (
-            patch.object(Path, "cwd", return_value=tmp_path),
-            patch(
-                "slumber.config.plugins.get_registry",
-                return_value=_mock_registry_for_validate_success(),
-            ),
+        with patch(
+            "slumber.config.plugins.get_registry",
+            return_value=_mock_registry_for_validate_success(),
         ):
             result = runner.invoke(
                 app,
@@ -113,20 +109,30 @@ class TestStudyValidateCLI:
         (study_path / "conditions" / "control.yaml").write_text(
             minimal_condition_yaml, encoding="utf-8"
         )
-        with patch.object(Path, "cwd", return_value=study_path):
-            result = runner.invoke(app, ["study", "validate"])
+        result = runner.invoke(
+            app, ["study", "validate", "--study-dir", str(study_path)]
+        )
         assert result.exit_code == 1
         assert "Plugin validation failed" in result.output
         assert "Master" in result.output
 
-    def test_validate_exits_1_when_no_study_in_cwd(
-        self, runner: CliRunner, tmp_path: Path
+    def test_validate_exits_1_when_no_study_dir_provided(
+        self, runner: CliRunner, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        with patch.object(Path, "cwd", return_value=tmp_path):
-            result = runner.invoke(app, ["study", "validate"])
+        """Validate requires --study-dir or STUDY_DIR (prompts in interactive mode, aborts in non-interactive)."""
+        monkeypatch.delenv("STUDY_DIR", raising=False)
+        # Prevent callback default `load_dotenv()` from loading repository .env.
+        result = runner.invoke(
+            app,
+            ["--env", str(tmp_path / "does-not-exist.env"), "study", "validate"],
+        )
         assert result.exit_code == 1
-        assert "study.yaml" in result.output
-        assert "not found" in result.output.lower()
+        assert (
+            "study-dir" in result.output.lower()
+            or "study_dir" in result.output.lower()
+            or "study directory" in result.output.lower()
+            or "aborted" in result.output.lower()
+        )
 
     def test_validate_exits_1_when_manifest_invalid(
         self, runner: CliRunner, tmp_path: Path
@@ -137,8 +143,9 @@ class TestStudyValidateCLI:
         (study_path / "study.yaml").write_text(
             "study_id: x\n# name missing\n", encoding="utf-8"
         )
-        with patch.object(Path, "cwd", return_value=study_path):
-            result = runner.invoke(app, ["study", "validate"])
+        result = runner.invoke(
+            app, ["study", "validate", "--study-dir", str(study_path)]
+        )
         assert result.exit_code == 1
         assert (
             "Study manifest error" in result.output
@@ -155,7 +162,8 @@ class TestStudyValidateCLI:
         (study_path / "conditions" / "bad.yaml").write_text(
             "name: x\n# procedures and dag missing\n", encoding="utf-8"
         )
-        with patch.object(Path, "cwd", return_value=study_path):
-            result = runner.invoke(app, ["study", "validate"])
+        result = runner.invoke(
+            app, ["study", "validate", "--study-dir", str(study_path)]
+        )
         assert result.exit_code == 1
         assert "Condition file error" in result.output or "bad.yaml" in result.output

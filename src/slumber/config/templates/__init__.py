@@ -1,1 +1,1 @@
-"""Study init templates (env.example, gitignore)."""
+"""Study init templates (env.study.example → .env, gitignore)."""

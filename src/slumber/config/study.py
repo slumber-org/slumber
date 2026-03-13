@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from importlib.resources import as_file, files
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from slumber.utils.yaml import BlankLineDumper, load_and_validate
 _TEMPLATES_PACKAGE = "slumber.config.templates"
 
 _STUDY_MANIFEST_FILE = "study.yaml"
-_ENV_EXAMPLE_FILENAME = "env.example"
+_ENV_FILENAME = "env"
 _GITIGNORE_FILENAME = "gitignore"
 
 
@@ -48,13 +49,13 @@ def init_study(
     """Create a study folder with manifest, conditions/, and assets/.
 
     Creates <base_dir>/<study_id>/ with study.yaml, empty conditions/,
-    assets/, and optionally .env.example and .gitignore.
+    assets/, and optionally .env and .gitignore.
 
     Args:
         base_dir: Project root; study folder will be base_dir / study_id.
         study_id: Unique study identifier (used as folder name).
         name: Human-readable study name; defaults to study_id.
-        create_env_example: If True, create .env.example at study folder.
+        create_env_example: If True, create .env at study folder.
         create_gitignore: If True, create study folder .gitignore.
 
     Returns:
@@ -87,9 +88,7 @@ def init_study(
         )
 
     if create_env_example:
-        create_template_file(
-            study_path / f".{_ENV_EXAMPLE_FILENAME}", _ENV_EXAMPLE_FILENAME
-        )
+        create_template_file(study_path / f".{_ENV_FILENAME}", _ENV_FILENAME)
 
     if create_gitignore:
         create_template_file(
@@ -102,14 +101,15 @@ def init_study(
 def resolve_study_dir(
     study_dir: Path | None = None,
 ) -> Path:
-    """Resolve the study directory from an explicit path or the current directory.
+    """Resolve the study directory from an explicit path, env, or the current directory.
 
     When study_dir is given, it must be an existing directory containing
-    study.yaml. When study_dir is None, the current working directory is
-    checked for study.yaml; if present, it is the study dir.
+    study.yaml. When study_dir is None, STUDY_DIR is checked; if set,
+    that path is used. Otherwise the current working directory is checked.
 
     Args:
-        study_dir: Optional path to the study folder. If None, uses Path.cwd().
+        study_dir: Optional path to the study folder. If None, uses
+            STUDY_DIR env var (if set) or Path.cwd().
 
     Returns:
         Path to the study directory if found.
@@ -118,17 +118,23 @@ def resolve_study_dir(
         ValueError: If the study directory is not found or is not a directory.
         FileNotFoundError: If the study manifest is not found.
     """
-    path = (study_dir if study_dir is not None else Path.cwd()).resolve()
-    if not path.is_dir():
-        raise ValueError(f"{path} is not a directory.")
+    if study_dir is None:
+        if os.getenv("STUDY_DIR"):
+            study_dir = Path(os.environ["STUDY_DIR"])
+        else:
+            study_dir = Path.cwd()
 
-    manifest = path / _STUDY_MANIFEST_FILE
+    study_dir = study_dir.resolve()
+    if not study_dir.is_dir():
+        raise ValueError(f"{study_dir} is not a directory.")
+
+    manifest = study_dir / _STUDY_MANIFEST_FILE
     if not manifest.is_file():
         raise FileNotFoundError(
-            f"Study manifest ({_STUDY_MANIFEST_FILE}) not found in {path}."
+            f"Study manifest ({_STUDY_MANIFEST_FILE}) not found in {study_dir}."
         )
 
-    return path
+    return study_dir
 
 
 def load_study(study_dir: Path) -> Study:

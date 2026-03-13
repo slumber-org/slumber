@@ -1,58 +1,56 @@
 """Study-related CLI commands."""
 
+import shutil
 from pathlib import Path
-from typing import Annotated
 
 import typer
 from pydantic import ValidationError
 
-from slumber.cli.utils import require_study_dir, StudyDirPath
+from slumber.auth import get_client
+from slumber.backend import create_study
+from slumber.cli.utils import STUDY_DIR_ENV
 from slumber.config import init_study, load_study, validate_study_plugins
 from slumber.utils.errors import format_validation_error
 
 
 DEFAULT_STUDY_ID = "new_study"
+DEFAULT_BASE_DIR = Path(".")
+DEFAULT_STUDY_NAME = "New Study"
 
 study_app = typer.Typer(help="Study folder and manifest commands.")
 
 
 @study_app.command("init")
 def initialize_study(
-    base_dir: Annotated[
-        Path,
-        typer.Option(
-            "--base-dir",
-            "-b",
-            show_default=True,
-            file_okay=False,
-            writable=True,
-            resolve_path=True,
-            prompt="Base directory (project root)",
-            help="Base directory; study folder will be created as <base-dir>/<study-id>/.",
-        ),
-    ] = Path("."),
-    study_id: Annotated[
-        str,
-        typer.Option(
-            "--study-id",
-            "-s",
-            prompt="Study ID (folder name)",
-            help="Study identifier (folder name). If omitted, prompt interactively.",
-        ),
-    ] = DEFAULT_STUDY_ID,
-    name: Annotated[
-        str,
-        typer.Option(
-            "--name",
-            "-n",
-            prompt="Study name (human-readable)",
-            help="Human-readable study name; defaults to study_id.",
-        ),
-    ] = DEFAULT_STUDY_ID,
+    base_dir: Path = typer.Option(
+        DEFAULT_BASE_DIR,
+        "--base-dir",
+        "-b",
+        show_default=True,
+        file_okay=False,
+        writable=True,
+        resolve_path=True,
+        prompt=True,
+        help="Base directory (study folder will be created as <base-dir>/<study-id>).",
+    ),
+    study_id: str = typer.Option(
+        DEFAULT_STUDY_ID,
+        "--study-id",
+        "-s",
+        prompt=True,
+        help="Study ID.",
+    ),
+    name: str = typer.Option(
+        DEFAULT_STUDY_NAME,
+        "--name",
+        "-n",
+        prompt=True,
+        help="Human-readable study name.",
+    ),
     no_env_example: bool = typer.Option(
         False,
         "--no-env-example",
-        help="Do not create .env.example inside the study folder.",
+        help="Do not create .env inside the study folder.",
     ),
     no_gitignore: bool = typer.Option(
         False,
@@ -63,8 +61,8 @@ def initialize_study(
     """Create a new study folder with manifest, conditions/, and assets/.
 
     Creates <base-dir>/<study-id>/ containing study.yaml, empty conditions/
-    and assets/. Optionally creates .env.example and .gitignore inside the
-    study folder (for non-interactive use, pass --base-dir and --study-id).
+    and assets/. Optionally creates .env (from config template) and .gitignore
+    inside the study folder (for non-interactive use, pass --base-dir and --study-id).
     """
 
     try:
@@ -79,22 +77,53 @@ def initialize_study(
         typer.echo(str(e), err=True)
         raise typer.Exit(1) from e
 
+    try:
+        client = get_client(use_service_role=True)
+        create_study(client, study_id, name)
+        typer.echo(f"Registered study '{study_id}' in the database.")
+    except ValueError as e:
+        typer.echo(f"Database: {e}", err=True)
+        _cleanup_study_dir(study_path)
+        raise typer.Exit(1) from e
+    except Exception as e:
+        typer.echo(f"Database: {e}", err=True)
+        _cleanup_study_dir(study_path)
+        raise typer.Exit(1) from e
+
     typer.echo(f"Created study at {study_path}")
-    typer.echo("Next: cd into the study folder and run 'slumber study validate'.")
+
+
+def _cleanup_study_dir(study_path: Path) -> None:
+    """Remove a newly created study directory after DB registration failure."""
+    try:
+        shutil.rmtree(study_path)
+        typer.echo(
+            "Database registration failed, so the created study folder was removed.",
+            err=True,
+        )
+    except Exception as cleanup_error:
+        typer.echo(
+            "Database registration failed and automatic study-folder cleanup failed: "
+            f"{cleanup_error}. Remove this folder manually: {study_path}",
+            err=True,
+        )
 
 
 @study_app.command("validate")
 def validate_study(
-    study_dir: StudyDirPath = None,
+    study_dir: Path = typer.Option(
+        ...,
+        "--study-dir",
+        "-d",
+        file_okay=False,
+        dir_okay=True,
+        resolve_path=True,
+        envvar=STUDY_DIR_ENV,
+        prompt=True,
+        help="Path to study folder.",
+    ),
 ) -> None:
-    """Validate study manifest and all condition files in the study folder.
-
-    Discovers the study by looking for study.yaml in the current directory
-    (or in --study-dir). Loads .env from the study folder, then the manifest
-    and every condition YAML in conditions_dir; reports validation errors
-    with file paths.
-    """
-    study_dir = require_study_dir(study_dir)
+    """Validate study manifest and all condition files in the study folder."""
 
     try:
         study = load_study(study_dir)
