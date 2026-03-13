@@ -9,6 +9,8 @@ Create Date: ${create_date}
 from collections.abc import Sequence
 
 from alembic import op
+${"import sqlalchemy as sa" if not imports or "import sqlalchemy as sa" not in imports else ""}
+${"import sqlmodel" if not imports or ("import sqlmodel" not in imports and "from sqlmodel" not in imports) else ""}
 ${imports if imports else ""}
 
 # revision identifiers, used by Alembic.

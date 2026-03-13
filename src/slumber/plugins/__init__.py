@@ -6,16 +6,14 @@ from slumber.plugins.registry import (
     PluginRegistry,
     get_registry,
 )
-from slumber.plugins.types import TaskClass, UIBackend, UnitClass
+from slumber.plugins.types import UIBackend
 from slumber.plugins.units import build_unit_from_settings
 
 __all__ = [
     "EntryPointGroup",
     "PluginNotFoundError",
     "PluginRegistry",
-    "TaskClass",
     "UIBackend",
-    "UnitClass",
     "build_unit_from_settings",
     "get_registry",
 ]

@@ -2,20 +2,8 @@
 
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
-import ezmsg.core as ez
-
-from slumber.plugins.tasks.base import Task
-
 if TYPE_CHECKING:
     from slumber.schemas.procedure import Procedure
-
-
-# Unit plugins are ez.Unit subclasses
-UnitClass = type[ez.Unit]
-
-
-# Task plugins are Task subclasses
-TaskClass = type[Task]
 
 
 @runtime_checkable

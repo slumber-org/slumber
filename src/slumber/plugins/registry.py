@@ -6,6 +6,8 @@ from collections import defaultdict
 from enum import Enum
 from typing import Any
 
+from slumber.plugins.tasks.base import Task
+
 try:
     from importlib.metadata import entry_points
 except ImportError:
@@ -14,7 +16,9 @@ except ImportError:
 from loguru import logger
 
 from slumber.plugins.errors import PluginNotFoundError
-from slumber.plugins.types import TaskClass, UIBackend, UnitClass
+from slumber.plugins.types import UIBackend
+
+import ezmsg.core as ez
 
 
 class EntryPointGroup(str, Enum):
@@ -25,9 +29,9 @@ class EntryPointGroup(str, Enum):
     UI_BACKENDS = "slumber.ui_backends"
 
 
-_ENTRY_POINT_GROUP_TO_TYPE = {
-    EntryPointGroup.UNITS: UnitClass,
-    EntryPointGroup.TASKS: TaskClass,
+_ENTRY_POINT_GROUP_TO_CLASS = {
+    EntryPointGroup.UNITS: ez.Unit,
+    EntryPointGroup.TASKS: Task,
     EntryPointGroup.UI_BACKENDS: UIBackend,
 }
 
@@ -41,14 +45,15 @@ def _resolve_plugin_for_group(
     """
     if group in [EntryPointGroup.UNITS, EntryPointGroup.TASKS]:
         if isinstance(loaded_object, type) and issubclass(
-            loaded_object, _ENTRY_POINT_GROUP_TO_TYPE[group]
+            loaded_object, _ENTRY_POINT_GROUP_TO_CLASS[group]
         ):
             return loaded_object
+
         logger.warning(
             "Skipping {}[{}]: expected {!r} subclass, got {!r}.",
             group.value,
             name,
-            _ENTRY_POINT_GROUP_TO_TYPE[group].__name__,
+            _ENTRY_POINT_GROUP_TO_CLASS[group].__name__,
             type(loaded_object).__name__,
         )
         return None
@@ -97,7 +102,9 @@ class PluginRegistry:
     """Single registry for units, tasks, and UI backends loaded from entry points."""
 
     def __init__(self) -> None:
-        self._plugins: dict[EntryPointGroup, dict[str, Any]] = defaultdict(dict)
+        self._plugins: dict[
+            EntryPointGroup, dict[str, type[Task] | type[ez.Unit] | UIBackend]
+        ] = defaultdict(dict)
         self._load_all()
 
     def _load_all(self) -> None:
@@ -105,7 +112,9 @@ class PluginRegistry:
         for group in EntryPointGroup:
             self._plugins[group] = _load_entry_points(group)
 
-    def get_plugin(self, group: EntryPointGroup, key: str) -> Any:
+    def get_plugin(
+        self, group: EntryPointGroup, key: str
+    ) -> type[Task] | type[ez.Unit] | UIBackend:
         """Return the plugin for the given group and key.
 
         Args:

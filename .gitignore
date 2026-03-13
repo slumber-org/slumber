@@ -12,6 +12,10 @@ wheels/
 # Virtual environments
 .venv
 
-# Slumber env files (secrets)
+# Slumber env files (secrets); .env.example at root is committed
 .env
 .env.*
+!.env.example
+
+# macOS
+.DS_Store

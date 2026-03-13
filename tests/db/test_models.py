@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, time
+from datetime import datetime, timezone
 from uuid import uuid4
 
 
@@ -25,10 +25,10 @@ def test_study_model_instantiation() -> None:
 
 
 def test_condition_model_instantiation() -> None:
-    """Condition can be instantiated with study_id, name, procedures, dag."""
+    """Condition can be instantiated with id, study_id, procedures, dag."""
     condition = Condition(
+        id="condition_1",
         study_id="test-study",
-        name="condition_1",
         procedures={"pre_sleep": {"steps": [{"task": "instruction"}]}},
         dag={
             "components": [{"name": "MASTER", "unit_type": "Master"}],
@@ -36,16 +36,17 @@ def test_condition_model_instantiation() -> None:
             "process_components": [],
         },
     )
+    assert condition.id == "condition_1"
     assert condition.study_id == "test-study"
-    assert condition.name == "condition_1"
     assert "pre_sleep" in condition.procedures
     assert condition.dag["components"][0]["name"] == "MASTER"
 
 
 def test_participant_model_instantiation() -> None:
-    """Participant can be instantiated with study_id, participant_id, auth_user_id."""
+    """Participant can be instantiated with id, study_id, participant_id, auth_user_id."""
     uid = uuid4()
     participant = Participant(
+        id="test-study_sub-001",
         study_id="test-study",
         participant_id="sub-001",
         auth_user_id=uid,
@@ -57,27 +58,30 @@ def test_participant_model_instantiation() -> None:
 
 def test_session_model_instantiation() -> None:
     """Session can be instantiated with required fields."""
+    earliest = datetime(2025, 3, 12, 22, 0, 0, tzinfo=timezone.utc)
+    latest = datetime(2025, 3, 13, 6, 0, 0, tzinfo=timezone.utc)
     session = Session(
-        participant_id=1,
-        scheduled_date=date(2025, 3, 6),
+        participant_id="test-study_sub-001",
+        earliest_start_at=earliest,
+        latest_start_at=latest,
     )
-    assert session.participant_id == 1
-    assert session.scheduled_date == date(2025, 3, 6)
+    assert session.participant_id == "test-study_sub-001"
+    assert session.earliest_start_at == earliest
+    assert session.latest_start_at == latest
     assert session.condition_id is None
-    assert session.min_start_time is None
-    assert session.max_start_time is None
 
 
-def test_session_model_with_optional_times() -> None:
-    """Session accepts optional min/max start times."""
+def test_session_model_with_condition() -> None:
+    """Session accepts optional condition_id (string)."""
+    earliest = datetime(2025, 3, 12, 22, 0, 0, tzinfo=timezone.utc)
+    latest = datetime(2025, 3, 13, 6, 0, 0, tzinfo=timezone.utc)
     session = Session(
-        participant_id=1,
-        scheduled_date=date(2025, 3, 6),
-        min_start_time=time(22, 0),
-        max_start_time=time(6, 0),
+        participant_id="test-study_sub-001",
+        earliest_start_at=earliest,
+        latest_start_at=latest,
+        condition_id="condition_2",
     )
-    assert session.min_start_time == time(22, 0)
-    assert session.max_start_time == time(6, 0)
+    assert session.condition_id == "condition_2"
 
 
 def test_run_model_instantiation() -> None:
@@ -112,26 +116,29 @@ def test_study_table_metadata() -> None:
 
 
 def test_condition_table_metadata() -> None:
-    """Condition table has study_id FK and unique (study_id, name)."""
+    """Condition table has id (str PK), study_id FK, procedures, dag."""
     assert Condition.__tablename__ == "condition"
+    assert "id" in Condition.model_fields
     assert "study_id" in Condition.model_fields
     assert "procedures" in Condition.model_fields
     assert "dag" in Condition.model_fields
 
 
 def test_participant_table_metadata() -> None:
-    """Participant table has auth_user_id (UUID) and unique (study_id, participant_id)."""
+    """Participant table has id (str PK), auth_user_id (UUID), unique (study_id, participant_id)."""
     assert Participant.__tablename__ == "participant"
+    assert "id" in Participant.model_fields
     assert "auth_user_id" in Participant.model_fields
     assert Participant.model_fields["auth_user_id"].annotation is not None
 
 
 def test_session_table_metadata() -> None:
-    """Session table has participant_id, condition_id, scheduled_date."""
+    """Session table has participant_id, condition_id, earliest_start_at, latest_start_at."""
     assert Session.__tablename__ == "session"
     assert "participant_id" in Session.model_fields
     assert "condition_id" in Session.model_fields
-    assert "scheduled_date" in Session.model_fields
+    assert "earliest_start_at" in Session.model_fields
+    assert "latest_start_at" in Session.model_fields
 
 
 def test_run_table_metadata() -> None:

@@ -3,30 +3,22 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 import typer
 
-from slumber.cli.utils import StudyDirPath, require_study_dir
-
 db_app = typer.Typer(
     name="db",
-    help="Database schema migrations (Postgres / Supabase). Requires DATABASE_URL from study .env.",
+    help="Database schema migrations (Postgres / Supabase).",
 )
-
-
-@db_app.callback()
-def _db_callback(
-    study_dir: StudyDirPath = None,
-) -> None:
-    require_study_dir(study_dir)
 
 
 def _alembic_cmd(args: list[str]) -> int:
     """Run alembic with framework root as cwd so alembic.ini is found."""
-    root = Path(__file__).resolve().parent.parent.parent.parent
+    root = Path().cwd()
     env = dict(os.environ)
     env["PYTHONPATH"] = str(root / "src") + os.pathsep + env.get("PYTHONPATH", "")
     return subprocess.call(
@@ -36,11 +28,37 @@ def _alembic_cmd(args: list[str]) -> int:
     )
 
 
+def _compute_next_numeric_rev_id() -> str:
+    """Compute the next numeric Alembic revision id.
+
+    This assumes existing revision ids follow the `NNN_<slug>.py` filename
+    convention (e.g. `001_initial_schema.py`).
+    """
+    pattern = re.compile(r"^(?P<num>\d+)_.*\.py$")
+    nums: list[int] = []
+    num_width = 3
+
+    root = Path().cwd()
+    versions_dir = root / "migrations" / "versions"
+
+    if versions_dir.exists():
+        for path in versions_dir.glob("*.py"):
+            match = pattern.match(path.name)
+            if not match:
+                continue
+            num_str = match.group("num")
+            nums.append(int(num_str))
+            num_width = max(num_width, len(num_str))
+
+    next_num = (max(nums) + 1) if nums else 1
+    return str(next_num).zfill(num_width)
+
+
 @db_app.command("upgrade")
 def db_upgrade(
-    revision: str = typer.Argument("head", help="Target revision (default: head)."),
+    revision: str = typer.Argument("head", help="Target revision."),
 ) -> None:
-    """Apply migrations up to the given revision (default: head)."""
+    """Apply migrations up to the given revision."""
     raise typer.Exit(_alembic_cmd(["upgrade", revision]))
 
 
@@ -70,3 +88,39 @@ def db_current() -> None:
 def db_history() -> None:
     """Show migration history."""
     raise typer.Exit(_alembic_cmd(["history"]))
+
+
+@db_app.command("revision")
+def db_revision(
+    message: str = typer.Option(
+        ...,
+        "--message",
+        "-m",
+        help="Migration message.",
+    ),
+    autogenerate: bool = typer.Option(
+        True,
+        "--autogenerate/--no-autogenerate",
+        help=(
+            "Autogenerate migration by comparing SQLModel metadata to the current "
+            "database schema."
+        ),
+    ),
+    rev_id: str | None = typer.Option(
+        ...,
+        "--rev-id",
+        default_factory=_compute_next_numeric_rev_id,
+        help="Alembic revision id override. Defaults to the next sequential numeric id.",
+    ),
+) -> None:
+    """Create a new Alembic migration file."""
+
+    args = ["revision", "--rev-id", rev_id]
+
+    if autogenerate:
+        args.append("--autogenerate")
+
+    if message:
+        args.extend(["-m", message])
+
+    raise typer.Exit(_alembic_cmd(args))

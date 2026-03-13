@@ -11,13 +11,19 @@ from slumber.config import init_study, load_study, resolve_study_dir
 class TestDiscoverStudyDir:
     """Tests for resolve_study_dir."""
 
-    def test_returns_cwd_when_study_yaml_in_cwd(self, tmp_path: Path) -> None:
+    def test_returns_cwd_when_study_yaml_in_cwd(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv("STUDY_DIR", raising=False)
         (tmp_path / "study.yaml").write_text("study_id: s\nname: S\n", encoding="utf-8")
         with patch.object(Path, "cwd", return_value=tmp_path):
             found = resolve_study_dir()
         assert found == tmp_path
 
-    def test_raises_when_no_study_yaml_in_cwd(self, tmp_path: Path) -> None:
+    def test_raises_when_no_study_yaml_in_cwd(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv("STUDY_DIR", raising=False)
         with patch.object(Path, "cwd", return_value=tmp_path):
             with pytest.raises(FileNotFoundError, match="Study manifest"):
                 resolve_study_dir()
