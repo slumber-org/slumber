@@ -16,6 +16,13 @@ from typing import TYPE_CHECKING
 
 from loguru import logger
 
+from slumber.constants import (
+    SESSION_FILE_ENV,
+    SUPABASE_ANON_KEY_ENV,
+    SUPABASE_SERVICE_ROLE_KEY_ENV,
+    SUPABASE_URL_ENV,
+)
+
 if TYPE_CHECKING:
     from supabase import Client
 
@@ -25,7 +32,7 @@ _PACKAGE_NAME = __name__.split(".", 1)[0]
 
 def _get_session_path() -> Path:
     """Return path to session file from env or default."""
-    path = os.getenv("SLUMBER_SESSION_FILE", "").strip()
+    path = os.getenv(SESSION_FILE_ENV, "").strip()
     if path:
         return Path(path)
     return Path.home() / ".config" / _PACKAGE_NAME / SESSION_FILENAME
@@ -42,7 +49,7 @@ def get_session_path() -> Path:
 
 def _env_supabase_url() -> str:
     """Return SUPABASE_URL from environment; raise if missing."""
-    url = os.getenv("SUPABASE_URL", "").strip()
+    url = os.getenv(SUPABASE_URL_ENV, "").strip()
     if not url:
         raise ValueError(
             "SUPABASE_URL is not set. Set it to your Supabase project URL "
@@ -53,7 +60,7 @@ def _env_supabase_url() -> str:
 
 def _env_anon_key() -> str:
     """Return SUPABASE_ANON_KEY from environment; raise if missing."""
-    key = os.getenv("SUPABASE_ANON_KEY", "").strip()
+    key = os.getenv(SUPABASE_ANON_KEY_ENV, "").strip()
     if not key:
         raise ValueError(
             "SUPABASE_ANON_KEY is not set. Set it to your Supabase anon key."
@@ -78,7 +85,7 @@ def get_client(*, use_service_role: bool = False) -> Client:
 
     url = _env_supabase_url()
     if use_service_role:
-        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        key = os.getenv(SUPABASE_SERVICE_ROLE_KEY_ENV, "").strip()
         if not key:
             raise ValueError(
                 "SUPABASE_SERVICE_ROLE_KEY is not set. Required when "

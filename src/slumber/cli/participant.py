@@ -8,7 +8,7 @@ import typer
 
 from slumber.auth import get_client
 from slumber.backend import create_participant_for_user, list_participants
-from slumber.cli.utils import (
+from slumber.constants import (
     PARTICIPANT_ID_ENV,
     STUDY_ID_ENV,
     USER_ID_ENV,

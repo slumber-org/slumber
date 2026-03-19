@@ -9,7 +9,9 @@ nav:
   - User Guide:
       - Overview: user-guide/index.md
       - Study Setup: user-guide/study-setup.md
+      - Config Validation: user-guide/config-validation.md
       - Condition Sync: user-guide/condition-sync.md
+      - CLI Reference: user-guide/cli-reference.md
   
   - Reference:
       - Schemas: reference/schemas.md

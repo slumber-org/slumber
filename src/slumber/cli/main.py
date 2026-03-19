@@ -1,12 +1,17 @@
 """Typer application and top-level commands."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from dotenv.main import load_dotenv
+
 import typer
+from dotenv.main import load_dotenv
 
 from slumber.cli.auth import auth_app
 from slumber.cli.condition import condition_app
 from slumber.cli.db import db_app
+from slumber.cli.doctor import doctor_command
+from slumber.cli.utils import configure_cli_logging
 from slumber.cli.participant import participant_app
 from slumber.cli.session import session_app
 from slumber.cli.study import study_app
@@ -21,6 +26,7 @@ app.add_typer(condition_app, name="condition")
 app.add_typer(db_app, name="db")
 app.add_typer(participant_app, name="participant")
 app.add_typer(session_app, name="session")
+app.command("doctor")(doctor_command)
 
 
 @app.callback()
@@ -32,8 +38,15 @@ def _callback(
         file_okay=True,
         dir_okay=False,
         resolve_path=True,
-        help="Environment file.",
+        help="Path to an environment file to load (overrides auto-discovered .env).",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Enable verbose logging (DEBUG level).",
     ),
 ) -> None:
-    """Load .env file."""
+    """SLUMBER — Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings."""
     load_dotenv(dotenv_path=env)
+    configure_cli_logging(verbose=verbose)

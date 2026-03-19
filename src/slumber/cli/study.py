@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from slumber.auth import get_client
 from slumber.backend import create_study
-from slumber.cli.utils import STUDY_DIR_ENV
+from slumber.constants import STUDY_DIR_ENV
 from slumber.config import init_study, load_study, validate_study_plugins
 from slumber.utils.errors import format_validation_error
 
