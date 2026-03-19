@@ -105,6 +105,17 @@ After `slumber auth login`, the session is stored in a file so other commands (e
 | `slumber auth password-change [--new-password <p>]` | Change the current user's password (must be signed in). |
 | `slumber auth status` | Show whether you are signed in and with which email. |
 
+## Condition sync (researcher)
+
+Pushes condition YAML files from the study folder into the Supabase `condition` table. Requires `SUPABASE_SERVICE_ROLE_KEY`. See the [Condition sync guide](../user-guide/condition-sync.md) for full details.
+
+| Command | Purpose |
+|--------|---------|
+| `slumber condition sync --study-dir <path>` | Upsert all conditions from the study's `conditions/` directory into Supabase. |
+| `slumber condition sync --study-dir <path> --conditions <name>` | Upsert only the named condition(s). Repeat `--conditions` for multiple names. |
+
+`--study-dir` may be replaced by the `STUDY_DIR` environment variable.
+
 ## Participant and session commands (researcher)
 
 These use `SUPABASE_SERVICE_ROLE_KEY`; no study directory or auth login required. Set options via env when not passed: `STUDY_DIR`, `STUDY_ID`, `USER_ID`, `PARTICIPANT_ID`.

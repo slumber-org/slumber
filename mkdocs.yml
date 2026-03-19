@@ -9,6 +9,7 @@ nav:
   - User Guide:
       - Overview: user-guide/index.md
       - Study Setup: user-guide/study-setup.md
+      - Condition Sync: user-guide/condition-sync.md
   
   - Reference:
       - Schemas: reference/schemas.md
