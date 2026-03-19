@@ -14,7 +14,7 @@ from slumber.backend import (
     delete_session as backend_delete,
 )
 from slumber.backend.participant import generate_participant_id
-from slumber.cli.utils import (
+from slumber.constants import (
     PARTICIPANT_ID_ENV,
     STUDY_ID_ENV,
 )

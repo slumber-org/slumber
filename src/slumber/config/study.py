@@ -8,6 +8,7 @@ from pathlib import Path
 
 import yaml
 
+from slumber.constants import STUDY_DIR_ENV
 from slumber.schemas.condition import load_conditions_from_dir
 from slumber.schemas.study import Study
 from slumber.utils.yaml import BlankLineDumper, load_and_validate
@@ -119,8 +120,8 @@ def resolve_study_dir(
         FileNotFoundError: If the study manifest is not found.
     """
     if study_dir is None:
-        if os.getenv("STUDY_DIR"):
-            study_dir = Path(os.environ["STUDY_DIR"])
+        if os.getenv(STUDY_DIR_ENV):
+            study_dir = Path(os.environ[STUDY_DIR_ENV])
         else:
             study_dir = Path.cwd()
 

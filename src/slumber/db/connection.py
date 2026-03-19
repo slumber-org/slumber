@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import os
 
+from slumber.constants import DATABASE_URL_ENV
+
 
 def get_database_url() -> str:
     """Return Postgres connection URL from environment.
@@ -23,7 +25,7 @@ def get_database_url() -> str:
     Raises:
         ValueError: If DATABASE_URL is missing or empty.
     """
-    url = os.getenv("DATABASE_URL", "").strip()
+    url = os.getenv(DATABASE_URL_ENV, "").strip()
     if not url:
         raise ValueError(
             "DATABASE_URL is not set. Set it to your Postgres connection string "
