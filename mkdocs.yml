@@ -11,6 +11,7 @@ nav:
       - Study Setup: user-guide/study-setup.md
       - Config Validation: user-guide/config-validation.md
       - Condition Sync: user-guide/condition-sync.md
+      - Run Layout and Logging: user-guide/run-layout-logging.md
       - CLI Reference: user-guide/cli-reference.md
   
   - Reference:

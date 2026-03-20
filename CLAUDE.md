@@ -123,7 +123,7 @@ Completed tasks (Tasks 1–6): schemas, study init, config load/validate, plugin
 Pending tasks:
 - **Task 7**: `slumber condition sync` — upsert conditions from `conditions/` into Supabase
 - **Task 8**: CLI skeleton refinement, `slumber doctor`, loguru verbose flag
-- **Task 9**: Run directory layout + run logging from `study.runs.logging`
+- **Task 9**: Run directory layout + run logging from `study.logging`
 - **Task 10**: `slumber study run` (minimal, headless), optional Sentry init
 
 Future stages: Stage 2 (NiceGUI shell), Stage 3 (ZMax, HDF5, survey widgets, packaging), Stage 4 (docs), Stage 5 (coverage gates + CI).
