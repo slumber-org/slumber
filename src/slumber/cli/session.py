@@ -41,7 +41,7 @@ def session_create(
         "--study-id",
         envvar=STUDY_ID_ENV,
         prompt=True,
-        help="Study ID. Validates participant belongs to study.",
+        help="Study ID.",
     ),
     participant_id: str = typer.Option(
         ...,
@@ -53,14 +53,14 @@ def session_create(
     earliest_start_at: str = typer.Option(
         ...,
         "--earliest-start-at",
-        prompt=True,
-        help="Start of allowed start window (ISO 8601, e.g. 2025-03-12T22:00:00Z).",
+        prompt="Earliest start at (ISO 8601 - YYYY-MM-DDTHH:MM:SSZ)",
+        help="Start of allowed start window (ISO 8601 - YYYY-MM-DDTHH:MM:SSZ).",
     ),
     latest_start_at: str = typer.Option(
         ...,
         "--latest-start-at",
-        prompt=True,
-        help="End of allowed start window (ISO 8601, e.g. 2025-03-13T06:00:00Z).",
+        prompt="Latest start at (ISO 8601 - YYYY-MM-DDTHH:MM:SSZ)",
+        help="End of allowed start window (ISO 8601 - YYYY-MM-DDTHH:MM:SSZ).",
     ),
     condition_id: str | None = typer.Option(
         None, "--condition-id", help="Condition ID (e.g. condition_1)."

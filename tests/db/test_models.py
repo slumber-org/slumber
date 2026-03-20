@@ -95,6 +95,8 @@ def test_run_model_instantiation() -> None:
     assert run.status == "pending"
     assert run.run_directory == "/runs/sub-001/ses-1/run-1"
     assert run.parent_run_id is None
+    assert run.start_time is not None
+    assert run.end_time is None
 
 
 def test_run_model_with_parent() -> None:
@@ -142,9 +144,11 @@ def test_session_table_metadata() -> None:
 
 
 def test_run_table_metadata() -> None:
-    """Run table has session_id, parent_run_id, status, run_directory."""
+    """Run table has timing, status, and run path fields."""
     assert Run.__tablename__ == "run"
     assert "session_id" in Run.model_fields
     assert "parent_run_id" in Run.model_fields
+    assert "start_time" in Run.model_fields
+    assert "end_time" in Run.model_fields
     assert "status" in Run.model_fields
     assert "run_directory" in Run.model_fields

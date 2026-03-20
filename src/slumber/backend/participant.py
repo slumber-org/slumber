@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from slumber.utils.time import utc_now
-
 if TYPE_CHECKING:
     from supabase import Client
 
@@ -46,14 +44,11 @@ def create_participant(
         Exception: On duplicate (study_id, participant_id) or FK violation.
     """
     auth_user_id = _current_user_id(client)
-    now = utc_now().isoformat()
     payload = {
         "id": f"{study_id}_{participant_id}",
         "study_id": study_id,
         "participant_id": participant_id,
         "auth_user_id": auth_user_id,
-        "created_at": now,
-        "updated_at": now,
     }
     response = client.table("participant").insert(payload).execute()
     if not response.data or len(response.data) == 0:
@@ -81,18 +76,41 @@ def create_participant_for_user(
     Returns:
         Created row as dict.
     """
-    now = utc_now().isoformat()
     payload = {
         "id": generate_participant_id(study_id, participant_id),
         "study_id": study_id,
         "participant_id": participant_id,
         "auth_user_id": auth_user_id,
-        "created_at": now,
-        "updated_at": now,
     }
     response = client.table("participant").insert(payload).execute()
     if not response.data or len(response.data) == 0:
         raise RuntimeError("Participant insert returned no data")
+    return response.data[0]
+
+
+def get_participant_for_study(client: Client, study_id: str) -> dict:
+    """Return the current user's participant record for the given study.
+
+    Uses RLS — only the authenticated user's own participant row is visible.
+
+    Args:
+        client: Authenticated Supabase client.
+        study_id: Study identifier.
+
+    Returns:
+        Participant row as dict.
+
+    Raises:
+        ValueError: If the current user is not a participant in the study.
+    """
+    response = (
+        client.table("participant").select("*").eq("study_id", study_id).execute()
+    )
+    if not response.data:
+        raise ValueError(
+            f"Current user is not a participant in study {study_id!r}. "
+            "Ask the researcher to add you as a participant."
+        )
     return response.data[0]
 
 

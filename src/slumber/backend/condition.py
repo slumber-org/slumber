@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from slumber.utils.time import utc_now
-
 if TYPE_CHECKING:
     from supabase import Client
 
@@ -49,7 +47,6 @@ def sync_conditions(
         RuntimeError: If a condition upsert returns no data.
     """
     results = []
-    now = utc_now().isoformat()
     for condition in conditions:
         condition_id = generate_condition_id(study_id, condition.name)
         data = condition.model_dump(mode="json")
@@ -58,7 +55,6 @@ def sync_conditions(
             "study_id": study_id,
             "procedures": data["procedures"],
             "dag": data["dag"],
-            "updated_at": now,
         }
         response = client.table("condition").upsert(payload, on_conflict="id").execute()
         if not response.data or len(response.data) == 0:

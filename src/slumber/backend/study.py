@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from slumber.utils.time import utc_now
-
 if TYPE_CHECKING:
     from supabase import Client
 
@@ -34,12 +32,9 @@ def create_study(
     Raises:
         Exception: On duplicate id or DB error.
     """
-    now = utc_now().isoformat()
     payload = {
         "id": study_id,
         "name": name,
-        "created_at": now,
-        "updated_at": now,
     }
     response = client.table("study").insert(payload).execute()
     if not response.data or len(response.data) == 0:

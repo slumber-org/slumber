@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import TIMESTAMP, TEXT, UniqueConstraint, func
+from sqlalchemy import TIMESTAMP, TEXT, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, UUID as PG_UUID
 from sqlmodel import Column, Field, SQLModel
 
@@ -23,10 +23,12 @@ class TimestampMixin(SQLModel):
     created_at: datetime = Field(
         default_factory=utc_now,
         sa_type=TIMESTAMP(timezone=True),
+        sa_column_kwargs={"nullable": False, "server_default": text("now()")},
     )
     updated_at: datetime = Field(
         default_factory=utc_now,
         sa_type=TIMESTAMP(timezone=True),
+        sa_column_kwargs={"nullable": False, "server_default": text("now()")},
     )
 
 
@@ -86,7 +88,6 @@ class Session(TimestampMixin, table=True):
     earliest_start_at and latest_start_at define the allowed start window
     (participant may start the session any time in that range). No two sessions
     for the same participant may have overlapping windows (DB exclusion).
-    start_time/end_time record actual run.
     """
 
     __tablename__ = "session"
@@ -106,8 +107,6 @@ class Session(TimestampMixin, table=True):
     )
     earliest_start_at: datetime = Field(..., sa_type=TIMESTAMP(timezone=True))
     latest_start_at: datetime = Field(..., sa_type=TIMESTAMP(timezone=True))
-    start_time: datetime | None = Field(default=None, sa_type=TIMESTAMP(timezone=True))
-    end_time: datetime | None = Field(default=None, sa_type=TIMESTAMP(timezone=True))
 
 
 class Run(TimestampMixin, table=True):
@@ -122,6 +121,12 @@ class Run(TimestampMixin, table=True):
     id: int | None = Field(default=None, primary_key=True)
     session_id: int = Field(foreign_key="session.id")
     parent_run_id: int | None = Field(default=None, foreign_key="run.id")
+    start_time: datetime = Field(
+        default_factory=utc_now,
+        sa_type=TIMESTAMP(timezone=True),
+        sa_column_kwargs={"nullable": False, "server_default": text("now()")},
+    )
+    end_time: datetime | None = Field(default=None, sa_type=TIMESTAMP(timezone=True))
     status: str = Field(
         ..., max_length=64, index=True
     )  # e.g. pending, running, completed, failed

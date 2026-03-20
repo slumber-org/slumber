@@ -16,5 +16,5 @@ def configure_cli_logging(*, verbose: bool = False) -> None:
         verbose: If True, log at DEBUG level; otherwise WARNING.
     """
     logger.remove()
-    level = "DEBUG" if verbose else "WARNING"
+    level = "DEBUG" if verbose else "INFO"
     logger.add(sys.stderr, level=level, format="{level}: {message}")

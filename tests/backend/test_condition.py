@@ -88,6 +88,8 @@ class TestSyncConditions:
         payload = mock_client.table.return_value.upsert.call_args[0][0]
         assert "procedures" in payload
         assert "dag" in payload
+        assert "created_at" not in payload
+        assert "updated_at" not in payload
         assert isinstance(payload["procedures"], dict)
         assert isinstance(payload["dag"], dict)
 
