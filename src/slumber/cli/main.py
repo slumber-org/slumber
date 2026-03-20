@@ -11,7 +11,7 @@ from slumber.cli.auth import auth_app
 from slumber.cli.condition import condition_app
 from slumber.cli.db import db_app
 from slumber.cli.doctor import doctor_command
-from slumber.cli.utils import configure_cli_logging
+from slumber.cli.logging import configure_cli_logging
 from slumber.cli.participant import participant_app
 from slumber.cli.session import session_app
 from slumber.cli.study import study_app
