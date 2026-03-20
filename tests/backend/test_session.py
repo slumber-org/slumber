@@ -9,9 +9,10 @@ import pytest
 
 from slumber.backend.session import (
     create_session,
+    delete_session,
+    get_active_session,
     list_sessions,
     update_session,
-    delete_session,
 )
 
 
@@ -284,3 +285,38 @@ def test_delete_session_succeeds_when_row_deleted() -> None:
     mock_client.table.return_value = mock_table
 
     delete_session(mock_client, 7)  # no raise
+
+
+def test_get_active_session_returns_row() -> None:
+    """get_active_session returns first row within the start window."""
+    now = datetime(2025, 10, 1, 23, 0, 0, tzinfo=timezone.utc)
+    row = {"id": 99, "participant_id": "s1_sub-001", "condition_id": "s1_ctrl"}
+    mock_chain = MagicMock()
+    mock_chain.eq.return_value = mock_chain
+    mock_chain.lte.return_value = mock_chain
+    mock_chain.gte.return_value.execute.return_value = MagicMock(data=[row])
+    mock_table = MagicMock()
+    mock_table.select.return_value = mock_chain
+    mock_client = MagicMock()
+    mock_client.table.return_value = mock_table
+
+    result = get_active_session(mock_client, "s1_sub-001", now)
+
+    assert result == row
+    mock_chain.eq.assert_called_once_with("participant_id", "s1_sub-001")
+
+
+def test_get_active_session_raises_when_no_session() -> None:
+    """get_active_session raises ValueError when no session is within window."""
+    now = datetime(2025, 10, 1, 23, 0, 0, tzinfo=timezone.utc)
+    mock_chain = MagicMock()
+    mock_chain.eq.return_value = mock_chain
+    mock_chain.lte.return_value = mock_chain
+    mock_chain.gte.return_value.execute.return_value = MagicMock(data=[])
+    mock_table = MagicMock()
+    mock_table.select.return_value = mock_chain
+    mock_client = MagicMock()
+    mock_client.table.return_value = mock_table
+
+    with pytest.raises(ValueError, match="No session"):
+        get_active_session(mock_client, "s1_sub-001", now)

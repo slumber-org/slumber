@@ -5,8 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from slumber.utils.time import utc_now
-
 if TYPE_CHECKING:
     from supabase import Client
 
@@ -90,14 +88,11 @@ def create_session(
             (earliest_start_at, latest_start_at) window.
     """
     _check_no_overlap(client, participant_id, earliest_start_at, latest_start_at)
-    now = utc_now()
     payload = {
         "participant_id": participant_id,
         "earliest_start_at": _datetime_to_iso(earliest_start_at),
         "latest_start_at": _datetime_to_iso(latest_start_at),
         "condition_id": condition_id,
-        "created_at": _datetime_to_iso(now),
-        "updated_at": _datetime_to_iso(now),
     }
     payload = {k: v for k, v in payload.items() if v is not None}
     response = client.table("session").insert(payload).execute()
@@ -218,6 +213,45 @@ def update_session(
     response = client.table("session").update(payload).eq("id", session_id).execute()
     if not response.data or len(response.data) == 0:
         raise ValueError(f"Session {session_id} not found")
+    return response.data[0]
+
+
+def get_active_session(
+    client: Client,
+    participant_id: str,
+    now: datetime,
+) -> dict:
+    """Return the session whose start window contains now for the participant.
+
+    Queries sessions where ``earliest_start_at <= now <= latest_start_at``
+    for the given participant. Expects exactly one such session to be active
+    at any given time (the DB exclusion constraint prevents overlapping windows).
+
+    Args:
+        client: Authenticated Supabase client.
+        participant_id: Participant table id (``{study_id}_{participant_id}``).
+        now: Current time (must be timezone-aware).
+
+    Returns:
+        Active session row as dict.
+
+    Raises:
+        ValueError: If no session is currently within its start window.
+    """
+    now_iso = _datetime_to_iso(now)
+    response = (
+        client.table("session")
+        .select("*")
+        .eq("participant_id", participant_id)
+        .lte("earliest_start_at", now_iso)
+        .gte("latest_start_at", now_iso)
+        .execute()
+    )
+    if not response.data:
+        raise ValueError(
+            f"No session is scheduled for participant {participant_id!r} at {now_iso}. "
+            "Ask the researcher to create a session with a start window that includes now."
+        )
     return response.data[0]
 
 

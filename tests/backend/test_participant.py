@@ -9,6 +9,7 @@ import pytest
 from slumber.backend.participant import (
     create_participant,
     create_participant_for_user,
+    get_participant_for_study,
     list_participants,
 )
 
@@ -132,3 +133,32 @@ def test_list_participants_with_auth_user_id_filters() -> None:
 
     assert len(result) == 1
     mock_chain.eq.assert_called_once_with("auth_user_id", "uuid-1")
+
+
+def test_get_participant_for_study_returns_row() -> None:
+    """get_participant_for_study returns first row filtered by study_id."""
+    row = {"id": "s1_sub-001", "study_id": "s1", "participant_id": "sub-001"}
+    mock_chain = MagicMock()
+    mock_chain.eq.return_value.execute.return_value = MagicMock(data=[row])
+    mock_table = MagicMock()
+    mock_table.select.return_value = mock_chain
+    mock_client = MagicMock()
+    mock_client.table.return_value = mock_table
+
+    result = get_participant_for_study(mock_client, "s1")
+
+    assert result == row
+    mock_chain.eq.assert_called_once_with("study_id", "s1")
+
+
+def test_get_participant_for_study_raises_when_not_found() -> None:
+    """get_participant_for_study raises ValueError when no row returned."""
+    mock_chain = MagicMock()
+    mock_chain.eq.return_value.execute.return_value = MagicMock(data=[])
+    mock_table = MagicMock()
+    mock_table.select.return_value = mock_chain
+    mock_client = MagicMock()
+    mock_client.table.return_value = mock_table
+
+    with pytest.raises(ValueError, match="not a participant"):
+        get_participant_for_study(mock_client, "s1")

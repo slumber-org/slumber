@@ -54,9 +54,10 @@ Each check displays one of three symbols:
 
 **Dependencies** — verifies that declared packages are importable:
 
-| Package | Required |
-|---------|----------|
-| `ezmsg` | Yes (data acquisition backbone) |
+| Package | Required | Notes |
+|---------|----------|-------|
+| `ezmsg` | Yes | Data acquisition backbone. |
+| `sentry_sdk` | No | Enables Sentry run monitoring. Install with `pip install slumber[sentry]` or `uv sync --extra sentry`. |
 
 **Exit codes:** `0` if all required checks pass; `1` if any required check fails, with a summary count.
 
@@ -81,6 +82,20 @@ slumber study init --base-dir . --study-id my-study --name "My Study"
 Creates `<study-id>/` with `study.yaml`, empty `conditions/` and `assets/` directories, an optional `.env` (from the study template), and `.gitignore`. Also registers the study in Supabase (requires `SUPABASE_SERVICE_ROLE_KEY`).
 
 See [Study setup](study-setup.md) for full details.
+
+### slumber study run
+
+Run the scheduled session for the current user:
+
+```bash
+slumber study run --study-dir path/to/my-study
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--study-dir`, `-d` | — | Path to the study folder. Also read from `STUDY_DIR`. |
+
+Requires `slumber auth login` first. Looks up the authenticated user's participant record in the study, finds the session whose start window contains the current time, creates a Run record in the database, and executes the session's condition via the UI backend. Condition, participant, session, and run ID are all derived from Supabase — no manual flags required. Set `SENTRY_DSN` to enable Sentry monitoring. See [Running a study](study-run.md).
 
 ### slumber study validate
 

@@ -179,6 +179,27 @@ class TestCheckDependencies:
         assert results["ezmsg"].status == CheckStatus.FAIL
         assert results["ezmsg"].required is True
 
+    def test_sentry_sdk_skip_when_not_installed(self) -> None:
+        """sentry_sdk shows SKIP (not required) when it cannot be imported."""
+
+        def _raise(name: str) -> None:
+            if name == "sentry_sdk":
+                raise ImportError("no module named sentry_sdk")
+
+        with patch("slumber.cli.doctor.importlib.import_module", side_effect=_raise):
+            results = {r.name: r for r in check_dependencies()}
+
+        assert results["sentry_sdk"].status == CheckStatus.SKIP
+        assert results["sentry_sdk"].required is False
+
+    def test_sentry_sdk_ok_when_installed(self) -> None:
+        """sentry_sdk shows OK when it can be imported."""
+        with patch("slumber.cli.doctor.importlib.import_module", return_value=object()):
+            results = {r.name: r for r in check_dependencies()}
+
+        assert results["sentry_sdk"].status == CheckStatus.OK
+        assert results["sentry_sdk"].required is False
+
 
 # ---------------------------------------------------------------------------
 # run_doctor integration

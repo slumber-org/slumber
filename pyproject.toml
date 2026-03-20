@@ -30,6 +30,11 @@ instruction = "slumber.plugins.tasks.instruction:InstructionTask"
 [project.entry-points."slumber.ui_backends"]
 headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
 
+[project.optional-dependencies]
+sentry = [
+    "sentry-sdk>=2.0.0",
+]
+
 [build-system]
 requires = ["uv_build>=0.9.13,<0.10.0"]
 build-backend = "uv_build"

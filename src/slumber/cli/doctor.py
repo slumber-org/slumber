@@ -65,9 +65,15 @@ _ENV_CHECKS: list[tuple[str, str, bool]] = [
     ),
 ]
 
-_DEPS: list[tuple[str, str]] = [
-    ("ezmsg", "data acquisition backbone"),
+_DEPS: list[tuple[str, bool]] = [
+    ("ezmsg", True),
+    ("sentry_sdk", False),
 ]
+
+_DEP_DESCRIPTIONS: dict[str, str] = {
+    "ezmsg": "data acquisition backbone",
+    "sentry_sdk": "optional; enables Sentry run monitoring (pip install slumber[sentry] or uv sync --extra sentry)",
+}
 
 
 class CheckStatus(str, Enum):
@@ -192,8 +198,8 @@ def check_dependencies() -> list[CheckResult]:
         List of CheckResult, one per package.
     """
     results = []
-    for package, description in _DEPS:
-        required = True
+    for package, required in _DEPS:
+        description = _DEP_DESCRIPTIONS[package]
         try:
             importlib.import_module(package)
             results.append(
