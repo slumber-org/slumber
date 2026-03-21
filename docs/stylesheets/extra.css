@@ -1,0 +1,26 @@
+/* SLUMBER color palette — sleep/night theme */
+:root {
+  --slumber-midnight: #1a1f3c;   /* deep navy */
+  --slumber-indigo: #3d4a8a;    /* muted indigo */
+  --slumber-lavender: #7b7fc4;  /* soft lavender */
+  --slumber-amber: #e8a45a;     /* warm amber */
+  --slumber-fog: #f2f0f8;       /* pale fog (light bg) */
+}
+
+/* Light mode */
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: var(--slumber-fog);
+  --md-primary-fg-color: var(--slumber-indigo);
+  --md-primary-fg-color--light: var(--slumber-lavender);
+  --md-primary-fg-color--dark: var(--slumber-midnight);
+  --md-accent-fg-color: var(--slumber-amber);
+  --md-typeset-a-color: var(--slumber-indigo);
+}
+
+/* Dark mode */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: var(--slumber-lavender);
+  --md-primary-fg-color--light: #9b9fd4;
+  --md-primary-fg-color--dark: var(--slumber-indigo);
+  --md-accent-fg-color: var(--slumber-amber);
+}
