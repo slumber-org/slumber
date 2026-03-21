@@ -1,4 +1,58 @@
 site_name: SLUMBER
+site_description: Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings
+
+repo_url: https://github.com/slumber-org/slumber
+repo_name: slumber-org/slumber
+edit_uri: edit/develop/docs/
+
+copyright: Copyright &copy; Ali Saberi
+
+plugins:
+  - search
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - navigation.expand
+    - navigation.path
+    - toc.follow
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
 
 nav:
   - Home: index.md
@@ -14,7 +68,7 @@ nav:
       - Run Layout and Logging: user-guide/run-layout-logging.md
       - Running a Study: user-guide/study-run.md
       - CLI Reference: user-guide/cli-reference.md
-  
+
   - Reference:
       - Schemas: reference/schemas.md
       - Plugins: reference/plugins.md
@@ -22,4 +76,3 @@ nav:
 
   - About:
       - Contributing: about/contributing.md
-      - Legacy reference: about/legacy-reference.md
