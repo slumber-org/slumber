@@ -30,7 +30,6 @@ Status:
 
 from __future__ import annotations
 
-from slumber.constants import PACKAGE_ROOT
 
 INDIGO_LIGHT = "#7B7FC4"
 INDIGO = "#3D4A8A"
@@ -64,6 +63,3 @@ PRIMARY = INDIGO
 SLEEP_INDIGO = INDIGO_LIGHT
 AWAKE_AMBER = AMBER
 ACCENT_LAVENDER = INDIGO_LIGHT
-
-LOGO_PATH = PACKAGE_ROOT / "docs/assets/logo.png"
-FAVICON_PATH = PACKAGE_ROOT / "docs/assets/favicon.png"

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.pages import render_powered_by
+from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.theme import (
     SURFACE_LIGHT,
     SURFACE_MID,
@@ -27,7 +27,7 @@ def render_login_page(state: AppState, refresh: object) -> None:
     """
     cfg = state.ui_config.login
 
-    with ui.column().classes("items-center justify-center w-full h-screen pb-8"):
+    with centered_fullscreen_layout(content_gap=None):
         if state.logo_url:
             ui.image(state.logo_url).classes("w-24 h-24 rounded-xl")
         else:
@@ -68,6 +68,3 @@ def render_login_page(state: AppState, refresh: object) -> None:
             ).classes("w-full mt-2").props("rounded unelevated color=primary").style(
                 "letter-spacing: 1px"
             )
-
-        ui.element("div").classes("flex-grow")
-        render_powered_by()

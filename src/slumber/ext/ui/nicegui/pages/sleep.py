@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.pages import render_powered_by
+from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.theme import (
     AWAKE_AMBER,
     NEGATIVE,
@@ -32,10 +32,10 @@ def render_sleep_page(state: AppState, refresh: object) -> None:
     is_asleep = state.is_asleep
     accent = SLEEP_INDIGO if is_asleep else AWAKE_AMBER
 
-    with ui.column().classes("items-center justify-between w-full h-screen py-16"):
-        ui.element("div")
-
-        with ui.column().classes("items-center gap-4"):
+    with centered_fullscreen_layout(content_gap=None):
+        with ui.column().classes(
+            "flex-1 flex flex-col justify-center items-center min-h-0"
+        ):
             if state.logo_url:
                 ui.image(state.logo_url).classes("w-20 h-20 rounded-xl")
             else:
@@ -105,15 +105,14 @@ def render_sleep_page(state: AppState, refresh: object) -> None:
                 state.fire_event("session_end")
                 refresh()  # type: ignore[operator]
 
-        ui.button(
-            cfg.end_button,
-            icon=cfg.end_button_icon,
-            on_click=end_session,
-        ).props("size=md rounded outline").style(
-            "min-width: 220px; letter-spacing: 1px"
-        ).classes(f"text-[{NEGATIVE}]").set_enabled(not is_asleep)
-
-        render_powered_by()
+        with ui.row().classes("w-full justify-center shrink-0"):
+            ui.button(
+                cfg.end_button,
+                icon=cfg.end_button_icon,
+                on_click=end_session,
+            ).props("size=md rounded outline").style(
+                "min-width: 220px; letter-spacing: 1px"
+            ).classes(f"text-[{NEGATIVE}]").set_enabled(not is_asleep)
 
 
 async def _confirm(title: str, message: str) -> bool:

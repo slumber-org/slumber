@@ -10,12 +10,23 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any, Callable
 
+from nicegui import ui
+
+from slumber.ext.ui.nicegui.theme import (
+    INDIGO_LIGHT,
+    SURFACE_LIGHT,
+    SURFACE_MID,
+    TEXT_SECONDARY,
+)
+
 if TYPE_CHECKING:
     from slumber.schemas.procedure import Step
 
 RenderFunc = Callable[["Step", Any], None]
 
 _RENDERERS: dict[str, RenderFunc] = {}
+
+POWERED_BY = "Powered by SLUMBER"
 
 
 def register_renderer(task_type: str, renderer: RenderFunc) -> None:
@@ -41,14 +52,6 @@ def render_placeholder(step: "Step", container: Any) -> None:
         step: The procedure step to render.
         container: A NiceGUI container element to render into.
     """
-    from nicegui import ui
-
-    from slumber.ext.ui.nicegui.theme import (
-        INDIGO_LIGHT,
-        SURFACE_LIGHT,
-        SURFACE_MID,
-        TEXT_SECONDARY,
-    )
 
     with container:
         with ui.row().classes("items-center gap-2 mb-2"):
@@ -67,3 +70,10 @@ def render_placeholder(step: "Step", container: Any) -> None:
         ui.label("Widget not yet implemented").classes(
             f"text-body2 text-[{TEXT_SECONDARY}] italic mt-1"
         )
+
+
+def render_powered_by() -> None:
+    """Render the attribution strip (spacing matches all participant pages)."""
+
+    with ui.row().classes("w-full justify-center pt-2 pb-8"):
+        ui.label(POWERED_BY).classes(f"text-caption text-[{TEXT_SECONDARY}] opacity-60")
