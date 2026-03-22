@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.pages import render_powered_by
+from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.renderers import get_renderer
 from slumber.ext.ui.nicegui.theme import (
     ACCENT_LAVENDER,
@@ -36,7 +36,7 @@ def render_procedure_page(state: AppState, refresh: object) -> None:
     total_steps = procedure.n_steps
     is_completed = state.current_step_index in state.completed_steps
 
-    with ui.column().classes("w-full h-screen"):
+    with centered_fullscreen_layout(content_gap=None):
         with ui.row().classes(
             f"w-full items-center justify-between px-6 py-3 bg-[{SURFACE_MID}] "
             f"border-b border-[{SURFACE_LIGHT}]"
@@ -130,9 +130,6 @@ def render_procedure_page(state: AppState, refresh: object) -> None:
                     icon="done",
                     on_click=lambda: (state.complete_current_step(), refresh()),  # type: ignore[operator]
                 ).props("flat rounded color=accent")
-
-        with ui.row().classes("w-full justify-center py-1"):
-            render_powered_by()
 
 
 def _prev(state: AppState) -> None:

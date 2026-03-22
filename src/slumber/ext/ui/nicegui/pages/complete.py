@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from nicegui import app, ui
 
-from slumber.ext.ui.nicegui.pages import render_powered_by
+from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.theme import POSITIVE, TEXT_SECONDARY
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ def render_complete_page(state: AppState, refresh: object) -> None:
     """
     cfg = state.ui_config.complete
 
-    with ui.column().classes("items-center justify-center w-full h-screen gap-2 pb-8"):
+    with centered_fullscreen_layout():
         if state.logo_url:
             ui.image(state.logo_url).classes("w-24 h-24 rounded-xl")
         else:
@@ -37,6 +37,3 @@ def render_complete_page(state: AppState, refresh: object) -> None:
         ).classes("mt-8").props("size=lg rounded outline").style(
             "min-width: 220px; letter-spacing: 1px"
         )
-
-        ui.element("div").classes("flex-grow")
-        render_powered_by()

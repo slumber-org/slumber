@@ -8,13 +8,14 @@ from typing import TYPE_CHECKING, Any
 from loguru import logger
 from nicegui import app, ui
 
+from slumber.constants import PACKAGE_ROOT
 from slumber.ext.ui.nicegui.pages.complete import render_complete_page
 from slumber.ext.ui.nicegui.pages.login import render_login_page
 from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
 from slumber.ext.ui.nicegui.pages.sleep import render_sleep_page
 from slumber.ext.ui.nicegui.pages.welcome import render_welcome_page
 from slumber.ext.ui.nicegui.state import AppState
-from slumber.ext.ui.nicegui.theme import COLORS, FAVICON_PATH, LOGO_PATH
+from slumber.ext.ui.nicegui.theme import COLORS
 
 if TYPE_CHECKING:
     from slumber.runtime.run import RunContext
@@ -28,6 +29,9 @@ _PAGE_RENDERERS = {
     "sleep": render_sleep_page,
     "complete": render_complete_page,
 }
+
+LOGO_PATH = PACKAGE_ROOT / "docs/assets/logo.png"
+FAVICON_PATH = PACKAGE_ROOT / "docs/assets/favicon.png"
 
 
 class NiceGUIBackend:
