@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.theme import ACCENT_LAVENDER, TEXT_SECONDARY
+from slumber.ext.ui.nicegui.theme import TEXT_SECONDARY
 
 if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
@@ -22,7 +22,10 @@ def render_welcome_page(state: AppState, refresh: object) -> None:
     cfg = state.ui_config.welcome
 
     with ui.column().classes("items-center justify-center w-full h-screen gap-2"):
-        ui.icon(cfg.icon, size="80px").classes(f"text-[{ACCENT_LAVENDER}]")
+        if state.logo_url:
+            ui.image(state.logo_url).classes("w-28 h-28 rounded-xl")
+        else:
+            ui.icon(cfg.icon, size="80px").classes(f"text-[{TEXT_SECONDARY}]")
         ui.label(state.study.name).classes("text-h3 font-bold mt-4")
         ui.label(cfg.subtitle).classes(f"text-subtitle1 text-[{TEXT_SECONDARY}]")
 

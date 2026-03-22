@@ -1,3 +1,7 @@
+<div style="text-align: center; margin-bottom: 1rem;">
+  <img src="assets/logo.png" alt="SLUMBER logo" width="160">
+</div>
+
 # Welcome to SLUMBER
 
 SLUMBER (**S**leep **L**ogging and **U**nsupervised **M**onitoring through **B**io**E**lectrical **R**ecordings) is an open-source, Python-based framework designed for conducting sleep studies outside of the laboratory environment.

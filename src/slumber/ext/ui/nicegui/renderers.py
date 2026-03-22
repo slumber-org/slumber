@@ -43,16 +43,21 @@ def render_placeholder(step: "Step", container: Any) -> None:
     """
     from nicegui import ui
 
-    from slumber.ext.ui.nicegui.theme import SURFACE, SURFACE_LIGHT, TEXT_SECONDARY
+    from slumber.ext.ui.nicegui.theme import (
+        INDIGO_LIGHT,
+        SURFACE_LIGHT,
+        SURFACE_MID,
+        TEXT_SECONDARY,
+    )
 
     with container:
         with ui.row().classes("items-center gap-2 mb-2"):
-            ui.icon("widgets", size="sm").classes("text-[#7B7FC4]")
+            ui.icon("widgets", size="sm").classes(f"text-[{INDIGO_LIGHT}]")
             ui.label(step.display_title).classes("text-h5 font-bold")
         if step.settings:
             with (
                 ui.card()
-                .classes(f"w-full bg-[{SURFACE}] border border-[{SURFACE_LIGHT}]")
+                .classes(f"w-full bg-[{SURFACE_MID}] border border-[{SURFACE_LIGHT}]")
                 .props("flat bordered")
             ):
                 ui.code(

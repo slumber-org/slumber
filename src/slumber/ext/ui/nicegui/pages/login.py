@@ -8,9 +8,8 @@ from loguru import logger
 from nicegui import ui
 
 from slumber.ext.ui.nicegui.theme import (
-    ACCENT_LAVENDER,
-    SURFACE,
     SURFACE_LIGHT,
+    SURFACE_MID,
     TEXT_SECONDARY,
 )
 
@@ -28,14 +27,17 @@ def render_login_page(state: AppState, refresh: object) -> None:
     cfg = state.ui_config.login
 
     with ui.column().classes("items-center justify-center w-full h-screen"):
-        ui.icon(cfg.icon, size="64px").classes(f"text-[{ACCENT_LAVENDER}]")
+        if state.logo_url:
+            ui.image(state.logo_url).classes("w-24 h-24 rounded-xl")
+        else:
+            ui.icon(cfg.icon, size="64px").classes(f"text-[{TEXT_SECONDARY}]")
         ui.label(cfg.title).classes("text-h3 font-bold mt-2")
         ui.label(cfg.subtitle).classes(f"text-subtitle1 text-[{TEXT_SECONDARY}]")
 
         with (
             ui.card()
             .classes(
-                f"w-96 mt-6 px-6 py-5 bg-[{SURFACE}] border border-[{SURFACE_LIGHT}]"
+                f"w-96 mt-6 px-6 py-5 bg-[{SURFACE_MID}] border border-[{SURFACE_LIGHT}]"
             )
             .props("flat bordered")
         ):

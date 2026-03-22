@@ -20,8 +20,9 @@ Flow to test:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
-from nicegui import ui
+from nicegui import app, ui
 
 from slumber.ext.ui.nicegui.pages.complete import render_complete_page
 from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
@@ -37,10 +38,18 @@ from slumber.schemas.study import Study
 
 def _demo_login_page(state: AppState, refresh: object) -> None:
     """Login page that accepts any credentials (demo only)."""
-    from slumber.ext.ui.nicegui.theme import SURFACE, SURFACE_LIGHT, TEXT_SECONDARY
+    from slumber.ext.ui.nicegui.theme import (
+        INDIGO_LIGHT,
+        SURFACE_LIGHT,
+        SURFACE_MID,
+        TEXT_SECONDARY,
+    )
 
     with ui.column().classes("items-center justify-center w-full h-screen"):
-        ui.icon("nights_stay", size="64px").classes("text-[#7B7FC4]")
+        if state.logo_url:
+            ui.image(state.logo_url).classes("w-24 h-24 rounded-xl")
+        else:
+            ui.icon("nights_stay", size="64px").classes(f"text-[{INDIGO_LIGHT}]")
         ui.label("SLUMBER").classes("text-h3 font-bold mt-2")
         ui.label("Sign in to continue").classes(
             f"text-subtitle1 text-[{TEXT_SECONDARY}]"
@@ -49,7 +58,7 @@ def _demo_login_page(state: AppState, refresh: object) -> None:
         with (
             ui.card()
             .classes(
-                f"w-96 mt-6 px-6 py-5 bg-[{SURFACE}] border border-[{SURFACE_LIGHT}]"
+                f"w-96 mt-6 px-6 py-5 bg-[{SURFACE_MID}] border border-[{SURFACE_LIGHT}]"
             )
             .props("flat bordered")
         ):
@@ -173,6 +182,14 @@ def main() -> None:
     condition = build_demo_condition()
     context = FakeRunContext()
 
+    logo_url = None
+    assets_dir = Path(__file__).resolve().parents[1] / "docs" / "assets"
+    logo_path = assets_dir / "logo.png"
+    favicon_path = assets_dir / "favicon.png"
+    if logo_path.is_file():
+        app.add_static_files("/logo", str(logo_path.parent))
+        logo_url = f"/logo/{logo_path.name}"
+
     state = AppState(
         study=study,
         condition=condition,
@@ -180,6 +197,7 @@ def main() -> None:
         config={},
         authenticated=False,
         current_page="login",
+        logo_url=logo_url,
     )
 
     @ui.page("/")
@@ -199,7 +217,14 @@ def main() -> None:
 
     print("Starting demo at http://localhost:8080")
     print("Press Ctrl+C to stop.\n")
-    ui.run(title="SLUMBER Demo", port=8080, reload=False, show=False, dark=True)
+    ui.run(
+        title="SLUMBER Demo",
+        favicon=favicon_path if favicon_path.is_file() else None,
+        port=8080,
+        reload=False,
+        show=False,
+        dark=True,
+    )
 
 
 if __name__ == "__main__":

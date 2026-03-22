@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, FilePath
 
 
 class WelcomePageConfig(BaseModel):
@@ -81,3 +81,11 @@ class NiceGUIConfig(BaseModel):
     procedure: ProcedurePageConfig = Field(default_factory=ProcedurePageConfig)
     complete: CompletePageConfig = Field(default_factory=CompletePageConfig)
     login: LoginPageConfig = Field(default_factory=LoginPageConfig)
+    logo: FilePath | None = Field(
+        default=None,
+        description="Path to logo image. Falls back to docs/assets/logo.png.",
+    )
+    favicon: FilePath | None = Field(
+        default=None,
+        description="Path to favicon image. Falls back to docs/assets/favicon.png.",
+    )

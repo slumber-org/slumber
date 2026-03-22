@@ -11,8 +11,8 @@ from slumber.ext.ui.nicegui.theme import (
     AWAKE_AMBER,
     NEGATIVE,
     SLEEP_INDIGO,
-    SURFACE,
     SURFACE_LIGHT,
+    SURFACE_MID,
     TEXT_SECONDARY,
 )
 
@@ -115,7 +115,7 @@ async def _confirm(title: str, message: str) -> bool:
     with (
         ui.dialog() as dialog,
         ui.card()
-        .classes(f"px-6 py-5 bg-[{SURFACE}] border border-[{SURFACE_LIGHT}]")
+        .classes(f"px-6 py-5 bg-[{SURFACE_MID}] border border-[{SURFACE_LIGHT}]")
         .props("flat bordered"),
     ):
         ui.label(title).classes("text-h6 font-bold")
