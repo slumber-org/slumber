@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from nicegui import ui
 
+from slumber.ext.ui.nicegui.pages import render_powered_by
 from slumber.ext.ui.nicegui.theme import TEXT_SECONDARY
 
 if TYPE_CHECKING:
@@ -21,7 +22,7 @@ def render_welcome_page(state: AppState, refresh: object) -> None:
     """
     cfg = state.ui_config.welcome
 
-    with ui.column().classes("items-center justify-center w-full h-screen gap-2"):
+    with ui.column().classes("items-center justify-center w-full h-screen gap-2 pb-8"):
         if state.logo_url:
             ui.image(state.logo_url).classes("w-28 h-28 rounded-xl")
         else:
@@ -38,3 +39,6 @@ def render_welcome_page(state: AppState, refresh: object) -> None:
         ).classes("mt-6").props("size=lg rounded color=primary unelevated").style(
             "min-width: 220px; letter-spacing: 1px"
         )
+
+        ui.element("div").classes("flex-grow")
+        render_powered_by()
