@@ -24,6 +24,7 @@ from pathlib import Path
 
 from nicegui import app, ui
 
+from slumber.ext.ui.nicegui.pages import render_powered_by
 from slumber.ext.ui.nicegui.pages.complete import render_complete_page
 from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
 from slumber.ext.ui.nicegui.pages.sleep import render_sleep_page
@@ -45,7 +46,7 @@ def _demo_login_page(state: AppState, refresh: object) -> None:
         TEXT_SECONDARY,
     )
 
-    with ui.column().classes("items-center justify-center w-full h-screen"):
+    with ui.column().classes("items-center justify-center w-full h-screen pb-8"):
         if state.logo_url:
             ui.image(state.logo_url).classes("w-24 h-24 rounded-xl")
         else:
@@ -75,6 +76,9 @@ def _demo_login_page(state: AppState, refresh: object) -> None:
             ui.button("Sign In", icon="login", on_click=handle_login).classes(
                 "w-full mt-2"
             ).props("rounded unelevated color=primary").style("letter-spacing: 1px")
+
+        ui.element("div").classes("flex-grow")
+        render_powered_by()
 
 
 _PAGE_RENDERERS = {

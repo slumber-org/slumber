@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
+from slumber.ext.ui.nicegui.pages import render_powered_by
 from slumber.ext.ui.nicegui.theme import (
     AWAKE_AMBER,
     NEGATIVE,
@@ -35,10 +36,13 @@ def render_sleep_page(state: AppState, refresh: object) -> None:
         ui.element("div")
 
         with ui.column().classes("items-center gap-4"):
-            ui.icon(
-                cfg.asleep_icon if is_asleep else cfg.awake_icon,
-                size="96px",
-            ).classes(f"text-[{accent}]")
+            if state.logo_url:
+                ui.image(state.logo_url).classes("w-20 h-20 rounded-xl")
+            else:
+                ui.icon(
+                    cfg.asleep_icon if is_asleep else cfg.awake_icon,
+                    size="96px",
+                ).classes(f"text-[{accent}]")
 
             ui.label(cfg.asleep_label if is_asleep else cfg.awake_label).classes(
                 f"text-h3 font-bold text-[{accent}]"
@@ -108,6 +112,8 @@ def render_sleep_page(state: AppState, refresh: object) -> None:
         ).props("size=md rounded outline").style(
             "min-width: 220px; letter-spacing: 1px"
         ).classes(f"text-[{NEGATIVE}]").set_enabled(not is_asleep)
+
+        render_powered_by()
 
 
 async def _confirm(title: str, message: str) -> bool:

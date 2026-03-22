@@ -83,7 +83,7 @@ class NiceGUIConfig(BaseModel):
     login: LoginPageConfig = Field(default_factory=LoginPageConfig)
     logo: FilePath | None = Field(
         default=None,
-        description="Path to logo image. Falls back to docs/assets/logo.png.",
+        description="Path to logo image for the study.",
     )
     favicon: FilePath | None = Field(
         default=None,
