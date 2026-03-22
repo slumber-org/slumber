@@ -74,34 +74,24 @@ class TestRunStudy:
         with pytest.raises(ValueError, match="not found"):
             run_study(study, "nonexistent", _ctx(), study_dir)
 
-    def test_runs_all_procedures_via_ui_backend(self, tmp_path: Path) -> None:
-        two_proc_condition = """\
-name: ctrl
-procedures:
-  pre_sleep:
-    steps:
-      - task: instruction
-  post_sleep:
-    steps:
-      - task: instruction
-dag:
-  components:
-    - name: MASTER
-      unit_type: Master
-  connections: []
-  process_components: []
-"""
-        study_dir, study = _make_study(tmp_path, two_proc_condition)
+    def test_calls_ui_backend_run(self, tmp_path: Path) -> None:
+        study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)
         mock_backend = MagicMock()
         mock_registry = MagicMock()
         mock_registry.get_plugin.return_value = mock_backend
+        ctx = _ctx()
 
-        run_study(study, "ctrl", _ctx(), study_dir, registry=mock_registry)
+        run_study(study, "ctrl", ctx, study_dir, registry=mock_registry)
 
         mock_registry.get_plugin.assert_called_once_with(
             EntryPointGroup.UI_BACKENDS, "headless"
         )
-        assert mock_backend.run_procedure.call_count == 2
+        mock_backend.run.assert_called_once()
+        call_args = mock_backend.run.call_args
+        assert call_args[0][0] is study  # study
+        assert call_args[0][1].name == "ctrl"  # condition
+        assert call_args[0][2] is ctx  # context
+        assert call_args[0][3] == {}  # config (default empty)
 
     def test_cleans_up_log_handlers_on_success(self, tmp_path: Path) -> None:
         study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)
@@ -119,7 +109,7 @@ dag:
         study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)
         removed: list[int] = []
         mock_backend = MagicMock()
-        mock_backend.run_procedure.side_effect = RuntimeError("boom")
+        mock_backend.run.side_effect = RuntimeError("boom")
         mock_registry = MagicMock()
         mock_registry.get_plugin.return_value = mock_backend
 

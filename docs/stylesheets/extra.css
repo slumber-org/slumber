@@ -1,26 +1,57 @@
-/* SLUMBER color palette — sleep/night theme */
-:root {
-  --slumber-midnight: #1a1f3c;   /* deep navy */
-  --slumber-indigo: #3d4a8a;    /* muted indigo */
-  --slumber-lavender: #7b7fc4;  /* soft lavender */
-  --slumber-amber: #e8a45a;     /* warm amber */
-  --slumber-fog: #f2f0f8;       /* pale fog (light bg) */
-}
+/* SLUMBER color palette — sleep/night theme
+   Shared with the NiceGUI app (src/slumber/ext/ui/nicegui/theme.py) */
 
 /* Light mode */
 [data-md-color-scheme="default"] {
-  --md-default-bg-color: var(--slumber-fog);
-  --md-primary-fg-color: var(--slumber-indigo);
-  --md-primary-fg-color--light: var(--slumber-lavender);
-  --md-primary-fg-color--dark: var(--slumber-midnight);
-  --md-accent-fg-color: var(--slumber-amber);
-  --md-typeset-a-color: var(--slumber-indigo);
+  --md-primary-fg-color:        #3d4a8a;
+  --md-primary-fg-color--light: #7b7fc4;
+  --md-primary-fg-color--dark:  #1a1f3c;
+  --md-accent-fg-color:         #e8a45a;
+  --md-typeset-a-color:         #3d4a8a;
 }
 
-/* Dark mode */
+/* Dark mode — match NiceGUI app exactly */
 [data-md-color-scheme="slate"] {
-  --md-primary-fg-color: var(--slumber-lavender);
-  --md-primary-fg-color--light: #9b9fd4;
-  --md-primary-fg-color--dark: var(--slumber-indigo);
-  --md-accent-fg-color: var(--slumber-amber);
+  --md-default-bg-color:         #151833;
+  --md-default-fg-color:         #fffffe;
+  --md-default-fg-color--light:  #94a1b2;
+  --md-default-fg-color--lightest: #2a2f52;
+
+  --md-primary-fg-color:         #3d4a8a;
+  --md-primary-fg-color--light:  #7b7fc4;
+  --md-primary-fg-color--dark:   #1a1f3c;
+  --md-primary-bg-color:         #fffffe;
+
+  --md-accent-fg-color:          #e8a45a;
+
+  --md-typeset-a-color:          #7b7fc4;
+  --md-typeset-color:            #fffffe;
+
+  --md-code-bg-color:            #1a1f3c;
+  --md-code-fg-color:            #fffffe;
+  --md-code-hl-color:            #e8a45a26;
+
+  --md-footer-bg-color:          #1a1f3c;
+  --md-footer-bg-color--dark:    #121528;
+}
+
+/* Header matches app primary */
+.md-header {
+  background-color: #1a1f3c;
+}
+
+/* Tabs bar */
+.md-tabs {
+  background-color: #1a1f3c;
+}
+
+/* Nav sidebar in dark mode */
+[data-md-color-scheme="slate"] .md-nav--primary .md-nav__title {
+  background-color: #1a1f3c;
+}
+
+/* Admonition accent */
+[data-md-color-scheme="slate"] .md-typeset .admonition,
+[data-md-color-scheme="slate"] .md-typeset details {
+  background-color: #1a1f3c;
 }

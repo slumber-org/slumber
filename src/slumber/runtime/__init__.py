@@ -1,5 +1,10 @@
-"""Runtime: run directory layout, run logging, and run orchestration."""
+"""Runtime: run directory layout, run logging, event dispatch, and orchestration."""
 
+from slumber.runtime.events import (
+    SessionState,
+    evaluate_guard,
+    get_triggered_procedures,
+)
 from slumber.runtime.logging import configure_run_logging
 from slumber.runtime.orchestrator import run_study
 from slumber.runtime.run import RunContext, create_run_dir, resolve_run_dir
@@ -7,8 +12,11 @@ from slumber.runtime.sentry import init_sentry
 
 __all__ = [
     "RunContext",
+    "SessionState",
     "configure_run_logging",
     "create_run_dir",
+    "evaluate_guard",
+    "get_triggered_procedures",
     "init_sentry",
     "resolve_run_dir",
     "run_study",

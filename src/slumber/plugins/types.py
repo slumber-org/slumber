@@ -3,26 +3,32 @@
 from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from slumber.schemas.procedure import Procedure
+    from slumber.runtime.run import RunContext
+    from slumber.schemas.condition import Condition
+    from slumber.schemas.study import Study
 
 
 @runtime_checkable
 class UIBackend(Protocol):
     """Protocol for UI backend plugins.
 
-    The entry point resolves to a backend that can run procedures
-    (e.g. headless logger, NiceGUI app).
+    The entry point resolves to a backend that owns the full UI lifecycle
+    for a condition (e.g. headless logger, NiceGUI app).
     """
 
-    def run_procedure(
+    def run(
         self,
-        procedure: "Procedure",
+        study: "Study",
+        condition: "Condition",
+        context: "RunContext",
         config: dict[str, Any],
     ) -> None:
-        """Run a procedure: display/execute the given steps.
+        """Run the full UI lifecycle for a condition.
 
         Args:
-            procedure: Procedure instance (steps with task_type and settings).
-            config: UI backend config from study manifest.
+            study: Loaded study manifest.
+            condition: The condition to run (procedures + DAG).
+            context: Run context (study_id, participant_id, session_id, run_id).
+            config: UI backend config from study manifest (``study.ui.config``).
         """
         ...

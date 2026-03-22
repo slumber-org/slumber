@@ -95,10 +95,7 @@ def run_study(
         )
 
         ui_backend = reg.get_plugin(EntryPointGroup.UI_BACKENDS, study.ui.backend)
-
-        for proc_name, procedure in condition.procedures.items():
-            logger.info("Procedure: {!r} ({} step(s))", proc_name, procedure.n_steps)
-            ui_backend.run_procedure(procedure, study.ui.config)  # type: ignore[union-attr]
+        ui_backend.run(study, condition, context, study.ui.config)  # type: ignore[union-attr]
 
         logger.info("Run completed  run_id={!r}  dir={}", context.run_id, run_dir)
     finally:

@@ -86,14 +86,14 @@ You can use plain `ez.Settings` (e.g. dataclass-style) if you don’t need valid
 ### UI backend (`slumber.ui_backends`)
 
 - **Resolved as:** An object implementing the **UIBackend** protocol:
-  - `run_procedure(procedure, config) -> None` — run the procedure (e.g. display steps or log them). `procedure` is a `Procedure` instance (from `slumber.schemas`).
-- **Usage:** `slumber study run` loads the backend from `study.ui.backend` and calls `run_procedure` with the selected `Procedure` and UI config.
+  - `run(study, condition, context, config) -> None` — run the full UI lifecycle for a condition. The backend owns procedure dispatch, page navigation, and event handling.
+- **Usage:** `slumber study run` loads the backend from `study.ui.backend` and calls `run` with the `Study`, selected `Condition`, `RunContext`, and UI config dict. The backend is responsible for iterating procedures (e.g. headless runs them sequentially; NiceGUI dispatches them via session events).
 
 ## Built-in plugins
 
 The core package ships:
 
-- **`slumber.ui_backends.headless`** — Headless UI backend: no window, logs procedure and steps (for validate/CI/minimal run).
+- **`slumber.ui_backends.headless`** — Headless UI backend: no window, runs all procedures sequentially and logs steps (for validate/CI/minimal run).
 - **`slumber.tasks.instruction`** — Task class `InstructionTask` (task_type `instruction`) with optional `text` or `content` settings.
 
 No built-in **units** are provided; DAG units are added by extensions (e.g. device or processing packages).
