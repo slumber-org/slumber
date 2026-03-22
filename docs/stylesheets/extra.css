@@ -1,57 +1,59 @@
 /* SLUMBER color palette — sleep/night theme
-   Shared with the NiceGUI app (src/slumber/ext/ui/nicegui/theme.py) */
+   Matches src/slumber/ext/ui/nicegui/theme.py
+
+   INDIGO_LIGHT  #7b7fc4   AMBER         #e8a45a
+   INDIGO        #3d4a8a   SURFACE_DARK  #121528
+   INDIGO_DARK   #2a2f52   SURFACE       #151833
+   TEXT_PRIMARY   #fffffe   SURFACE_MID   #1a1f3c
+   TEXT_SECONDARY #94a1b2   SURFACE_LIGHT #2a2f52 */
 
 /* Light mode */
 [data-md-color-scheme="default"] {
-  --md-primary-fg-color:        #3d4a8a;
-  --md-primary-fg-color--light: #7b7fc4;
-  --md-primary-fg-color--dark:  #1a1f3c;
-  --md-accent-fg-color:         #e8a45a;
-  --md-typeset-a-color:         #3d4a8a;
+  --md-primary-fg-color:        #3d4a8a; /* INDIGO */
+  --md-primary-fg-color--light: #7b7fc4; /* INDIGO_LIGHT */
+  --md-primary-fg-color--dark:  #1a1f3c; /* SURFACE_MID */
+  --md-accent-fg-color:         #e8a45a; /* AMBER */
+  --md-typeset-a-color:         #3d4a8a; /* INDIGO */
 }
 
-/* Dark mode — match NiceGUI app exactly */
+/* Dark mode */
 [data-md-color-scheme="slate"] {
-  --md-default-bg-color:         #151833;
-  --md-default-fg-color:         #fffffe;
-  --md-default-fg-color--light:  #94a1b2;
-  --md-default-fg-color--lightest: #2a2f52;
+  --md-default-bg-color:         #151833; /* SURFACE */
+  --md-default-fg-color:         #fffffe; /* TEXT_PRIMARY */
+  --md-default-fg-color--light:  #94a1b2; /* TEXT_SECONDARY */
+  --md-default-fg-color--lightest: #2a2f52; /* SURFACE_LIGHT */
 
-  --md-primary-fg-color:         #3d4a8a;
-  --md-primary-fg-color--light:  #7b7fc4;
-  --md-primary-fg-color--dark:   #1a1f3c;
-  --md-primary-bg-color:         #fffffe;
+  --md-primary-fg-color:         #3d4a8a; /* INDIGO */
+  --md-primary-fg-color--light:  #7b7fc4; /* INDIGO_LIGHT */
+  --md-primary-fg-color--dark:   #1a1f3c; /* SURFACE_MID */
+  --md-primary-bg-color:         #fffffe; /* TEXT_PRIMARY */
 
-  --md-accent-fg-color:          #e8a45a;
+  --md-accent-fg-color:          #e8a45a; /* AMBER */
 
-  --md-typeset-a-color:          #7b7fc4;
-  --md-typeset-color:            #fffffe;
+  --md-typeset-a-color:          #7b7fc4; /* INDIGO_LIGHT */
+  --md-typeset-color:            #fffffe; /* TEXT_PRIMARY */
 
-  --md-code-bg-color:            #1a1f3c;
-  --md-code-fg-color:            #fffffe;
-  --md-code-hl-color:            #e8a45a26;
+  --md-code-bg-color:            #1a1f3c; /* SURFACE_MID */
+  --md-code-fg-color:            #fffffe; /* TEXT_PRIMARY */
+  --md-code-hl-color:            #e8a45a26; /* AMBER @ 15% */
 
-  --md-footer-bg-color:          #1a1f3c;
-  --md-footer-bg-color--dark:    #121528;
+  --md-footer-bg-color:          #1a1f3c; /* SURFACE_MID */
+  --md-footer-bg-color--dark:    #121528; /* SURFACE_DARK */
 }
 
-/* Header matches app primary */
 .md-header {
-  background-color: #1a1f3c;
+  background-color: #1a1f3c; /* SURFACE_MID */
 }
 
-/* Tabs bar */
 .md-tabs {
-  background-color: #1a1f3c;
+  background-color: #1a1f3c; /* SURFACE_MID */
 }
 
-/* Nav sidebar in dark mode */
 [data-md-color-scheme="slate"] .md-nav--primary .md-nav__title {
-  background-color: #1a1f3c;
+  background-color: #1a1f3c; /* SURFACE_MID */
 }
 
-/* Admonition accent */
 [data-md-color-scheme="slate"] .md-typeset .admonition,
 [data-md-color-scheme="slate"] .md-typeset details {
-  background-color: #1a1f3c;
+  background-color: #1a1f3c; /* SURFACE_MID */
 }

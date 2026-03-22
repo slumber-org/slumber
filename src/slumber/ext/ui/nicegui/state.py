@@ -41,6 +41,7 @@ class AppState:
     completed_steps: set[int] = field(default_factory=set)
 
     is_asleep: bool = False
+    logo_url: str | None = field(default=None, repr=False)
     _last_event: str | None = field(default=None, repr=False)
     _ui_config: NiceGUIConfig | None = field(default=None, repr=False)
 

@@ -11,8 +11,8 @@ from slumber.ext.ui.nicegui.theme import (
     ACCENT_LAVENDER,
     POSITIVE,
     PRIMARY,
-    SURFACE,
     SURFACE_LIGHT,
+    SURFACE_MID,
     TEXT_SECONDARY,
 )
 
@@ -37,7 +37,7 @@ def render_procedure_page(state: AppState, refresh: object) -> None:
 
     with ui.column().classes("w-full h-screen"):
         with ui.row().classes(
-            f"w-full items-center justify-between px-6 py-3 bg-[{SURFACE}] "
+            f"w-full items-center justify-between px-6 py-3 bg-[{SURFACE_MID}] "
             f"border-b border-[{SURFACE_LIGHT}]"
         ):
             with ui.row().classes("items-center gap-3"):
@@ -68,7 +68,7 @@ def render_procedure_page(state: AppState, refresh: object) -> None:
 
             if procedure.show_task_list:
                 with ui.column().classes(
-                    f"w-64 p-4 bg-[{SURFACE}] border-l border-[{SURFACE_LIGHT}]"
+                    f"w-64 p-4 bg-[{SURFACE_MID}] border-l border-[{SURFACE_LIGHT}]"
                 ):
                     ui.label(cfg.steps_label).classes(
                         f"text-overline text-[{TEXT_SECONDARY}] mb-3"
@@ -95,7 +95,7 @@ def render_procedure_page(state: AppState, refresh: object) -> None:
 
         with ui.row().classes(
             f"w-full items-center justify-center gap-3 px-6 py-3 "
-            f"bg-[{SURFACE}] border-t border-[{SURFACE_LIGHT}]"
+            f"bg-[{SURFACE_MID}] border-t border-[{SURFACE_LIGHT}]"
         ):
             ui.button(
                 cfg.previous_button,

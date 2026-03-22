@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
-from nicegui import ui
+from nicegui import app, ui
 
 from slumber.ext.ui.nicegui.pages.complete import render_complete_page
 from slumber.ext.ui.nicegui.pages.login import render_login_page
@@ -13,7 +14,7 @@ from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
 from slumber.ext.ui.nicegui.pages.sleep import render_sleep_page
 from slumber.ext.ui.nicegui.pages.welcome import render_welcome_page
 from slumber.ext.ui.nicegui.state import AppState
-from slumber.ext.ui.nicegui.theme import COLORS
+from slumber.ext.ui.nicegui.theme import COLORS, FAVICON_PATH, LOGO_PATH
 
 if TYPE_CHECKING:
     from slumber.runtime.run import RunContext
@@ -56,6 +57,7 @@ class NiceGUIBackend:
             config: UI backend config from ``study.ui.config``.
         """
         authenticated = _check_auth()
+        logo_url = _serve_logo(config)
         state = AppState(
             study=study,
             condition=condition,
@@ -63,6 +65,7 @@ class NiceGUIBackend:
             config=config,
             authenticated=authenticated,
             current_page="welcome" if authenticated else "login",
+            logo_url=logo_url,
         )
 
         logger.info(
@@ -89,13 +92,36 @@ class NiceGUIBackend:
 
             page_content()
 
+        favicon = _find_favicon_path(config)
         ui.run(
             title=study.name,
+            favicon=favicon,
             dark=config.get("dark", None),
             port=config.get("port", 8080),
             reload=False,
             show=config.get("show", True),
         )
+
+
+def _find_logo_path(config: dict[str, Any]) -> Path | None:
+    """Resolve the logo file path from config or default location."""
+    logo_path = config.get("logo", LOGO_PATH)
+    return logo_path if logo_path and logo_path.is_file() else None
+
+
+def _find_favicon_path(config: dict[str, Any]) -> Path | None:
+    """Resolve the favicon file path from config or default location."""
+    favicon_path = config.get("favicon", FAVICON_PATH)
+    return favicon_path if favicon_path and favicon_path.is_file() else None
+
+
+def _serve_logo(config: dict[str, Any]) -> str | None:
+    """Serve the logo file and return its URL, or None if not found."""
+    path = _find_logo_path(config)
+    if path is None:
+        return None
+    app.add_static_files("/logo", str(path.parent))
+    return f"/logo/{path.name}"
 
 
 def _check_auth() -> bool:

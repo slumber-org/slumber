@@ -1,6 +1,10 @@
-"""Package-level environment variable name constants."""
+"""Package-level constants."""
 
 from __future__ import annotations
+
+from pathlib import Path
+
+PACKAGE_ROOT = Path(__file__).resolve().parents[2]
 
 SUPABASE_URL_ENV = "SUPABASE_URL"
 SUPABASE_ANON_KEY_ENV = "SUPABASE_ANON_KEY"
