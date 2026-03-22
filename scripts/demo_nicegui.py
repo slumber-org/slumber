@@ -1,0 +1,206 @@
+#!/usr/bin/env python
+"""Demo script to manually test the NiceGUI participant UI.
+
+Boots the app with a fake study/condition so you can click through all
+pages without needing Supabase, a database, or any .env config.
+
+Usage:
+    uv run python scripts/demo_nicegui.py
+
+Then open http://localhost:8080 in your browser.
+
+Flow to test:
+    Welcome -> "Start Session" -> pre_sleep procedure -> Sleep page
+    -> "Going to Sleep" -> Sleep page (asleep state)
+    -> "I'm Awake" -> first_awakening procedure -> Sleep page
+    -> "I'm Awake" again -> later_awakening procedure -> Sleep page
+    -> "End Session" -> post_sleep procedure -> Completion page
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from nicegui import ui
+
+from slumber.ext.ui.nicegui.pages.complete import render_complete_page
+from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
+from slumber.ext.ui.nicegui.pages.sleep import render_sleep_page
+from slumber.ext.ui.nicegui.pages.welcome import render_welcome_page
+from slumber.ext.ui.nicegui.state import AppState
+from slumber.ext.ui.nicegui.theme import COLORS
+from slumber.schemas.condition import Condition
+from slumber.schemas.dag import DAG, Component
+from slumber.schemas.procedure import Procedure, Step
+from slumber.schemas.study import Study
+
+
+def _demo_login_page(state: AppState, refresh: object) -> None:
+    """Login page that accepts any credentials (demo only)."""
+    from slumber.ext.ui.nicegui.theme import SURFACE, SURFACE_LIGHT, TEXT_SECONDARY
+
+    with ui.column().classes("items-center justify-center w-full h-screen"):
+        ui.icon("nights_stay", size="64px").classes("text-[#7B7FC4]")
+        ui.label("SLUMBER").classes("text-h3 font-bold mt-2")
+        ui.label("Sign in to continue").classes(
+            f"text-subtitle1 text-[{TEXT_SECONDARY}]"
+        )
+
+        with (
+            ui.card()
+            .classes(
+                f"w-96 mt-6 px-6 py-5 bg-[{SURFACE}] border border-[{SURFACE_LIGHT}]"
+            )
+            .props("flat bordered")
+        ):
+            ui.input("Email", value="demo@slumber.io").classes("w-full")
+            ui.input(
+                "Password", value="demo", password=True, password_toggle_button=True
+            ).classes("w-full")
+
+            def handle_login() -> None:
+                state.authenticated = True
+                state.current_page = "welcome"
+                refresh()  # type: ignore[operator]
+
+            ui.button("Sign In", icon="login", on_click=handle_login).classes(
+                "w-full mt-2"
+            ).props("rounded unelevated color=primary").style("letter-spacing: 1px")
+
+
+_PAGE_RENDERERS = {
+    "login": _demo_login_page,
+    "welcome": render_welcome_page,
+    "procedure": render_procedure_page,
+    "sleep": render_sleep_page,
+    "complete": render_complete_page,
+}
+
+
+@dataclass
+class FakeRunContext:
+    study_id: str = "demo_study"
+    participant_id: str = "sub-001"
+    session_id: str = "ses-01"
+    run_id: str = "run-001"
+    condition_id: str = "demo_condition"
+
+
+def build_demo_condition() -> Condition:
+    """Build a condition with event-driven procedures for manual testing."""
+    return Condition(
+        name="demo_condition",
+        procedures={
+            "pre_sleep": Procedure(
+                title="Pre-Sleep Routine",
+                trigger="session_start",
+                steps=[
+                    Step(
+                        task_type="instruction",
+                        title="Welcome",
+                        settings={"text": "Welcome! Prepare for sleep."},
+                    ),
+                    Step(
+                        task_type="survey",
+                        title="Evening Questionnaire",
+                        settings={
+                            "questions": [
+                                "How are you feeling?",
+                                "Rate your sleepiness (1-10)",
+                            ]
+                        },
+                    ),
+                ],
+            ),
+            "first_awakening": Procedure(
+                title="First Awakening Protocol",
+                trigger="wake_up",
+                when={"awakening_count": 1},
+                steps=[
+                    Step(
+                        task_type="instruction",
+                        title="Dream Report",
+                        settings={
+                            "text": "First awakening! Please answer a few questions."
+                        },
+                    ),
+                ],
+            ),
+            "later_awakening": Procedure(
+                title="Awakening Check-in",
+                trigger="wake_up",
+                when={"awakening_count": {"gt": 1}},
+                steps=[
+                    Step(
+                        task_type="instruction",
+                        title="Quick Report",
+                        settings={"text": "Another awakening — quick check-in."},
+                    ),
+                ],
+            ),
+            "post_sleep": Procedure(
+                title="Morning Debrief",
+                trigger="session_end",
+                steps=[
+                    Step(
+                        task_type="instruction",
+                        title="Good Morning",
+                        settings={"text": "Good morning! Session complete."},
+                    ),
+                    Step(
+                        task_type="survey",
+                        title="Sleep Quality Survey",
+                        settings={
+                            "questions": [
+                                "How did you sleep?",
+                                "Any dreams?",
+                            ]
+                        },
+                    ),
+                ],
+            ),
+        },
+        dag=DAG(
+            components=[Component(name="MASTER", unit_type="Master")],
+            connections=[],
+            process_components=[],
+        ),
+    )
+
+
+def main() -> None:
+    study = Study(study_id="demo_study", name="SLUMBER Demo Study")
+    condition = build_demo_condition()
+    context = FakeRunContext()
+
+    state = AppState(
+        study=study,
+        condition=condition,
+        context=context,  # type: ignore[arg-type]
+        config={},
+        authenticated=False,
+        current_page="login",
+    )
+
+    @ui.page("/")
+    def main_page() -> None:
+        ui.query(".nicegui-content").classes("p-0 m-0")
+        ui.colors(**COLORS)
+
+        @ui.refreshable
+        def page_content() -> None:
+            renderer = _PAGE_RENDERERS.get(state.current_page)
+            if renderer is None:
+                ui.label(f"Unknown page: {state.current_page}").classes("text-negative")
+                return
+            renderer(state, page_content.refresh)
+
+        page_content()
+
+    print("Starting demo at http://localhost:8080")
+    print("Press Ctrl+C to stop.\n")
+    ui.run(title="SLUMBER Demo", port=8080, reload=False, show=False, dark=True)
+
+
+if __name__ == "__main__":
+    main()

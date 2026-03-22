@@ -83,7 +83,7 @@ class TestPluginRegistry:
         registry = get_registry()
         backend = registry.get_plugin(EntryPointGroup.UI_BACKENDS, "headless")
         assert backend is not None
-        assert hasattr(backend, "run_procedure")
+        assert hasattr(backend, "run")
 
 
 class TestPluginNotFoundError:

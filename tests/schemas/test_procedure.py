@@ -45,3 +45,55 @@ class TestProcedure:
     def test_steps_required(self) -> None:
         with pytest.raises(ValidationError):
             Procedure()  # type: ignore[call-arg]
+
+    def test_defaults(self) -> None:
+        proc = Procedure(steps=[Step(task_type="instruction")])
+        assert proc.trigger is None
+        assert proc.when is None
+        assert proc.show_task_list is True
+        assert proc.allow_skip is False
+
+    def test_trigger(self) -> None:
+        proc = Procedure(
+            steps=[Step(task_type="instruction")],
+            trigger="session_start",
+        )
+        assert proc.trigger == "session_start"
+
+    def test_when_dict(self) -> None:
+        proc = Procedure(
+            steps=[Step(task_type="instruction")],
+            trigger="wake_up",
+            when={"awakening_count": 1},
+        )
+        assert proc.when == {"awakening_count": 1}
+
+    def test_when_dict_with_operator(self) -> None:
+        proc = Procedure(
+            steps=[Step(task_type="instruction")],
+            trigger="wake_up",
+            when={"awakening_count": {"gt": 1}},
+        )
+        assert proc.when == {"awakening_count": {"gt": 1}}
+
+    def test_when_callable_string(self) -> None:
+        proc = Procedure(
+            steps=[Step(task_type="instruction")],
+            trigger="wake_up",
+            when="my_study.guards:is_rem_awakening",
+        )
+        assert proc.when == "my_study.guards:is_rem_awakening"
+
+    def test_show_task_list_false(self) -> None:
+        proc = Procedure(
+            steps=[Step(task_type="instruction")],
+            show_task_list=False,
+        )
+        assert proc.show_task_list is False
+
+    def test_allow_skip_true(self) -> None:
+        proc = Procedure(
+            steps=[Step(task_type="instruction")],
+            allow_skip=True,
+        )
+        assert proc.allow_skip is True

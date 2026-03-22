@@ -200,6 +200,27 @@ class TestCheckDependencies:
         assert results["sentry_sdk"].status == CheckStatus.OK
         assert results["sentry_sdk"].required is False
 
+    def test_nicegui_skip_when_not_installed(self) -> None:
+        """nicegui shows SKIP (not required) when it cannot be imported."""
+
+        def _raise(name: str) -> None:
+            if name == "nicegui":
+                raise ImportError("no module named nicegui")
+
+        with patch("slumber.cli.doctor.importlib.import_module", side_effect=_raise):
+            results = {r.name: r for r in check_dependencies()}
+
+        assert results["nicegui"].status == CheckStatus.SKIP
+        assert results["nicegui"].required is False
+
+    def test_nicegui_ok_when_installed(self) -> None:
+        """nicegui shows OK when it can be imported."""
+        with patch("slumber.cli.doctor.importlib.import_module", return_value=object()):
+            results = {r.name: r for r in check_dependencies()}
+
+        assert results["nicegui"].status == CheckStatus.OK
+        assert results["nicegui"].required is False
+
 
 # ---------------------------------------------------------------------------
 # run_doctor integration

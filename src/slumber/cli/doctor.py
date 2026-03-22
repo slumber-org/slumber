@@ -67,11 +67,13 @@ _ENV_CHECKS: list[tuple[str, str, bool]] = [
 
 _DEPS: list[tuple[str, bool]] = [
     ("ezmsg", True),
+    ("nicegui", False),
     ("sentry_sdk", False),
 ]
 
 _DEP_DESCRIPTIONS: dict[str, str] = {
     "ezmsg": "data acquisition backbone",
+    "nicegui": "optional; participant UI (pip install slumber[nicegui] or uv sync --extra nicegui)",
     "sentry_sdk": "optional; enables Sentry run monitoring (pip install slumber[sentry] or uv sync --extra sentry)",
 }
 

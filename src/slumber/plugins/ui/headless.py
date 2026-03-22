@@ -1,28 +1,39 @@
-"""Headless UI backend: no display, logs procedure and tasks (for testing/CI)."""
+"""Headless UI backend: no display, logs procedures and tasks (for testing/CI)."""
 
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
-from slumber.schemas.procedure import Procedure
+if TYPE_CHECKING:
+    from slumber.runtime.run import RunContext
+    from slumber.schemas.condition import Condition
+    from slumber.schemas.study import Study
 
 
 class HeadlessUIBackend:
-    """UI backend that does not display a window; logs procedure and tasks.
+    """UI backend that does not display a window; logs procedures and tasks.
 
-    Entry-point key: ``headless``. Used when no GUI is needed (e.g. validate,
-    automated runs, or when the UI backend is not yet implemented).
+    Entry-point key: ``headless``. Ignores triggers and guards — runs all
+    procedures in the condition sequentially. Used when no GUI is needed
+    (e.g. validate, automated runs, CI).
     """
 
-    def run_procedure(
+    def run(
         self,
-        procedure: Procedure,
+        study: "Study",
+        condition: "Condition",
+        context: "RunContext",
         config: dict[str, Any],
     ) -> None:
-        """Log the procedure step count; no user interaction."""
+        """Log all procedures and their steps; no user interaction."""
         logger.info(
-            "headless UI running procedure with {} step(s)",
-            procedure.n_steps,
+            "headless: condition={!r} ({} procedure(s))",
+            condition.name,
+            len(condition.procedures),
         )
-        for i, step in enumerate(procedure.steps):
-            logger.debug("  step {}: task_type={!r}", i + 1, step.task_type)
+        for proc_name, procedure in condition.procedures.items():
+            logger.info("  procedure {!r} ({} step(s))", proc_name, procedure.n_steps)
+            for i, step in enumerate(procedure.steps):
+                logger.debug("    step {}: task_type={!r}", i + 1, step.task_type)

@@ -29,10 +29,14 @@ instruction = "slumber.plugins.tasks.instruction:InstructionTask"
 
 [project.entry-points."slumber.ui_backends"]
 headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
+nicegui = "slumber.ext.ui.nicegui:NiceGUIBackend"
 
 [project.optional-dependencies]
 sentry = [
     "sentry-sdk>=2.0.0",
+]
+nicegui = [
+    "nicegui>=2.0.0",
 ]
 
 [build-system]
