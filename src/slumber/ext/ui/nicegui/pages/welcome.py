@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
 
 
-def render_welcome_page(state: AppState, refresh: object) -> None:
+def render(state: AppState, refresh: object) -> None:
     """Render the welcome page.
 
     Args:
@@ -30,12 +30,15 @@ def render_welcome_page(state: AppState, refresh: object) -> None:
         ui.label(state.study.name).classes("text-h3 font-bold mt-4")
         ui.label(cfg.subtitle).classes(f"text-subtitle1 text-[{TEXT_SECONDARY}]")
 
-        def start_session() -> None:
-            state.fire_event("session_start")
-            refresh()  # type: ignore[operator]
-
         ui.button(
-            cfg.start_button, icon=cfg.start_icon, on_click=start_session
+            cfg.start_button,
+            icon=cfg.start_icon,
+            on_click=lambda: _start_session(state, refresh),
         ).classes("mt-6").props("size=lg rounded color=primary unelevated").style(
             "min-width: 220px; letter-spacing: 1px"
         )
+
+
+def _start_session(state: AppState, refresh: object) -> None:
+    state.fire_event("session_start")
+    refresh()  # type: ignore[operator]

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
 
 
-def render_complete_page(state: AppState, refresh: object) -> None:
+def render(state: AppState, refresh: object) -> None:
     """Render the completion page.
 
     Args:

@@ -25,10 +25,10 @@ from pathlib import Path
 from nicegui import app, ui
 
 from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
-from slumber.ext.ui.nicegui.pages.complete import render_complete_page
-from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
-from slumber.ext.ui.nicegui.pages.sleep import render_sleep_page
-from slumber.ext.ui.nicegui.pages.welcome import render_welcome_page
+from slumber.ext.ui.nicegui.pages.complete import render as render_complete_page
+from slumber.ext.ui.nicegui.pages.procedure import render as render_procedure_page
+from slumber.ext.ui.nicegui.pages.sleep import render as render_sleep_page
+from slumber.ext.ui.nicegui.pages.welcome import render as render_welcome_page
 from slumber.ext.ui.nicegui.state import AppState
 from slumber.ext.ui.nicegui.theme import COLORS
 from slumber.schemas.condition import Condition

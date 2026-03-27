@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
+from slumber.auth.operations import sign_in
 from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.theme import (
     SURFACE_LIGHT,
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
 
 
-def render_login_page(state: AppState, refresh: object) -> None:
+def render(state: AppState, refresh: object) -> None:
     """Render the login page.
 
     Args:
@@ -49,22 +50,27 @@ def render_login_page(state: AppState, refresh: object) -> None:
             error_label = ui.label("").classes("text-negative")
             error_label.set_visibility(False)
 
-            async def handle_login() -> None:
-                try:
-                    from slumber.auth.operations import sign_in
-
-                    sign_in(email.value, password.value)
-                    state.authenticated = True
-                    state.current_page = "welcome"
-                    logger.info("Login successful for {}", email.value)
-                    refresh()  # type: ignore[operator]
-                except Exception as exc:
-                    error_label.text = str(exc)
-                    error_label.set_visibility(True)
-                    logger.warning("Login failed for {}: {}", email.value, exc)
-
             ui.button(
-                cfg.submit_button, icon=cfg.submit_icon, on_click=handle_login
+                cfg.submit_button,
+                icon=cfg.submit_icon,
+                on_click=lambda: _handle_login(
+                    email.value, password.value, error_label, state, refresh
+                ),
             ).classes("w-full mt-2").props("rounded unelevated color=primary").style(
                 "letter-spacing: 1px"
             )
+
+
+def _handle_login(
+    email: str, password: str, error_label: ui.label, state: AppState, refresh: object
+) -> None:
+    try:
+        sign_in(email, password)
+        logger.info("Login successful for {}", email)
+        state.authenticated = True
+        state.current_page = "welcome"
+        refresh()  # type: ignore[operator]
+    except Exception as exc:
+        logger.warning("Login failed for {}: {}", email, exc)
+        error_label.text = str(exc)
+        error_label.set_visibility(True)
