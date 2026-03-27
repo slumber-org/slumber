@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
 
 
-def render_procedure_page(state: AppState, refresh: object) -> None:
+def render(state: AppState, refresh: object) -> None:
     """Render the procedure runner page.
 
     Args:

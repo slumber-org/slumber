@@ -6,16 +6,18 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
+from starlette.responses import FileResponse, Response
 from nicegui import app, ui
 
 from slumber.constants import PACKAGE_ROOT
-from slumber.ext.ui.nicegui.pages.complete import render_complete_page
-from slumber.ext.ui.nicegui.pages.login import render_login_page
-from slumber.ext.ui.nicegui.pages.procedure import render_procedure_page
-from slumber.ext.ui.nicegui.pages.sleep import render_sleep_page
-from slumber.ext.ui.nicegui.pages.welcome import render_welcome_page
+from slumber.ext.ui.nicegui.pages.complete import render as render_complete_page
+from slumber.ext.ui.nicegui.pages.login import render as render_login_page
+from slumber.ext.ui.nicegui.pages.procedure import render as render_procedure_page
+from slumber.ext.ui.nicegui.pages.sleep import render as render_sleep_page
+from slumber.ext.ui.nicegui.pages.welcome import render as render_welcome_page
 from slumber.ext.ui.nicegui.state import AppState
 from slumber.ext.ui.nicegui.theme import COLORS
+from slumber.auth.client import load_session
 
 if TYPE_CHECKING:
     from slumber.runtime.run import RunContext
@@ -124,15 +126,19 @@ def _serve_logo(config: dict[str, Any]) -> str | None:
     path = _find_logo_path(config)
     if path is None:
         return None
-    app.add_static_files("/logo", str(path.parent))
-    return f"/logo/{path.name}"
+
+    @app.get("/logo")
+    def serve_logo() -> Response:
+        if path is None or not path.is_file():
+            return Response(status_code=404)
+        return FileResponse(path)
+
+    return "/logo"
 
 
 def _check_auth() -> bool:
     """Check if a valid Supabase session exists."""
     try:
-        from slumber.auth.client import load_session
-
         session = load_session()
         return session is not None
     except Exception:

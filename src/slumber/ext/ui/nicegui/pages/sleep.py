@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
+from slumber.ext.ui.nicegui.config import SleepPageConfig
 from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.theme import (
     AWAKE_AMBER,
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
 
 
-def render_sleep_page(state: AppState, refresh: object) -> None:
+def render(state: AppState, refresh: object) -> None:
     """Render the sleep page.
 
     Args:
@@ -53,63 +54,29 @@ def render_sleep_page(state: AppState, refresh: object) -> None:
 
             with ui.column().classes("items-center gap-3 mt-10"):
                 if not is_asleep:
-
-                    async def going_to_sleep() -> None:
-                        confirmed = await _confirm(
-                            cfg.sleep_confirm_title,
-                            cfg.sleep_confirm_message,
-                        )
-                        if confirmed:
-                            logger.info("Participant going to sleep")
-                            state.is_asleep = True
-                            state.fire_event("sleep_start")
-                            refresh()  # type: ignore[operator]
-
                     ui.button(
                         cfg.sleep_button,
                         icon=cfg.sleep_button_icon,
-                        on_click=going_to_sleep,
+                        on_click=lambda: _go_to_sleep(cfg, state, refresh),
                     ).props("size=lg rounded unelevated").style(
                         f"min-width: 220px; background-color: {SLEEP_INDIGO} !important; "
                         "color: white; letter-spacing: 1px"
                     )
                 else:
-
-                    async def im_awake() -> None:
-                        confirmed = await _confirm(
-                            cfg.wake_confirm_title,
-                            cfg.wake_confirm_message,
-                        )
-                        if confirmed:
-                            logger.info("Participant woke up")
-                            state.is_asleep = False
-                            state.fire_event("wake_up")
-                            refresh()  # type: ignore[operator]
-
                     ui.button(
                         cfg.wake_button,
                         icon=cfg.wake_button_icon,
-                        on_click=im_awake,
+                        on_click=lambda: _wake_up(cfg, state, refresh),
                     ).props("size=lg rounded unelevated").style(
                         f"min-width: 220px; background-color: {AWAKE_AMBER} !important; "
                         "color: #1a1a2e; letter-spacing: 1px"
                     )
 
-        async def end_session() -> None:
-            confirmed = await _confirm(
-                cfg.end_confirm_title,
-                cfg.end_confirm_message,
-            )
-            if confirmed:
-                logger.info("Participant ending session")
-                state.fire_event("session_end")
-                refresh()  # type: ignore[operator]
-
         with ui.row().classes("w-full justify-center shrink-0"):
             ui.button(
                 cfg.end_button,
                 icon=cfg.end_button_icon,
-                on_click=end_session,
+                on_click=lambda: _end_session(cfg, state, refresh),
             ).props("size=md rounded outline").style(
                 "min-width: 220px; letter-spacing: 1px"
             ).classes(f"text-[{NEGATIVE}]").set_enabled(not is_asleep)
@@ -133,3 +100,38 @@ async def _confirm(title: str, message: str) -> bool:
                 "rounded unelevated color=primary"
             )
     return await dialog  # type: ignore[return-value]
+
+
+async def _go_to_sleep(cfg: SleepPageConfig, state: AppState, refresh: object) -> None:
+    confirmed = await _confirm(
+        cfg.sleep_confirm_title,
+        cfg.sleep_confirm_message,
+    )
+    if confirmed:
+        logger.info("Participant going to sleep")
+        state.is_asleep = True
+        state.fire_event("sleep_start")
+        refresh()  # type: ignore[operator]
+
+
+async def _wake_up(cfg: SleepPageConfig, state: AppState, refresh: object) -> None:
+    confirmed = await _confirm(
+        cfg.wake_confirm_title,
+        cfg.wake_confirm_message,
+    )
+    if confirmed:
+        logger.info("Participant woke up")
+        state.is_asleep = False
+        state.fire_event("wake_up")
+        refresh()  # type: ignore[operator]
+
+
+async def _end_session(cfg: SleepPageConfig, state: AppState, refresh: object) -> None:
+    confirmed = await _confirm(
+        cfg.end_confirm_title,
+        cfg.end_confirm_message,
+    )
+    if confirmed:
+        logger.info("Participant ending session")
+        state.fire_event("session_end")
+        refresh()  # type: ignore[operator]
