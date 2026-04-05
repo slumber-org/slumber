@@ -1,4 +1,4 @@
-"""Database migration commands (Alembic)."""
+"""Database migration commands (Alembic) for Supabase/Postgres."""
 
 from __future__ import annotations
 
@@ -10,14 +10,17 @@ from pathlib import Path
 
 import typer
 
+from slumber.supabase.utils import exit_unless_supabase_extra_installed
+
 db_app = typer.Typer(
     name="db",
-    help="Database schema migrations (Postgres / Supabase).",
+    help="Database schema migrations (Supabase / Postgres via Alembic).",
 )
 
 
 def _alembic_cmd(args: list[str]) -> int:
     """Run alembic with framework root as cwd so alembic.ini is found."""
+    exit_unless_supabase_extra_installed()
     root = Path().cwd()
     env = dict(os.environ)
     env["PYTHONPATH"] = str(root / "src") + os.pathsep + env.get("PYTHONPATH", "")

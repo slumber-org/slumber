@@ -18,15 +18,11 @@ from pydantic import (
 if TYPE_CHECKING:
     from slumber.schemas.condition import Condition
 
-
 DEFAULT_CONDITIONS_DIR_NAME = "conditions"
 DEFAULT_RUNS_DIR_NAME = "runs"
 DEFAULT_ASSETS_DIR_NAME = "assets"
 DEFAULT_LOG_LEVEL = "INFO"
-DEFAULT_RUN_LAYOUT = "sub-{participant_id}/ses-{session_id}/run-{run_id}"
-VALID_RUN_LAYOUT_KEYS: ClassVar[frozenset[str]] = frozenset(
-    {"study_id", "participant_id", "run_id", "condition_id", "session_id"}
-)
+DEFAULT_RUN_LAYOUT = "run-{run_id}"
 
 # study_id must not contain path components so base_dir / study_id cannot escape base_dir
 INVALID_STUDY_ID_SUBSTRINGS: ClassVar[tuple[str, ...]] = ("/", "\\", "..")
@@ -68,6 +64,8 @@ class RunLayout(BaseModel):
 
     @model_validator(mode="after")
     def validate_layout(self) -> "RunLayout":
+        from slumber.runtime.run import VALID_RUN_LAYOUT_KEYS
+
         placeholders = re.findall(r"\{(\w+)\}", self.layout)
         unknown = set(placeholders) - VALID_RUN_LAYOUT_KEYS
         if unknown:

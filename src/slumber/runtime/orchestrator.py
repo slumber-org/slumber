@@ -11,7 +11,7 @@ from loguru import logger
 
 from slumber.plugins import EntryPointGroup, get_registry
 from slumber.runtime.logging import configure_run_logging
-from slumber.runtime.run import RunContext, create_run_dir
+from slumber.runtime.run import create_run_dir, RunContext
 
 if TYPE_CHECKING:
     from slumber.plugins.registry import PluginRegistry

@@ -10,8 +10,8 @@ from alembic import context
 from sqlalchemy import create_engine
 from sqlmodel import SQLModel
 
-from slumber.db.connection import get_database_url
-from slumber.db.models import (  # noqa: E402, F401
+from slumber.supabase.utils import get_database_url
+from slumber.supabase.models import (  # noqa: E402, F401
     Condition,
     Participant,
     Run,

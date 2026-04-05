@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-
 import typer
 
-from slumber.auth import sign_in, sign_up, sign_out, update_password
-from slumber.auth.client import get_authenticated_client
+from slumber.supabase.utils import exit_unless_supabase_extra_installed
 
 auth_app = typer.Typer(
     name="auth",
@@ -27,6 +25,9 @@ def auth_login(
     ),
 ) -> None:
     """Sign in with email and password; store session for other commands."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import sign_in
+
     try:
         sign_in(email, password)
         typer.echo("Signed in successfully.")
@@ -49,6 +50,9 @@ def auth_signup(
     ),
 ) -> None:
     """Sign up a new user with email and password."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import sign_up
+
     try:
         sign_up(email, password)
         typer.echo("Sign-up successful.")
@@ -60,6 +64,9 @@ def auth_signup(
 @auth_app.command("logout")
 def auth_logout() -> None:
     """Sign out and clear the stored session."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import sign_out
+
     sign_out()
     typer.echo("Signed out.")
 
@@ -76,6 +83,9 @@ def auth_password_change(
     ),
 ) -> None:
     """Change the current user's password (must be signed in)."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import update_password
+
     try:
         update_password(new_password)
         typer.echo(
@@ -92,6 +102,9 @@ def auth_password_change(
 @auth_app.command("status")
 def auth_status() -> None:
     """Show whether you are signed in (and with which user)."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth.client import get_authenticated_client
+
     try:
         client = get_authenticated_client()
         session = client.auth.get_session()

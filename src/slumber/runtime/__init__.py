@@ -1,23 +1,38 @@
-"""Runtime: run directory layout, run logging, event dispatch, and orchestration."""
+"""Runtime: run directory layout, run logging, event dispatch, and orchestration.
+
+``configure_run_logging`` and ``run_study`` are loaded lazily so importing
+``slumber.runtime.run`` (e.g. from ``slumber.schemas.study``) does not pull in
+modules that depend on ``slumber.schemas.study`` before it finishes loading.
+"""
+
+from __future__ import annotations
 
 from slumber.runtime.events import (
     SessionState,
     evaluate_guard,
     get_triggered_procedures,
 )
+from slumber.runtime.run import (
+    create_run_dir,
+    resolve_run_dir,
+    RunContext,
+    VALID_RUN_LAYOUT_KEYS,
+    run_context_as_dict,
+)
 from slumber.runtime.logging import configure_run_logging
 from slumber.runtime.orchestrator import run_study
-from slumber.runtime.run import RunContext, create_run_dir, resolve_run_dir
 from slumber.runtime.sentry import init_sentry
 
 __all__ = [
     "RunContext",
     "SessionState",
+    "VALID_RUN_LAYOUT_KEYS",
     "configure_run_logging",
     "create_run_dir",
     "evaluate_guard",
     "get_triggered_procedures",
     "init_sentry",
     "resolve_run_dir",
+    "run_context_as_dict",
     "run_study",
 ]

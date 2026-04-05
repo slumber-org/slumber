@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 
 from slumber.cli.main import app
 
+pytestmark = pytest.mark.supabase
 
 _MINIMAL_CONDITION_YAML = """\
 name: {name}
@@ -62,9 +63,9 @@ class TestConditionSync:
         ]
 
         with (
-            patch("slumber.cli.condition.get_client", return_value=mock_client),
+            patch("slumber.supabase.auth.get_client", return_value=mock_client),
             patch(
-                "slumber.cli.condition.sync_conditions",
+                "slumber.supabase.backend.sync_conditions",
                 return_value=[{"id": "test-study_condition_1"}],
             ) as mock_sync,
         ):
@@ -82,9 +83,9 @@ class TestConditionSync:
         study_dir = _make_study_dir(tmp_path, ["condition_1", "condition_2"])
 
         with (
-            patch("slumber.cli.condition.get_client", return_value=MagicMock()),
+            patch("slumber.supabase.auth.get_client", return_value=MagicMock()),
             patch(
-                "slumber.cli.condition.sync_conditions",
+                "slumber.supabase.backend.sync_conditions",
                 return_value=[{"id": "test-study_condition_1"}],
             ) as mock_sync,
         ):
@@ -151,7 +152,7 @@ class TestConditionSync:
         study_dir = _make_study_dir(tmp_path, ["condition_1"])
 
         with patch(
-            "slumber.cli.condition.get_client",
+            "slumber.supabase.auth.get_client",
             side_effect=ValueError("SUPABASE_SERVICE_ROLE_KEY is not set"),
         ):
             result = runner.invoke(
@@ -169,9 +170,9 @@ class TestConditionSync:
         study_dir = _make_study_dir(tmp_path, ["condition_1"])
 
         with (
-            patch("slumber.cli.condition.get_client", return_value=MagicMock()),
+            patch("slumber.supabase.auth.get_client", return_value=MagicMock()),
             patch(
-                "slumber.cli.condition.sync_conditions",
+                "slumber.supabase.backend.sync_conditions",
                 side_effect=RuntimeError("DB error"),
             ),
         ):

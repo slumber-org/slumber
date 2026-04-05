@@ -6,13 +6,12 @@ from uuid import UUID
 
 import typer
 
-from slumber.auth import get_client
-from slumber.backend import create_participant_for_user, list_participants
 from slumber.constants import (
     PARTICIPANT_ID_ENV,
     STUDY_ID_ENV,
     USER_ID_ENV,
 )
+from slumber.supabase.utils import exit_unless_supabase_extra_installed
 
 participant_app = typer.Typer(
     name="participant",
@@ -45,6 +44,9 @@ def participant_create(
     ),
 ) -> None:
     """Create a participant: link an existing user (--user-id)."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import create_participant_for_user
 
     try:
         client = get_client(use_service_role=True)
@@ -84,6 +86,10 @@ def participant_list(
     ),
 ) -> None:
     """List participants for an auth user (researcher; uses service role)."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import list_participants
+
     try:
         UUID(user_id)
     except ValueError as e:

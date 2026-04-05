@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from slumber.backend.run import RunStatus, create_run, update_run
+from slumber.supabase.backend.run import RunStatus, create_run, update_run
 
 
 def test_create_run_inserts_and_returns_row() -> None:

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from slumber.backend.session import (
+from slumber.supabase.backend.session import (
     create_session,
     delete_session,
     get_active_session,

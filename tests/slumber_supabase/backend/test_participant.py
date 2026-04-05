@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from slumber.backend.participant import (
+from slumber.supabase.backend.participant import (
     create_participant,
     create_participant_for_user,
     get_participant_for_study,

@@ -9,6 +9,8 @@ from typer.testing import CliRunner
 
 from slumber.cli.main import app
 
+pytestmark = pytest.mark.supabase
+
 
 class TestSessionList:
     """Tests for slumber session list (researcher)."""
@@ -46,7 +48,7 @@ class TestSessionList:
         mock_client.table.return_value = mock_table
 
         with patch(
-            "slumber.cli.session.get_client",
+            "slumber.supabase.auth.get_client",
             return_value=mock_client,
         ):
             runner = CliRunner()
@@ -99,7 +101,7 @@ class TestSessionCreate:
         mock_client.table.return_value = mock_table
 
         with patch(
-            "slumber.cli.session.get_client",
+            "slumber.supabase.auth.get_client",
             return_value=mock_client,
         ):
             runner = CliRunner()

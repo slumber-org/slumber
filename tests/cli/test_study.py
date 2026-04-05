@@ -120,23 +120,19 @@ class TestStudyInitCLI:
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
         """CLI with --base-dir and --study-id creates correct layout without prompts."""
-        with (
-            patch("slumber.cli.study.get_client"),
-            patch("slumber.cli.study.create_study"),
-        ):
-            result = runner.invoke(
-                app,
-                [
-                    "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "cli-study",
-                    "--name",
-                    "cli-study",
-                ],
-            )
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "cli-study",
+                "--name",
+                "cli-study",
+            ],
+        )
         assert result.exit_code == 0
         study_path = tmp_path / "cli-study"
         assert study_path.is_dir()
@@ -149,23 +145,19 @@ class TestStudyInitCLI:
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
         """CLI creates .env and .gitignore inside the study folder by default."""
-        with (
-            patch("slumber.cli.study.get_client"),
-            patch("slumber.cli.study.create_study"),
-        ):
-            result = runner.invoke(
-                app,
-                [
-                    "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "proj-study",
-                    "--name",
-                    "proj-study",
-                ],
-            )
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "proj-study",
+                "--name",
+                "proj-study",
+            ],
+        )
         assert result.exit_code == 0
         study_path = tmp_path / "proj-study"
         assert (study_path / ".env").is_file()
@@ -177,23 +169,19 @@ class TestStudyInitCLI:
 
     def test_non_interactive_with_name(self, runner: CliRunner, tmp_path: Path) -> None:
         """CLI --name is reflected in study.yaml."""
-        with (
-            patch("slumber.cli.study.get_client"),
-            patch("slumber.cli.study.create_study"),
-        ):
-            result = runner.invoke(
-                app,
-                [
-                    "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "x",
-                    "--name",
-                    "My Study Name",
-                ],
-            )
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "x",
+                "--name",
+                "My Study Name",
+            ],
+        )
         assert result.exit_code == 0
         content = (tmp_path / "x" / "study.yaml").read_text(encoding="utf-8")
         assert "name: My Study Name" in content
@@ -201,23 +189,19 @@ class TestStudyInitCLI:
     def test_exits_when_dir_exists(self, runner: CliRunner, tmp_path: Path) -> None:
         """CLI exits with code 1 when study directory already exists."""
         (tmp_path / "existing").mkdir()
-        with (
-            patch("slumber.cli.study.get_client"),
-            patch("slumber.cli.study.create_study"),
-        ):
-            result = runner.invoke(
-                app,
-                [
-                    "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "existing",
-                    "--name",
-                    "existing",
-                ],
-            )
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "existing",
+                "--name",
+                "existing",
+            ],
+        )
         assert result.exit_code == 1
         assert "already exists" in result.output
 
@@ -225,24 +209,20 @@ class TestStudyInitCLI:
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
         """CLI --no-env-example does not create .env inside the study folder."""
-        with (
-            patch("slumber.cli.study.get_client"),
-            patch("slumber.cli.study.create_study"),
-        ):
-            result = runner.invoke(
-                app,
-                [
-                    "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "y",
-                    "--name",
-                    "y",
-                    "--no-env-example",
-                ],
-            )
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "y",
+                "--name",
+                "y",
+                "--no-env-example",
+            ],
+        )
         assert result.exit_code == 0
         assert not (tmp_path / "y" / ".env").exists()
 
@@ -250,10 +230,33 @@ class TestStudyInitCLI:
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
         """CLI --no-gitignore does not create .gitignore inside the study folder."""
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "z",
+                "--name",
+                "z",
+                "--no-gitignore",
+            ],
+        )
+        assert result.exit_code == 0
+        assert not (tmp_path / "z" / ".gitignore").exists()
+
+    @pytest.mark.supabase
+    def test_register_calls_supabase_create_study(
+        self, runner: CliRunner, tmp_path: Path
+    ) -> None:
+        """With --register, CLI calls Supabase create_study after filesystem init."""
         with (
-            patch("slumber.cli.study.get_client"),
-            patch("slumber.cli.study.create_study"),
+            patch("slumber.supabase.auth.get_client") as mock_get_client,
+            patch("slumber.supabase.backend.study.create_study") as mock_create,
         ):
+            mock_get_client.return_value = object()
             result = runner.invoke(
                 app,
                 [
@@ -262,11 +265,17 @@ class TestStudyInitCLI:
                     "--base-dir",
                     str(tmp_path),
                     "--study-id",
-                    "z",
+                    "reg-study",
                     "--name",
-                    "z",
-                    "--no-gitignore",
+                    "Reg Study",
+                    "--register",
                 ],
             )
         assert result.exit_code == 0
-        assert not (tmp_path / "z" / ".gitignore").exists()
+        mock_get_client.assert_called_once_with(use_service_role=True)
+        mock_create.assert_called_once()
+        call_args = mock_create.call_args[0]
+        assert call_args[1] == "reg-study"
+        assert call_args[2] == "Reg Study"
+        assert "Created study at" in result.output
+        assert "Registered study 'reg-study'" in result.output

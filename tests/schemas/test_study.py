@@ -33,7 +33,7 @@ class TestRunLayout:
     def test_valid_defaults(self) -> None:
         layout = RunLayout()
         assert layout.base_directory == "runs"
-        assert "participant_id" in layout.layout and "session_id" in layout.layout
+        assert layout.layout == "run-{run_id}"
 
     def test_valid_custom(self) -> None:
         layout = RunLayout(

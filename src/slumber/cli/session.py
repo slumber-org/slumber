@@ -6,18 +6,11 @@ from datetime import datetime
 
 import typer
 
-from slumber.auth import get_client
-from slumber.backend import (
-    create_session as backend_create,
-    list_sessions as backend_list,
-    update_session as backend_update,
-    delete_session as backend_delete,
-)
-from slumber.backend.participant import generate_participant_id
 from slumber.constants import (
     PARTICIPANT_ID_ENV,
     STUDY_ID_ENV,
 )
+from slumber.supabase.utils import exit_unless_supabase_extra_installed
 
 session_app = typer.Typer(
     name="session",
@@ -67,6 +60,10 @@ def session_create(
     ),
 ) -> None:
     """Create a session for a participant."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import create_session as backend_create
+    from slumber.supabase.backend.participant import generate_participant_id
 
     try:
         client = get_client(use_service_role=True)
@@ -118,6 +115,9 @@ def session_list(
     ),
 ) -> None:
     """List sessions (optionally filter by study or participant)."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import list_sessions as backend_list
 
     try:
         client = get_client(use_service_role=True)
@@ -166,6 +166,10 @@ def session_update(
     ),
 ) -> None:
     """Update a session (only provided options are changed)."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import update_session as backend_update
+
     try:
         client = get_client(use_service_role=True)
     except ValueError as e:
@@ -212,6 +216,10 @@ def session_delete(
     session_id: int = typer.Argument(..., help="Session ID to delete."),
 ) -> None:
     """Delete a session."""
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import delete_session as backend_delete
+
     try:
         client = get_client(use_service_role=True)
     except ValueError as e:

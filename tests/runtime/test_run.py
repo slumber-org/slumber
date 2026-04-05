@@ -21,10 +21,10 @@ def _study(
 def _ctx(**overrides: str) -> RunContext:
     defaults = dict(
         study_id="s1",
-        participant_id="001",
-        session_id="ses01",
         run_id="r001",
         condition_id="ctrl",
+        participant_id="001",
+        session_id="ses01",
     )
     return RunContext(**{**defaults, **overrides})  # type: ignore[arg-type]
 
@@ -54,6 +54,18 @@ class TestResolveRunDir:
     def test_returns_absolute_path(self, tmp_path: Path) -> None:
         result = resolve_run_dir(_study(), _ctx(), tmp_path)
         assert result.is_absolute()
+
+    def test_optional_participant_session_format_as_empty(self, tmp_path: Path) -> None:
+        study = _study(layout="{study_id}/{run_id}")
+        ctx = RunContext(
+            study_id="s1",
+            run_id="r1",
+            condition_id="c",
+            participant_id=None,
+            session_id=None,
+        )
+        result = resolve_run_dir(study, ctx, tmp_path)
+        assert result == (tmp_path / "runs" / "s1" / "r1").resolve()
 
 
 class TestCreateRunDir:

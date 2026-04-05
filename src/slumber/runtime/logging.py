@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import dataclasses
 from pathlib import Path
 
 from loguru import logger
 
-from slumber.runtime.run import RunContext
+from slumber.runtime.run import run_context_as_dict, RunContext
 from slumber.schemas.study import Study
 
 
@@ -37,7 +36,7 @@ def configure_run_logging(
         deregister handlers when the run ends.
     """
     handler_ids: list[int] = []
-    ctx_dict = dataclasses.asdict(context)
+    ctx_dict = run_context_as_dict(context)
 
     for handler_config in study.logging.handlers:
         kwargs: dict = dict(handler_config)

@@ -26,7 +26,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...   # For participant/session CLI (researcher)
 
 ## Database schema
 
-Tables (see `src/slumber/db/models.py`):
+Tables (see `src/slumber/supabase/models.py`):
 
 - **study** — Study manifest registration (`id` string PK, `name`).
 - **condition** — Condition config per study (`study_id`, `name`, `procedures` JSONB, `dag` JSONB).
@@ -64,7 +64,7 @@ export PYTHONPATH=src
 alembic upgrade head
 ```
 
-New migrations (after changing `src/slumber/db/models.py`):
+New migrations (after changing `src/slumber/supabase/models.py`):
 
 ```bash
 alembic revision --autogenerate -m "Description"

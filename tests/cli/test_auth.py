@@ -11,6 +11,8 @@ from typer.testing import CliRunner
 
 from slumber.cli.main import app
 
+pytestmark = pytest.mark.supabase
+
 
 class TestAuthLogout:
     """Tests for slumber auth logout."""
@@ -78,7 +80,8 @@ class TestAuthStatus:
         mock_client.auth = mock_auth
 
         with patch(
-            "slumber.cli.auth.get_authenticated_client", return_value=mock_client
+            "slumber.supabase.auth.client.get_authenticated_client",
+            return_value=mock_client,
         ):
             runner = CliRunner()
             result = runner.invoke(app, ["auth", "status"])

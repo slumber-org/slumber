@@ -42,10 +42,10 @@ dag:
 def _ctx(study_id: str = "s1") -> RunContext:
     return RunContext(
         study_id=study_id,
-        participant_id="sub-001",
-        session_id="ses-01",
         run_id="r001",
         condition_id="ctrl",
+        participant_id="sub-001",
+        session_id="ses-01",
     )
 
 
@@ -62,7 +62,23 @@ class TestRunStudy:
         assert meta["study_id"] == "s1"
         assert meta["condition_name"] == "ctrl"
         assert meta["run_id"] == "r001"
+        assert meta["participant_id"] == "sub-001"
+        assert meta["session_id"] == "ses-01"
         assert "started_at" in meta
+
+    def test_run_metadata_serializes_optional_ids_as_null(self, tmp_path: Path) -> None:
+        study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)
+        ctx = RunContext(
+            study_id="s1",
+            run_id="r001",
+            condition_id="ctrl",
+            participant_id=None,
+            session_id=None,
+        )
+        run_dir = run_study(study, "ctrl", ctx, study_dir)
+        meta = json.loads((run_dir / "run.json").read_text())
+        assert meta["participant_id"] is None
+        assert meta["session_id"] is None
 
     def test_returns_run_dir_path(self, tmp_path: Path) -> None:
         study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)

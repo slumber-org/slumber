@@ -34,8 +34,18 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Install core dependencies only
+        run: uv sync --locked --dev
+
+      - name: Run tests (no optional extras)
+        env:
+          SLUMBER_PYTEST_CORE_ONLY: "1"
+        run: uv run pytest -m "not supabase and not nicegui"
+
+      - name: Install all dependencies
         run: uv sync --locked --all-extras --dev
 
       - name: Run tests
+        env:
+          SLUMBER_PYTEST_CORE_ONLY: "0"
         run: uv run pytest

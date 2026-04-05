@@ -55,7 +55,6 @@ def _state(procedures: dict[str, Procedure] | None = None) -> AppState:
         study=_study(),
         condition=_condition(procedures),
         context=_FakeContext(),  # type: ignore[arg-type]
-        config={},
         authenticated=True,
         current_page="welcome",
     )

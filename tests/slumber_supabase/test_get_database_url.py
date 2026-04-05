@@ -1,11 +1,10 @@
-"""Tests for database connection (get_database_url)."""
+"""Tests for :func:`slumber.supabase.utils.get_database_url`."""
 
 from __future__ import annotations
 
-
 import pytest
 
-from slumber.db.connection import get_database_url
+from slumber.supabase.utils import get_database_url
 
 
 def test_get_database_url_raises_when_unset(monkeypatch: pytest.MonkeyPatch) -> None:
