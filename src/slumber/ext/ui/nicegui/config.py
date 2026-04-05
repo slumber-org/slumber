@@ -81,6 +81,10 @@ class NiceGUIConfig(BaseModel):
     procedure: ProcedurePageConfig = Field(default_factory=ProcedurePageConfig)
     complete: CompletePageConfig = Field(default_factory=CompletePageConfig)
     login: LoginPageConfig = Field(default_factory=LoginPageConfig)
+    require_login: bool = Field(
+        default=False,
+        description="If True, require Supabase login.",
+    )
     logo: FilePath | None = Field(
         default=None,
         description="Path to logo image for the study.",

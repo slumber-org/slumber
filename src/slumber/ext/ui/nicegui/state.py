@@ -28,10 +28,10 @@ class AppState:
     study: Study
     condition: Condition
     context: RunContext
-    config: dict[str, Any]
+    ui_config: NiceGUIConfig = field(default_factory=NiceGUIConfig)
 
     authenticated: bool = False
-    current_page: str = "login"
+    current_page: str = "welcome"
 
     session_state: SessionState = field(default_factory=SessionState)
 
@@ -43,14 +43,6 @@ class AppState:
     is_asleep: bool = False
     logo_url: str | None = field(default=None, repr=False)
     _last_event: str | None = field(default=None, repr=False)
-    _ui_config: NiceGUIConfig | None = field(default=None, repr=False)
-
-    @property
-    def ui_config(self) -> NiceGUIConfig:
-        """Parsed NiceGUI UI config with defaults."""
-        if self._ui_config is None:
-            self._ui_config = NiceGUIConfig.model_validate(self.config)
-        return self._ui_config
 
     @property
     def current_procedure_name(self) -> str:

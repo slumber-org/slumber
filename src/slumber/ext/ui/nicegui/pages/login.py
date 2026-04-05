@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
-from slumber.auth.operations import sign_in
 from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
 from slumber.ext.ui.nicegui.theme import (
     SURFACE_LIGHT,
     SURFACE_MID,
     TEXT_SECONDARY,
 )
+from slumber.supabase.utils import SUPABASE_INSTALL_HINT, is_supabase_extra_installed
 
 if TYPE_CHECKING:
     from slumber.ext.ui.nicegui.state import AppState
@@ -26,6 +26,7 @@ def render(state: AppState, refresh: object) -> None:
         state: App state.
         refresh: Callable to refresh the UI after state changes.
     """
+    supabase_available = is_supabase_extra_installed()
     cfg = state.ui_config.login
 
     with centered_fullscreen_layout(content_gap=None):
@@ -50,6 +51,15 @@ def render(state: AppState, refresh: object) -> None:
             error_label = ui.label("").classes("text-negative")
             error_label.set_visibility(False)
 
+            if not supabase_available:
+                ui.label("Supabase dependency missing.").classes(
+                    f"text-subtitle2 text-[{TEXT_SECONDARY}]"
+                )
+                ui.label(SUPABASE_INSTALL_HINT).classes(
+                    f"text-caption text-[{TEXT_SECONDARY}]"
+                )
+                return
+
             ui.button(
                 cfg.submit_button,
                 icon=cfg.submit_icon,
@@ -64,6 +74,13 @@ def render(state: AppState, refresh: object) -> None:
 def _handle_login(
     email: str, password: str, error_label: ui.label, state: AppState, refresh: object
 ) -> None:
+    try:
+        from slumber.supabase.auth.operations import sign_in
+    except ModuleNotFoundError:
+        error_label.text = SUPABASE_INSTALL_HINT
+        error_label.set_visibility(True)
+        return
+
     try:
         sign_in(email, password)
         logger.info("Login successful for {}", email)

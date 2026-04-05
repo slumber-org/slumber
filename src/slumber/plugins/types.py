@@ -28,7 +28,7 @@ class UIBackend(Protocol):
         Args:
             study: Loaded study manifest.
             condition: The condition to run (procedures + DAG).
-            context: Run context (study_id, participant_id, session_id, run_id).
+            context: Run context.
             config: UI backend config from study manifest (``study.ui.config``).
         """
         ...

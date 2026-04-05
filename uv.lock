@@ -2560,15 +2560,11 @@ name = "slumber"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "alembic" },
     { name = "ezmsg" },
     { name = "loguru" },
-    { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
-    { name = "sqlmodel" },
-    { name = "supabase" },
     { name = "typer" },
 ]
 
@@ -2578,6 +2574,12 @@ nicegui = [
 ]
 sentry = [
     { name = "sentry-sdk" },
+]
+supabase = [
+    { name = "alembic" },
+    { name = "psycopg2-binary" },
+    { name = "sqlmodel" },
+    { name = "supabase" },
 ]
 
 [package.dev-dependencies]
@@ -2603,20 +2605,20 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", specifier = ">=1.18.4" },
+    { name = "alembic", marker = "extra == 'supabase'", specifier = ">=1.18.4" },
     { name = "ezmsg", specifier = ">=3.7.3" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "nicegui", marker = "extra == 'nicegui'", specifier = ">=2.0.0" },
-    { name = "psycopg2-binary", specifier = ">=2.9.11" },
+    { name = "psycopg2-binary", marker = "extra == 'supabase'", specifier = ">=2.9.11" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "sentry-sdk", marker = "extra == 'sentry'", specifier = ">=2.0.0" },
-    { name = "sqlmodel", specifier = ">=0.0.37" },
-    { name = "supabase", specifier = ">=2.10.0" },
+    { name = "sqlmodel", marker = "extra == 'supabase'", specifier = ">=0.0.37" },
+    { name = "supabase", marker = "extra == 'supabase'", specifier = ">=2.10.0" },
     { name = "typer", specifier = ">=0.24.1" },
 ]
-provides-extras = ["sentry", "nicegui"]
+provides-extras = ["supabase", "sentry", "nicegui"]
 
 [package.metadata.requires-dev]
 dev = [

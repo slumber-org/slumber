@@ -11,10 +11,10 @@ from slumber.schemas.study import RunLoggingConfig, Study
 def _ctx() -> RunContext:
     return RunContext(
         study_id="s1",
-        participant_id="001",
-        session_id="ses01",
         run_id="r001",
         condition_id="ctrl",
+        participant_id="001",
+        session_id="ses01",
     )
 
 

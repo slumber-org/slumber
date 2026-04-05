@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from slumber.auth.operations import sign_in, sign_up, sign_out, update_password
-from slumber.auth.client import load_session
+from slumber.supabase.auth.client import load_session
+from slumber.supabase.auth.operations import sign_in, sign_out, sign_up, update_password
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def test_sign_in_calls_client_and_saves_session(
     mock_client = MagicMock()
     mock_client.auth.sign_in_with_password.return_value = mock_auth_response
 
-    with patch("slumber.auth.operations.get_client", return_value=mock_client):
+    with patch("slumber.supabase.auth.operations.get_client", return_value=mock_client):
         sign_in("u@example.com", "secret")
 
     mock_client.auth.sign_in_with_password.assert_called_once_with(
@@ -62,7 +62,7 @@ def test_sign_up_calls_client_and_saves_session(
     mock_client = MagicMock()
     mock_client.auth.sign_up.return_value = mock_auth_response
 
-    with patch("slumber.auth.operations.get_client", return_value=mock_client):
+    with patch("slumber.supabase.auth.operations.get_client", return_value=mock_client):
         sign_up("new@example.com", "secret")
 
     mock_client.auth.sign_up.assert_called_once_with(
@@ -85,7 +85,7 @@ def test_sign_out_clears_session_file(
     monkeypatch.setenv("SLUMBER_SESSION_FILE", str(session_file))
     mock_client = MagicMock()
 
-    with patch("slumber.auth.operations.get_client", return_value=mock_client):
+    with patch("slumber.supabase.auth.operations.get_client", return_value=mock_client):
         sign_out()
 
     assert not session_file.exists()
@@ -108,7 +108,8 @@ def test_update_password_calls_update_user(
     mock_client = MagicMock()
 
     with patch(
-        "slumber.auth.operations.get_authenticated_client", return_value=mock_client
+        "slumber.supabase.auth.operations.get_authenticated_client",
+        return_value=mock_client,
     ):
         update_password("new-secret")
 

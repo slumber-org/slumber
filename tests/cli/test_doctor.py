@@ -33,23 +33,27 @@ class TestCheckEnvironment:
         monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
         monkeypatch.setenv("SUPABASE_ANON_KEY", "anon-key")
 
-        results = {r.name: r for r in check_environment()}
+        with patch("slumber.cli.doctor.is_supabase_extra_installed", return_value=True):
+            results = {r.name: r for r in check_environment()}
 
         assert results["SUPABASE_URL"].status == CheckStatus.OK
         assert results["SUPABASE_ANON_KEY"].status == CheckStatus.OK
 
-    def test_required_vars_fail_when_missing(
+    def test_supabase_env_skip_when_extra_not_installed(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """SUPABASE_URL and SUPABASE_ANON_KEY are FAIL when not set."""
+        """SUPABASE_URL / ANON_KEY are optional when the supabase extra is absent."""
         monkeypatch.delenv("SUPABASE_URL", raising=False)
         monkeypatch.delenv("SUPABASE_ANON_KEY", raising=False)
 
-        results = {r.name: r for r in check_environment()}
+        with patch(
+            "slumber.cli.doctor.is_supabase_extra_installed", return_value=False
+        ):
+            results = {r.name: r for r in check_environment()}
 
-        assert results["SUPABASE_URL"].status == CheckStatus.FAIL
-        assert results["SUPABASE_URL"].required is True
-        assert results["SUPABASE_ANON_KEY"].status == CheckStatus.FAIL
+        assert results["SUPABASE_URL"].status == CheckStatus.SKIP
+        assert results["SUPABASE_URL"].required is False
+        assert results["SUPABASE_ANON_KEY"].status == CheckStatus.SKIP
 
     def test_optional_vars_skip_when_missing(
         self, monkeypatch: pytest.MonkeyPatch
@@ -116,36 +120,59 @@ class TestCheckEnvironment:
 
 
 class TestCheckSupabaseConnectivity:
+    def test_skip_when_extra_not_installed(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Connectivity is SKIP when the supabase package is not installed."""
+        monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+        monkeypatch.setenv("SUPABASE_ANON_KEY", "anon-key")
+
+        with patch(
+            "slumber.cli.doctor.is_supabase_extra_installed", return_value=False
+        ):
+            result = check_supabase_connectivity()
+
+        assert result.status == CheckStatus.SKIP
+        assert "slumber[supabase]" in result.message
+        assert result.required is False
+
     def test_skip_when_env_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Connectivity check is SKIP when URL or key is not set."""
         monkeypatch.delenv("SUPABASE_URL", raising=False)
         monkeypatch.delenv("SUPABASE_ANON_KEY", raising=False)
 
-        result = check_supabase_connectivity()
+        with patch("slumber.cli.doctor.is_supabase_extra_installed", return_value=True):
+            result = check_supabase_connectivity()
 
         assert result.status == CheckStatus.SKIP
         assert result.required is False
 
+    @pytest.mark.supabase
     def test_ok_when_client_succeeds(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Connectivity is OK when the Supabase client query returns without error."""
         monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
         monkeypatch.setenv("SUPABASE_ANON_KEY", "anon-key")
 
-        with patch("slumber.cli.doctor.create_client") as mock_create:
+        with (
+            patch("slumber.cli.doctor.is_supabase_extra_installed", return_value=True),
+            patch("supabase.create_client") as mock_create,
+        ):
             mock_client = mock_create.return_value
-            mock_client.table.return_value.select.return_value.limit.return_value.execute.return_value = None
+            mock_client.auth.get_user.return_value = None
 
             result = check_supabase_connectivity()
 
         assert result.status == CheckStatus.OK
 
+    @pytest.mark.supabase
     def test_fail_when_client_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Connectivity is FAIL when the Supabase client raises an exception."""
         monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
         monkeypatch.setenv("SUPABASE_ANON_KEY", "anon-key")
 
-        with patch(
-            "slumber.cli.doctor.create_client", side_effect=Exception("timeout")
+        with (
+            patch("slumber.cli.doctor.is_supabase_extra_installed", return_value=True),
+            patch("supabase.create_client", side_effect=Exception("timeout")),
         ):
             result = check_supabase_connectivity()
 
@@ -221,6 +248,24 @@ class TestCheckDependencies:
         assert results["nicegui"].status == CheckStatus.OK
         assert results["nicegui"].required is False
 
+    def test_supabase_ok_when_extra_installed(self) -> None:
+        """supabase shows OK when is_supabase_extra_installed is true."""
+        with patch("slumber.cli.doctor.is_supabase_extra_installed", return_value=True):
+            results = {r.name: r for r in check_dependencies()}
+
+        assert results["supabase"].status == CheckStatus.OK
+        assert results["supabase"].required is False
+
+    def test_supabase_skip_when_extra_not_installed(self) -> None:
+        """supabase shows SKIP when the optional dependency is not present."""
+        with patch(
+            "slumber.cli.doctor.is_supabase_extra_installed", return_value=False
+        ):
+            results = {r.name: r for r in check_dependencies()}
+
+        assert results["supabase"].status == CheckStatus.SKIP
+        assert results["supabase"].required is False
+
 
 # ---------------------------------------------------------------------------
 # run_doctor integration
@@ -228,15 +273,16 @@ class TestCheckDependencies:
 
 
 class TestRunDoctor:
-    def test_failures_only_includes_required_fails(
+    def test_failures_does_not_include_optional_skips(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """DoctorReport.failures only lists required checks with FAIL status."""
+        """DoctorReport.failures does not include optional checks with SKIP status."""
         monkeypatch.delenv("SUPABASE_URL", raising=False)
         monkeypatch.delenv("SUPABASE_ANON_KEY", raising=False)
         monkeypatch.delenv("DATABASE_URL", raising=False)
 
         with (
+            patch("slumber.cli.doctor.is_supabase_extra_installed", return_value=True),
             patch("slumber.cli.doctor.check_supabase_connectivity") as mock_conn,
             patch("slumber.cli.doctor.check_dependencies", return_value=[]),
         ):
@@ -252,8 +298,8 @@ class TestRunDoctor:
 
         # Only required failures (SUPABASE_URL, SUPABASE_ANON_KEY) should be in failures
         failure_names = {f.name for f in report.failures}
-        assert "SUPABASE_URL" in failure_names
-        assert "SUPABASE_ANON_KEY" in failure_names
+        assert "SUPABASE_URL" not in failure_names  # optional
+        assert "SUPABASE_ANON_KEY" not in failure_names  # optional
         assert "DATABASE_URL" not in failure_names  # optional
 
 

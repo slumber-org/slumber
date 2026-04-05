@@ -90,10 +90,10 @@ _PAGE_RENDERERS = {
 @dataclass
 class FakeRunContext:
     study_id: str = "demo_study"
-    participant_id: str = "sub-001"
-    session_id: str = "ses-01"
     run_id: str = "run-001"
     condition_id: str = "demo_condition"
+    participant_id: str = "sub-001"
+    session_id: str = "ses-01"
 
 
 def build_demo_condition() -> Condition:
@@ -195,7 +195,6 @@ def main() -> None:
         study=study,
         condition=condition,
         context=context,  # type: ignore[arg-type]
-        config={},
         authenticated=False,
         current_page="login",
         logo_url=logo_url,

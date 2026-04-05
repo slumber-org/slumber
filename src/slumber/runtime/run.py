@@ -4,23 +4,33 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from slumber.schemas.study import Study
+if TYPE_CHECKING:
+    from slumber.schemas.study import Study
 
 
 @dataclasses.dataclass
 class RunContext:
     """Values used to expand placeholders in run layout and log sink paths.
 
-    All fields in VALID_RUN_LAYOUT_KEYS (study_id, participant_id, session_id,
-    run_id, condition_id) are present so layout strings can reference any of them.
+    Fields ``participant_id`` and ``session_id`` are optional.
     """
 
     study_id: str
-    participant_id: str
-    session_id: str
     run_id: str
-    condition_id: str = ""
+    condition_id: str
+    participant_id: str | None = None
+    session_id: str | None = None
+
+
+VALID_RUN_LAYOUT_KEYS: frozenset[str] = frozenset(
+    f.name for f in dataclasses.fields(RunContext)
+)
+
+
+def run_context_as_dict(context: RunContext) -> dict[str, str]:
+    return dataclasses.asdict(context)
 
 
 def resolve_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
@@ -38,7 +48,7 @@ def resolve_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
     Returns:
         Resolved (absolute) path to the run directory.
     """
-    layout = study.runs.layout.format(**dataclasses.asdict(context))
+    layout = study.runs.layout.format(**run_context_as_dict(context))
     return (study_dir / study.runs.base_directory / layout).resolve()
 
 

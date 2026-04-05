@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+import yaml
 from typer.testing import CliRunner
 
 from slumber.cli.main import app
@@ -45,29 +47,46 @@ def study_dir(tmp_path: Path) -> Path:
     return sd
 
 
-def _invoke(runner: CliRunner, study_dir: Path) -> object:
-    return runner.invoke(app, ["study", "run", "--study-dir", str(study_dir)])
+def _invoke_scheduled(runner: CliRunner, study_dir: Path) -> object:
+    return runner.invoke(
+        app,
+        ["study", "run", "--study-dir", str(study_dir), "--scheduled"],
+    )
 
 
-class TestStudyRunCLI:
+def _invoke_local(
+    runner: CliRunner, study_dir: Path, condition: str = "ctrl"
+) -> object:
+    return runner.invoke(
+        app,
+        ["study", "run", "--study-dir", str(study_dir), "--condition", condition],
+    )
+
+
+@pytest.mark.supabase
+class TestStudyRunScheduledCLI:
     def _patched_run(self, runner: CliRunner, study_dir: Path, **session_overrides):
         session = {**_SESSION_ROW, **session_overrides}
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=session),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW),
-            patch("slumber.cli.study.update_run"),
+            patch(
+                "slumber.supabase.backend.get_active_session",
+                return_value=session,
+            ),
+            patch("slumber.supabase.backend.create_run", return_value=_RUN_ROW),
+            patch("slumber.supabase.backend.update_run"),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry"),
         ):
-            return _invoke(runner, study_dir)
+            return _invoke_scheduled(runner, study_dir)
 
     def test_successful_run(self, runner: CliRunner, study_dir: Path) -> None:
         result = self._patched_run(runner, study_dir)
@@ -86,19 +105,25 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=_SESSION_ROW),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW) as mock_create,
-            patch("slumber.cli.study.update_run"),
+            patch(
+                "slumber.supabase.backend.get_active_session",
+                return_value=_SESSION_ROW,
+            ),
+            patch(
+                "slumber.supabase.backend.create_run", return_value=_RUN_ROW
+            ) as mock_create,
+            patch("slumber.supabase.backend.update_run"),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry"),
         ):
-            _invoke(runner, study_dir)
+            _invoke_scheduled(runner, study_dir)
         mock_create.assert_called_once_with(mock_client, 42)
 
     def test_db_run_updated_completed_on_success(
@@ -107,23 +132,27 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=_SESSION_ROW),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW),
-            patch("slumber.cli.study.update_run") as mock_update,
+            patch(
+                "slumber.supabase.backend.get_active_session",
+                return_value=_SESSION_ROW,
+            ),
+            patch("slumber.supabase.backend.create_run", return_value=_RUN_ROW),
+            patch("slumber.supabase.backend.update_run") as mock_update,
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry"),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 0
         call_kwargs = mock_update.call_args
         assert call_kwargs.args[1] == 7
-        from slumber.backend.run import RunStatus
+        from slumber.supabase.backend.run import RunStatus
 
         assert call_kwargs.kwargs["status"] == RunStatus.COMPLETED
         assert "run_directory" in call_kwargs.kwargs
@@ -134,31 +163,35 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=_SESSION_ROW),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW),
-            patch("slumber.cli.study.update_run") as mock_update,
+            patch(
+                "slumber.supabase.backend.get_active_session",
+                return_value=_SESSION_ROW,
+            ),
+            patch("slumber.supabase.backend.create_run", return_value=_RUN_ROW),
+            patch("slumber.supabase.backend.update_run") as mock_update,
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry"),
             patch("slumber.cli.study.run_study", side_effect=RuntimeError("boom")),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 1
-        from slumber.backend.run import RunStatus
+        from slumber.supabase.backend.run import RunStatus
 
         mock_update.assert_called_once_with(mock_client, 7, status=RunStatus.FAILED)
 
     def test_exits_when_not_logged_in(self, runner: CliRunner, study_dir: Path) -> None:
         with patch(
-            "slumber.cli.study.get_authenticated_client",
+            "slumber.supabase.auth.get_authenticated_client",
             side_effect=ValueError("Not logged in"),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 1
         assert "Not logged in" in result.output
 
@@ -168,15 +201,16 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 side_effect=ValueError("not a participant"),
             ),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 1
         assert "not a participant" in result.output
 
@@ -186,19 +220,20 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
             patch(
-                "slumber.cli.study.get_active_session",
+                "slumber.supabase.backend.get_active_session",
                 side_effect=ValueError("No session scheduled"),
             ),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 1
         assert "No session scheduled" in result.output
 
@@ -215,19 +250,23 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=_SESSION_ROW),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW),
-            patch("slumber.cli.study.update_run"),
+            patch(
+                "slumber.supabase.backend.get_active_session",
+                return_value=_SESSION_ROW,
+            ),
+            patch("slumber.supabase.backend.create_run", return_value=_RUN_ROW),
+            patch("slumber.supabase.backend.update_run"),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry") as mock_sentry,
         ):
-            _invoke(runner, study_dir)
+            _invoke_scheduled(runner, study_dir)
         mock_sentry.assert_called_once_with("s1")
 
     def test_run_completes_when_update_run_raises(
@@ -237,22 +276,26 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=_SESSION_ROW),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW),
             patch(
-                "slumber.cli.study.update_run",
+                "slumber.supabase.backend.get_active_session",
+                return_value=_SESSION_ROW,
+            ),
+            patch("slumber.supabase.backend.create_run", return_value=_RUN_ROW),
+            patch(
+                "slumber.supabase.backend.update_run",
                 side_effect=RuntimeError("network error"),
             ),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry"),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 0
         assert "Run complete" in result.output
 
@@ -263,23 +306,27 @@ class TestStudyRunCLI:
         mock_client = MagicMock()
         with (
             patch(
-                "slumber.cli.study.get_authenticated_client", return_value=mock_client
+                "slumber.supabase.auth.get_authenticated_client",
+                return_value=mock_client,
             ),
             patch(
-                "slumber.cli.study.get_participant_for_study",
+                "slumber.supabase.backend.get_participant_for_study",
                 return_value=_PARTICIPANT_ROW,
             ),
-            patch("slumber.cli.study.get_active_session", return_value=_SESSION_ROW),
-            patch("slumber.cli.study.create_run", return_value=_RUN_ROW),
             patch(
-                "slumber.cli.study.update_run",
+                "slumber.supabase.backend.get_active_session",
+                return_value=_SESSION_ROW,
+            ),
+            patch("slumber.supabase.backend.create_run", return_value=_RUN_ROW),
+            patch(
+                "slumber.supabase.backend.update_run",
                 side_effect=RuntimeError("network error"),
             ),
             patch("slumber.cli.study.utc_now", return_value=_NOW),
             patch("slumber.cli.study.init_sentry"),
             patch("slumber.cli.study.run_study", side_effect=RuntimeError("boom")),
         ):
-            result = _invoke(runner, study_dir)
+            result = _invoke_scheduled(runner, study_dir)
         assert result.exit_code == 1
         assert "boom" in result.output
 
@@ -287,6 +334,102 @@ class TestStudyRunCLI:
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
         result = runner.invoke(
-            app, ["study", "run", "--study-dir", str(tmp_path / "nonexistent")]
+            app,
+            [
+                "study",
+                "run",
+                "--study-dir",
+                str(tmp_path / "nonexistent"),
+                "--scheduled",
+            ],
+        )
+        assert result.exit_code == 1
+
+
+class TestStudyRunLocalCLI:
+    def test_local_run_succeeds_without_supabase_mocks(
+        self, runner: CliRunner, study_dir: Path
+    ) -> None:
+        result = _invoke_local(runner, study_dir)
+        assert result.exit_code == 0, result.output
+        assert "Run complete" in result.output
+        assert "run-" in result.output
+        assert re.search(
+            r"run-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+            result.output,
+            re.IGNORECASE,
+        )
+
+    def test_local_run_custom_participant_session_placeholder_in_path(
+        self,
+        runner: CliRunner,
+        study_dir: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Local CLI runs have no DB session"""
+        manifest = study_dir / "study.yaml"
+        data = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+        data.setdefault("runs", {})
+        data["runs"]["layout"] = "sub-{participant_id}/run-{run_id}"
+        manifest.write_text(
+            yaml.dump(data, sort_keys=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("PARTICIPANT_ID", "p1")
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "run",
+                "--study-dir",
+                str(study_dir),
+                "--condition",
+                "ctrl",
+            ],
+        )
+        assert result.exit_code == 0, result.output
+        assert "sub-p1" in result.output
+
+    def test_requires_condition_or_scheduled(
+        self, runner: CliRunner, study_dir: Path
+    ) -> None:
+        result = runner.invoke(
+            app,
+            ["study", "run", "--study-dir", str(study_dir)],
+        )
+        assert result.exit_code == 1
+        assert "--condition" in result.output or "scheduled" in result.output.lower()
+
+    def test_rejects_condition_with_scheduled(
+        self, runner: CliRunner, study_dir: Path
+    ) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "run",
+                "--study-dir",
+                str(study_dir),
+                "--scheduled",
+                "--condition",
+                "ctrl",
+            ],
+        )
+        assert result.exit_code == 1
+        assert "Do not pass --condition" in result.output
+
+    def test_exits_on_missing_study_dir(
+        self, runner: CliRunner, tmp_path: Path
+    ) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "run",
+                "--study-dir",
+                str(tmp_path / "nonexistent"),
+                "--condition",
+                "ctrl",
+            ],
         )
         assert result.exit_code == 1

@@ -10,6 +10,7 @@ from starlette.responses import FileResponse, Response
 from nicegui import app, ui
 
 from slumber.constants import PACKAGE_ROOT
+from slumber.ext.ui.nicegui.config import NiceGUIConfig
 from slumber.ext.ui.nicegui.pages.complete import render as render_complete_page
 from slumber.ext.ui.nicegui.pages.login import render as render_login_page
 from slumber.ext.ui.nicegui.pages.procedure import render as render_procedure_page
@@ -17,7 +18,8 @@ from slumber.ext.ui.nicegui.pages.sleep import render as render_sleep_page
 from slumber.ext.ui.nicegui.pages.welcome import render as render_welcome_page
 from slumber.ext.ui.nicegui.state import AppState
 from slumber.ext.ui.nicegui.theme import COLORS
-from slumber.auth.client import load_session
+from slumber.supabase.auth.client import load_session
+from slumber.supabase.utils import SUPABASE_INSTALL_HINT, is_supabase_extra_installed
 
 if TYPE_CHECKING:
     from slumber.runtime.run import RunContext
@@ -62,15 +64,28 @@ class NiceGUIBackend:
             context: Run context (IDs for study, participant, session, run).
             config: UI backend config from ``study.ui.config``.
         """
-        authenticated = _check_auth()
+        nicegui_cfg = NiceGUIConfig.model_validate(config)
+
+        authenticated = False
+        first_page = "welcome"
+        if nicegui_cfg.require_login:
+            if not is_supabase_extra_installed():
+                raise RuntimeError(
+                    "NiceGUI login requires the Supabase optional dependency. "
+                    f"{SUPABASE_INSTALL_HINT}"
+                )
+
+            authenticated = _check_auth()
+            first_page = "login" if not authenticated else "welcome"
+
         logo_url = _serve_logo(config)
         state = AppState(
             study=study,
             condition=condition,
             context=context,
-            config=config,
+            ui_config=nicegui_cfg,
             authenticated=authenticated,
-            current_page="welcome" if authenticated else "login",
+            current_page=first_page,
             logo_url=logo_url,
         )
 

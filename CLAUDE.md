@@ -9,8 +9,8 @@ SLUMBER (Sleep Logging and Unsupervised Monitoring through BioElectrical Recordi
 ## Commands
 
 ```bash
-# Install dependencies
-uv sync
+# Install dependencies (full test suite needs optional extras — same as CI)
+uv sync --all-extras --dev
 
 # Run the CLI
 uv run slumber --help
@@ -20,7 +20,7 @@ uv run ruff check .
 uv run ruff format .
 uv run ruff check --fix .
 
-# Tests
+# Tests (after `uv sync --all-extras --dev`; core-only install may miss imports)
 uv run pytest
 uv run pytest -v
 uv run pytest tests/test_smoke.py          # specific file
@@ -38,7 +38,7 @@ uv run mkdocs serve
 
 ### Layers
 
-**CLI** (`src/slumber/cli/`) — Typer app split into sub-modules: `auth`, `study`, `db`, `participant`, `session`. Entry point is `slumber:main`.
+**CLI** (`src/slumber/cli/`) — Typer app: `auth`, `study`, `condition`, `db`, `participant`, `session`, `doctor`. Commands that need Supabase call :func:`slumber.supabase.utils.exit_unless_supabase_extra_installed` before lazy imports. Entry point is `slumber:main`.
 
 **Schemas** (`src/slumber/schemas/`) — Pydantic v2 models that define the study contract:
 - `StudyManifest` — top-level `study.yaml` (metadata, dirs, UI config, run layout, logging)
@@ -50,11 +50,7 @@ uv run mkdocs serve
 
 **Plugin Registry** (`src/slumber/plugins/registry.py`) — Discovers plugins via Python entry points (`slumber.tasks`, `slumber.units`, `slumber.ui_backends`). Built-in plugins: `instruction` task, `headless` UI backend.
 
-**Backend** (`src/slumber/backend/`) — CRUD wrappers around Supabase Postgres for studies, participants, and sessions.
-
-**Auth** (`src/slumber/auth/`) — Supabase Auth client; persists session to `~/.config/slumber/session.json`.
-
-**DB Models** (`src/slumber/db/models.py`) — SQLModel ORM: `Study`, `Condition`, `Participant`, `Session`, `Run`. Migrations live in `migrations/versions/`.
+**Supabase stack** (`src/slumber/supabase/`, optional extra `slumber[supabase]`) — Auth client (`supabase/auth/`), REST/table helpers (`supabase/backend/`), SQLModel tables (`supabase/models.py`), shared helpers (`supabase/utils.py`, e.g. ``DATABASE_URL``). Migrations live in `migrations/versions/`.
 
 ### Plugin System
 

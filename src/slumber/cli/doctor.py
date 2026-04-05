@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 import typer
-from supabase import create_client
 
 from slumber.constants import (
     DATABASE_URL_ENV,
@@ -22,13 +21,17 @@ from slumber.constants import (
     SUPABASE_URL_ENV,
     USER_ID_ENV,
 )
+from slumber.supabase import is_supabase_extra_installed
 
 
 _ENV_CHECKS: list[tuple[str, str, bool]] = [
-    # --- Required ---
-    (SUPABASE_URL_ENV, "required for all Supabase operations", True),
-    (SUPABASE_ANON_KEY_ENV, "required for auth and API access", True),
-    # --- Optional: backend / admin ---
+    # --- Optional: Supabase ---
+    (SUPABASE_URL_ENV, "optional; required for all Supabase operations", False),
+    (
+        SUPABASE_ANON_KEY_ENV,
+        "optional; required for Supabase auth and API access",
+        False,
+    ),
     (DATABASE_URL_ENV, "optional; required for slumber db upgrade (migrations)", False),
     (
         SUPABASE_SERVICE_ROLE_KEY_ENV,
@@ -67,12 +70,14 @@ _ENV_CHECKS: list[tuple[str, str, bool]] = [
 
 _DEPS: list[tuple[str, bool]] = [
     ("ezmsg", True),
+    ("supabase", False),
     ("nicegui", False),
     ("sentry_sdk", False),
 ]
 
 _DEP_DESCRIPTIONS: dict[str, str] = {
     "ezmsg": "data acquisition backbone",
+    "supabase": "optional; cloud backend (pip install slumber[supabase] or uv sync --extra supabase)",
     "nicegui": "optional; participant UI (pip install slumber[nicegui] or uv sync --extra nicegui)",
     "sentry_sdk": "optional; enables Sentry run monitoring (pip install slumber[sentry] or uv sync --extra sentry)",
 }
@@ -133,6 +138,11 @@ def check_environment() -> list[CheckResult]:
     """
     results = []
     for var, description, required in _ENV_CHECKS:
+        if (
+            var in (SUPABASE_URL_ENV, SUPABASE_ANON_KEY_ENV)
+            and not is_supabase_extra_installed()
+        ):
+            required = False
         value = os.getenv(var, "").strip()
         if value:
             results.append(
@@ -164,11 +174,20 @@ def check_environment() -> list[CheckResult]:
 def check_supabase_connectivity() -> CheckResult:
     """Try to reach the Supabase project and execute a lightweight query.
 
-    Skipped when SUPABASE_URL or SUPABASE_ANON_KEY are not set.
+    Skipped when the ``supabase`` extra is not installed or when
+    SUPABASE_URL / SUPABASE_ANON_KEY are not set.
 
     Returns:
         CheckResult for the connectivity check.
     """
+    if not is_supabase_extra_installed():
+        return CheckResult(
+            name="connectivity",
+            status=CheckStatus.SKIP,
+            message="skipped (install slumber[supabase] for Supabase client)",
+            required=False,
+        )
+
     url = os.getenv(SUPABASE_URL_ENV, "").strip()
     key = os.getenv(SUPABASE_ANON_KEY_ENV, "").strip()
 
@@ -181,6 +200,8 @@ def check_supabase_connectivity() -> CheckResult:
         )
 
     try:
+        from supabase import create_client
+
         client = create_client(url, key)
         client.auth.get_user()
         return CheckResult(name="connectivity", status=CheckStatus.OK, message="ok")
@@ -202,8 +223,15 @@ def check_dependencies() -> list[CheckResult]:
     results = []
     for package, required in _DEPS:
         description = _DEP_DESCRIPTIONS[package]
-        try:
-            importlib.import_module(package)
+        if package == "supabase":
+            installed = is_supabase_extra_installed()
+        else:
+            try:
+                importlib.import_module(package)
+                installed = True
+            except ImportError:
+                installed = False
+        if installed:
             results.append(
                 CheckResult(
                     name=package,
@@ -212,7 +240,7 @@ def check_dependencies() -> list[CheckResult]:
                     required=required,
                 )
             )
-        except ImportError:
+        else:
             results.append(
                 CheckResult(
                     name=package,

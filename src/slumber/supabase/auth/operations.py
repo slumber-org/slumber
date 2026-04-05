@@ -7,7 +7,7 @@ the authenticated user.
 
 from __future__ import annotations
 
-from slumber.auth.client import (
+from slumber.supabase.auth.client import (
     get_authenticated_client,
     get_client,
     load_session,

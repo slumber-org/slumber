@@ -5,8 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from uuid import uuid4
 
-
-from slumber.db.models import (
+from slumber.supabase.models import (
     Condition,
     Participant,
     Run,

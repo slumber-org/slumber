@@ -9,15 +9,11 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "alembic>=1.18.4",
     "python-dotenv>=1.0.0",
     "ezmsg>=3.7.3",
     "loguru>=0.7.3",
-    "psycopg2-binary>=2.9.11",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
-    "sqlmodel>=0.0.37",
-    "supabase>=2.10.0",
     "typer>=0.24.1",
 ]
 
@@ -32,6 +28,12 @@ headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
 nicegui = "slumber.ext.ui.nicegui:NiceGUIBackend"
 
 [project.optional-dependencies]
+supabase = [
+    "alembic>=1.18.4",
+    "psycopg2-binary>=2.9.11",
+    "sqlmodel>=0.0.37",
+    "supabase>=2.10.0",
+]
 sentry = [
     "sentry-sdk>=2.0.0",
 ]
@@ -64,6 +66,12 @@ test = [
 
 [tool.uv.dependency-groups]
 dev = {requires-python = ">=3.12"}
+
+[tool.pytest.ini_options]
+markers = [
+    "supabase: tests requiring slumber[supabase] (client, SQLModel, Alembic stack)",
+    "nicegui: tests requiring slumber[nicegui]",
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

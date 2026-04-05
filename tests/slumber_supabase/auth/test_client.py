@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from slumber.auth.client import (
+from slumber.supabase.auth.client import (
     SESSION_FILENAME,
     get_session_path,
     get_client,
@@ -17,7 +17,7 @@ from slumber.auth.client import (
     load_session,
     _save_session,
 )
-from slumber.auth.client import _PACKAGE_NAME
+from slumber.supabase.auth.client import _PACKAGE_NAME
 
 
 def test_get_session_path_default(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -126,7 +126,7 @@ def test_get_authenticated_client_raises_when_no_session(
     monkeypatch.setenv("SLUMBER_SESSION_FILE", str(tmp_path / "none.json"))
     monkeypatch.setenv("SUPABASE_URL", "https://x.supabase.co")
     monkeypatch.setenv("SUPABASE_ANON_KEY", "key")
-    from slumber.auth.client import get_authenticated_client
+    from slumber.supabase.auth.client import get_authenticated_client
 
     with pytest.raises(ValueError, match="Not logged in"):
         get_authenticated_client()

@@ -7,10 +7,9 @@ from pathlib import Path
 import typer
 from pydantic import ValidationError
 
-from slumber.auth import get_client
-from slumber.backend import sync_conditions
-from slumber.constants import STUDY_DIR_ENV
 from slumber.config import load_study
+from slumber.constants import STUDY_DIR_ENV
+from slumber.supabase.utils import exit_unless_supabase_extra_installed
 from slumber.utils.errors import format_validation_error
 
 condition_app = typer.Typer(
@@ -50,6 +49,10 @@ def condition_sync(
 
     Requires SUPABASE_SERVICE_ROLE_KEY in the environment.
     """
+    exit_unless_supabase_extra_installed()
+    from slumber.supabase.auth import get_client
+    from slumber.supabase.backend import sync_conditions
+
     try:
         study = load_study(study_dir)
     except ValidationError as e:
