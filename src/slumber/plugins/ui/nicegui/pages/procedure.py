@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
-from slumber.ext.ui.nicegui.renderers import get_renderer
-from slumber.ext.ui.nicegui.theme import (
+from slumber.plugins.ui.nicegui.layouts import centered_fullscreen_layout
+from slumber.plugins.ui.nicegui.renderers import get_renderer
+from slumber.plugins.ui.nicegui.theme import (
     ACCENT_LAVENDER,
     POSITIVE,
     PRIMARY,
@@ -18,7 +18,7 @@ from slumber.ext.ui.nicegui.theme import (
 )
 
 if TYPE_CHECKING:
-    from slumber.ext.ui.nicegui.state import AppState
+    from slumber.plugins.ui.nicegui.state import AppState
 
 
 def render(state: AppState, refresh: object) -> None:

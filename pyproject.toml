@@ -25,7 +25,7 @@ instruction = "slumber.plugins.tasks.instruction:InstructionTask"
 
 [project.entry-points."slumber.ui_backends"]
 headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
-nicegui = "slumber.ext.ui.nicegui:NiceGUIBackend"
+nicegui = "slumber.plugins.ui.nicegui:NiceGUIBackend"
 
 [project.optional-dependencies]
 supabase = [

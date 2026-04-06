@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from slumber.ext.ui.nicegui.renderers import (
+from slumber.plugins.ui.nicegui.renderers import (
     _RENDERERS,
     get_renderer,
     register_renderer,

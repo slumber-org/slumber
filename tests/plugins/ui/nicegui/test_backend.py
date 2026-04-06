@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from slumber.ext.ui.nicegui import NiceGUIBackend
 from slumber.plugins.types import UIBackend
+from slumber.plugins.ui.nicegui import NiceGUIBackend
 
 
 class TestNiceGUIBackend:

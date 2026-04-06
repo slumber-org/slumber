@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from slumber.ext.ui.nicegui.state import AppState
+from slumber.plugins.ui.nicegui.state import AppState
 from slumber.schemas.condition import Condition
 from slumber.schemas.dag import DAG, Component
 from slumber.schemas.procedure import Procedure, Step

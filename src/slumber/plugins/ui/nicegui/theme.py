@@ -30,7 +30,6 @@ Status:
 
 from __future__ import annotations
 
-
 INDIGO_LIGHT = "#7B7FC4"
 INDIGO = "#3D4A8A"
 INDIGO_DARK = "#2A2F52"

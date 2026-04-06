@@ -24,13 +24,13 @@ from pathlib import Path
 
 from nicegui import app, ui
 
-from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
-from slumber.ext.ui.nicegui.pages.complete import render as render_complete_page
-from slumber.ext.ui.nicegui.pages.procedure import render as render_procedure_page
-from slumber.ext.ui.nicegui.pages.sleep import render as render_sleep_page
-from slumber.ext.ui.nicegui.pages.welcome import render as render_welcome_page
-from slumber.ext.ui.nicegui.state import AppState
-from slumber.ext.ui.nicegui.theme import COLORS
+from slumber.plugins.ui.nicegui.layouts import centered_fullscreen_layout
+from slumber.plugins.ui.nicegui.pages.complete import render as render_complete_page
+from slumber.plugins.ui.nicegui.pages.procedure import render as render_procedure_page
+from slumber.plugins.ui.nicegui.pages.sleep import render as render_sleep_page
+from slumber.plugins.ui.nicegui.pages.welcome import render as render_welcome_page
+from slumber.plugins.ui.nicegui.state import AppState
+from slumber.plugins.ui.nicegui.theme import COLORS
 from slumber.schemas.condition import Condition
 from slumber.schemas.dag import DAG, Component
 from slumber.schemas.procedure import Procedure, Step
@@ -39,7 +39,7 @@ from slumber.schemas.study import Study
 
 def _demo_login_page(state: AppState, refresh: object) -> None:
     """Login page that accepts any credentials (demo only)."""
-    from slumber.ext.ui.nicegui.theme import (
+    from slumber.plugins.ui.nicegui.theme import (
         INDIGO_LIGHT,
         SURFACE_LIGHT,
         SURFACE_MID,

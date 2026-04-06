@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
-from slumber.ext.ui.nicegui.config import NiceGUIConfig
+from slumber.plugins.ui.nicegui.config import NiceGUIConfig
 from slumber.runtime.events import SessionState, get_triggered_procedures
 
 if TYPE_CHECKING:

@@ -5,8 +5,9 @@ from __future__ import annotations
 from collections.abc import Generator
 from contextlib import contextmanager
 
-from slumber.ext.ui.nicegui.renderers import render_powered_by
 from nicegui import ui
+
+from slumber.plugins.ui.nicegui.renderers import render_powered_by
 
 
 @contextmanager

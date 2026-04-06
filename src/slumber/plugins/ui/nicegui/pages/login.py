@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
-from slumber.ext.ui.nicegui.theme import (
+from slumber.plugins.ui.nicegui.layouts import centered_fullscreen_layout
+from slumber.plugins.ui.nicegui.theme import (
     SURFACE_LIGHT,
     SURFACE_MID,
     TEXT_SECONDARY,
@@ -16,7 +16,7 @@ from slumber.ext.ui.nicegui.theme import (
 from slumber.supabase.utils import SUPABASE_INSTALL_HINT, is_supabase_extra_installed
 
 if TYPE_CHECKING:
-    from slumber.ext.ui.nicegui.state import AppState
+    from slumber.plugins.ui.nicegui.state import AppState
 
 
 def render(state: AppState, refresh: object) -> None:
