@@ -33,14 +33,16 @@ DEFAULT_UI_BACKEND = "headless"
 class UI(BaseModel):
     """Selected UI backend and its configuration."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     backend: str = Field(
         default=DEFAULT_UI_BACKEND,
         min_length=1,
         description="UI backend plugin key (e.g. 'headless').",
     )
-    config: dict[str, Any] = Field(
+    settings: dict[str, Any] = Field(
         default_factory=dict,
-        description="UI backend-specific configuration.",
+        description="UI backend-specific settings.",
     )
 
 
@@ -154,3 +156,5 @@ class Study(BaseModel):
     def conditions(self) -> list["Condition"]:
         """Conditions loaded from the study directory (set by load_study())."""
         return self._conditions
+
+    # TODO: [feature] add logo and favicon fields to the study manifest\

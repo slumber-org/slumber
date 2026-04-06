@@ -27,7 +27,7 @@ def render(state: AppState, refresh: object) -> None:
         refresh: Callable to refresh the UI after state changes.
     """
     supabase_available = is_supabase_extra_installed()
-    cfg = state.ui_config.login
+    cfg = state.ui_settings.login
 
     with centered_fullscreen_layout(content_gap=None):
         if state.logo_url:

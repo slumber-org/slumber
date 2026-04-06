@@ -1,39 +1,28 @@
 # UI Backends
 
-UI backends implement the `UIBackend` protocol and control the full participant experience for a study condition.
+UI backends subclass **`UIBackend`** (`slumber.plugins.ui.base`) and control the full participant experience for a study condition.
 
-## UIBackend Protocol
+## `UIBackend`
 
-```python
-from typing import Any, Protocol, runtime_checkable
+- **`ui_settings_model`**: `ClassVar[type[BaseModel] | None]` — Pydantic model for `study.ui.settings`, or `None` if the backend accepts no settings.
+- **`configure(settings: dict) -> None`**: Validates and stores settings (implemented on the base class).
+- **`run(study, condition, context) -> None`**: Run the full UI lifecycle (implemented by each backend).
 
-@runtime_checkable
-class UIBackend(Protocol):
-    def run(
-        self,
-        study: Study,
-        condition: Condition,
-        context: RunContext,
-        config: dict[str, Any],
-    ) -> None:
-        """Run the full UI lifecycle for a condition."""
-        ...
-```
+The orchestrator calls `configure()` once per run with `study.ui.settings`, then `run()`.
 
-The orchestrator calls `run()` once per study run. The backend owns the full lifecycle: displaying pages, executing procedures, handling user interaction, and returning when the session is complete.
+### Arguments to `run`
 
-### Arguments
-
-- **`study`**: The loaded `Study` manifest (name, settings, UI config).
+- **`study`**: The loaded `Study` manifest.
 - **`condition`**: The `Condition` to run (procedures dict + DAG).
 - **`context`**: `RunContext` with IDs (study, participant, session, run, condition).
-- **`config`**: The `study.ui.config` dict from the manifest.
+
+Participant-facing settings live under **`study.ui.settings`** in `study.yaml` (see study schema).
 
 ## Built-in Backends
 
 ### `headless`
 
-Logs all procedures and steps without displaying a UI. Ignores triggers and guards — runs all procedures sequentially. Used for testing and CI.
+Logs all procedures and steps without displaying a UI. Ignores triggers and guards — runs all procedures sequentially. Used for testing and CI. Does not accept `ui.settings`.
 
 ### `nicegui`
 
@@ -102,12 +91,12 @@ Unregistered task types fall back to a placeholder renderer.
 
 ## Implementing a Custom Backend
 
-1. Create a class with a `run()` method matching the protocol.
-2. Register it as an entry point in `pyproject.toml`:
+1. Subclass **`UIBackend`** (`slumber.plugins.ui.base`), set `ui_settings_model` (or `None`), and implement `run()`.
+2. Register the **class** as an entry point in `pyproject.toml`:
 
 ```toml
 [project.entry-points."slumber.ui_backends"]
 my_backend = "my_package.backend:MyBackend"
 ```
 
-3. Set `ui.backend: my_backend` in `study.yaml`.
+3. Set `ui.backend: my_backend` in `study.yaml` (and optional `ui.settings` if your model defines fields).

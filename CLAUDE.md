@@ -59,7 +59,7 @@ Third-party packages register plugins via `pyproject.toml` entry points:
 [project.entry-points."slumber.tasks"]
 my_task = "my_package.tasks:MyTask"
 ```
-Task classes subclass `src/slumber/plugins/tasks/base.py`. UI backends implement the `UIBackend` protocol from `src/slumber/plugins/types.py`.
+Task classes subclass `src/slumber/plugins/tasks/base.py`. UI backends subclass `src/slumber/plugins/ui/base.py` (`UIBackend`).
 
 ### Study Folder Structure
 

@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING
 
 from loguru import logger
 
-from slumber.plugins import EntryPointGroup, get_registry
+from slumber.config.plugins import resolve_ui_backend_from_ui
+from slumber.plugins import get_registry
 from slumber.runtime.logging import configure_run_logging
 from slumber.runtime.run import create_run_dir, RunContext
 
@@ -94,8 +95,8 @@ def run_study(
             context.run_id,
         )
 
-        ui_backend = reg.get_plugin(EntryPointGroup.UI_BACKENDS, study.ui.backend)
-        ui_backend.run(study, condition, context, study.ui.config)  # type: ignore[union-attr]
+        ui_backend = resolve_ui_backend_from_ui(study.ui, reg)
+        ui_backend.run(study, condition, context)
 
         logger.info("Run completed  run_id={!r}  dir={}", context.run_id, run_dir)
     finally:

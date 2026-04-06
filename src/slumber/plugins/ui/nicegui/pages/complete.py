@@ -20,7 +20,7 @@ def render(state: AppState, refresh: object) -> None:
         state: App state.
         refresh: Callable to refresh the UI after state changes.
     """
-    cfg = state.ui_config.complete
+    cfg = state.ui_settings.complete
 
     with centered_fullscreen_layout():
         if state.logo_url:

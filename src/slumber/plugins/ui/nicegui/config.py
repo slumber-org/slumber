@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, FilePath
+from pydantic import BaseModel, Field
 
 
 class WelcomePageConfig(BaseModel):
@@ -69,12 +69,12 @@ class LoginPageConfig(BaseModel):
     submit_icon: str = Field(default="login")
 
 
-class NiceGUIConfig(BaseModel):
-    """Top-level config for the NiceGUI UI backend.
+class NiceGUISettings(BaseModel):
+    """Top-level settings for the NiceGUI UI backend."""
 
-    Populated from ``study.yaml`` under ``ui.config`` when the backend
-    is set to ``nicegui``.
-    """
+    port: int = Field(default=8080, ge=1, le=65535, description="Web server port.")
+    show: bool = Field(default=True, description="Open a browser window on start.")
+    dark: bool | None = Field(default=None, description="Force dark mode if set.")
 
     welcome: WelcomePageConfig = Field(default_factory=WelcomePageConfig)
     sleep: SleepPageConfig = Field(default_factory=SleepPageConfig)
@@ -84,12 +84,4 @@ class NiceGUIConfig(BaseModel):
     require_login: bool = Field(
         default=False,
         description="If True, require Supabase login.",
-    )
-    logo: FilePath | None = Field(
-        default=None,
-        description="Path to logo image for the study.",
-    )
-    favicon: FilePath | None = Field(
-        default=None,
-        description="Path to favicon image. Falls back to docs/assets/favicon.png.",
-    )
+    )  # TODO: [refactor] require authentication should be a study configuration

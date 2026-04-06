@@ -4,13 +4,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError
+
 from slumber.plugins import EntryPointGroup, PluginNotFoundError, get_registry
 from slumber.plugins.tasks import build_task_from_settings
+from slumber.plugins.ui import build_ui_backend_from_settings
 from slumber.plugins.units import build_unit_from_settings
 
 if TYPE_CHECKING:
+    import ezmsg.core as ez
+
     from slumber.plugins import PluginRegistry
+    from slumber.plugins.tasks.base import Task
+    from slumber.plugins.ui.base import UIBackend
     from slumber.schemas.condition import Condition
+    from slumber.schemas.dag import Component
+    from slumber.schemas.procedure import Step
     from slumber.schemas.study import Study, UI
 
 
@@ -28,8 +37,7 @@ def _validate_dag_components(
     errors: list[str] = []
     for comp in condition.dag.components:
         try:
-            unit_class = registry.get_plugin(EntryPointGroup.UNITS, comp.unit_type)
-            build_unit_from_settings(unit_class, comp.settings)
+            resolve_unit_from_component(comp, registry)
         except PluginNotFoundError as e:
             errors.append(
                 f"Condition {condition.name!r}, DAG component {comp.name!r} "
@@ -52,8 +60,7 @@ def _validate_procedure_steps(
     for proc_name, procedure in condition.procedures.items():
         for step in procedure.steps:
             try:
-                task_class = registry.get_plugin(EntryPointGroup.TASKS, step.task_type)
-                build_task_from_settings(task_class, step.settings)
+                resolve_task_from_step(step, registry)
             except PluginNotFoundError as e:
                 errors.append(
                     f"Condition {condition.name!r}, procedure {proc_name!r}, "
@@ -92,16 +99,41 @@ def _validate_condition_plugins(
     return errors
 
 
-def _validate_ui_backend(ui: "UI", registry: "PluginRegistry") -> list[str]:
-    """Validate the UI backend key against the registry."""
+def _validate_ui_backend(study: "Study", registry: "PluginRegistry") -> list[str]:
+    """Validate the UI backend and its settings against the registry."""
     errors: list[str] = []
     try:
-        registry.get_plugin(EntryPointGroup.UI_BACKENDS, ui.backend)
+        resolve_ui_backend_from_ui(study.ui, registry)
     except PluginNotFoundError as e:
         errors.append(
             f"UI backend {e.key!r}: plugin not found. Available: {e.available}."
         )
+    except (ValueError, ValidationError) as e:
+        errors.append(
+            f"UI backend {study.ui.backend!r} settings invalid: {_format_snippet(str(e))}."
+        )
     return errors
+
+
+def resolve_ui_backend_from_ui(ui: "UI", registry: "PluginRegistry") -> UIBackend:
+    """Load the UI backend class from the registry and build a configured instance."""
+    backend_class = registry.get_plugin(EntryPointGroup.UI_BACKENDS, ui.backend)
+    return build_ui_backend_from_settings(backend_class, ui.settings)
+
+
+def resolve_unit_from_component(
+    component: "Component",
+    registry: "PluginRegistry",
+) -> "ez.Unit":
+    """Load the unit class from the registry and build a configured instance."""
+    unit_class = registry.get_plugin(EntryPointGroup.UNITS, component.unit_type)
+    return build_unit_from_settings(unit_class, component.settings)
+
+
+def resolve_task_from_step(step: "Step", registry: "PluginRegistry") -> "Task":
+    """Load the task class from the registry and build a validated instance."""
+    task_class = registry.get_plugin(EntryPointGroup.TASKS, step.task_type)
+    return build_task_from_settings(task_class, step.settings)
 
 
 def validate_study_plugins(
@@ -122,7 +154,7 @@ def validate_study_plugins(
     """
     reg = registry if registry is not None else get_registry()
     all_errors: list[str] = []
-    all_errors.extend(_validate_ui_backend(study.ui, reg))
+    all_errors.extend(_validate_ui_backend(study, reg))
     for condition in study.conditions:
         all_errors.extend(_validate_condition_plugins(condition, reg))
     if all_errors:

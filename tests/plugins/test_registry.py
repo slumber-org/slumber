@@ -81,7 +81,14 @@ class TestPluginRegistry:
 
     def test_get_plugin_headless_ui_resolved(self) -> None:
         registry = get_registry()
-        backend = registry.get_plugin(EntryPointGroup.UI_BACKENDS, "headless")
+        backend_class_or_obj = registry.get_plugin(
+            EntryPointGroup.UI_BACKENDS, "headless"
+        )
+        backend = (
+            backend_class_or_obj()
+            if isinstance(backend_class_or_obj, type)
+            else backend_class_or_obj
+        )
         assert backend is not None
         assert hasattr(backend, "run")
 

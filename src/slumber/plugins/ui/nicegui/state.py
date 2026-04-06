@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
-from slumber.plugins.ui.nicegui.config import NiceGUIConfig
+from slumber.plugins.ui.nicegui.config import NiceGUISettings
 from slumber.runtime.events import SessionState, get_triggered_procedures
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ class AppState:
     study: Study
     condition: Condition
     context: RunContext
-    ui_config: NiceGUIConfig = field(default_factory=NiceGUIConfig)
+    ui_settings: NiceGUISettings = field(default_factory=NiceGUISettings)
 
     authenticated: bool = False
     current_page: str = "welcome"
