@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 from loguru import logger
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.config import SleepPageConfig
-from slumber.ext.ui.nicegui.layouts import centered_fullscreen_layout
-from slumber.ext.ui.nicegui.theme import (
+from slumber.plugins.ui.nicegui.config import SleepPageConfig
+from slumber.plugins.ui.nicegui.layouts import centered_fullscreen_layout
+from slumber.plugins.ui.nicegui.theme import (
     AWAKE_AMBER,
     NEGATIVE,
     SLEEP_INDIGO,
@@ -19,7 +19,7 @@ from slumber.ext.ui.nicegui.theme import (
 )
 
 if TYPE_CHECKING:
-    from slumber.ext.ui.nicegui.state import AppState
+    from slumber.plugins.ui.nicegui.state import AppState
 
 
 def render(state: AppState, refresh: object) -> None:

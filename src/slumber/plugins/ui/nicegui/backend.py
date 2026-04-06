@@ -6,18 +6,18 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
-from starlette.responses import FileResponse, Response
 from nicegui import app, ui
+from starlette.responses import FileResponse, Response
 
 from slumber.constants import PACKAGE_ROOT
-from slumber.ext.ui.nicegui.config import NiceGUIConfig
-from slumber.ext.ui.nicegui.pages.complete import render as render_complete_page
-from slumber.ext.ui.nicegui.pages.login import render as render_login_page
-from slumber.ext.ui.nicegui.pages.procedure import render as render_procedure_page
-from slumber.ext.ui.nicegui.pages.sleep import render as render_sleep_page
-from slumber.ext.ui.nicegui.pages.welcome import render as render_welcome_page
-from slumber.ext.ui.nicegui.state import AppState
-from slumber.ext.ui.nicegui.theme import COLORS
+from slumber.plugins.ui.nicegui.config import NiceGUIConfig
+from slumber.plugins.ui.nicegui.pages.complete import render as render_complete_page
+from slumber.plugins.ui.nicegui.pages.login import render as render_login_page
+from slumber.plugins.ui.nicegui.pages.procedure import render as render_procedure_page
+from slumber.plugins.ui.nicegui.pages.sleep import render as render_sleep_page
+from slumber.plugins.ui.nicegui.pages.welcome import render as render_welcome_page
+from slumber.plugins.ui.nicegui.state import AppState
+from slumber.plugins.ui.nicegui.theme import COLORS
 from slumber.supabase.auth.client import load_session
 from slumber.supabase.utils import SUPABASE_INSTALL_HINT, is_supabase_extra_installed
 

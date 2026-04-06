@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from nicegui import ui
 
-from slumber.ext.ui.nicegui.theme import (
+from slumber.plugins.ui.nicegui.theme import (
     INDIGO_LIGHT,
     SURFACE_LIGHT,
     SURFACE_MID,

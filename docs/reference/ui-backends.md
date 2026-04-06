@@ -88,7 +88,7 @@ triggered = get_triggered_procedures("wake_up", condition.procedures, state)
 The NiceGUI backend uses a renderer dispatch to map `task_type` to render functions:
 
 ```python
-from slumber.ext.ui.nicegui.renderers import register_renderer, get_renderer
+from slumber.plugins.ui.nicegui.renderers import register_renderer, get_renderer
 
 def render_my_task(step, container):
     from nicegui import ui
