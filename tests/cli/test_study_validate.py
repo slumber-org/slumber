@@ -47,7 +47,7 @@ def _mock_registry_for_validate_success() -> MagicMock:
             raise LookupError(f"Unknown task type: {key!r}")
         if group == EntryPointGroup.UI_BACKENDS:
             if key == "headless":
-                return HeadlessUIBackend()
+                return HeadlessUIBackend
             raise LookupError(f"Unknown UI backend: {key!r}")
         raise LookupError(f"Unknown group: {group!r}")
 

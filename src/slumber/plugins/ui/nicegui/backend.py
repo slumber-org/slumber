@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, ClassVar
 
 from loguru import logger
 from nicegui import app, ui
 from starlette.responses import FileResponse, Response
 
 from slumber.constants import PACKAGE_ROOT
-from slumber.plugins.ui.nicegui.config import NiceGUIConfig
+from slumber.plugins.ui.base import UIBackend
+from slumber.plugins.ui.nicegui.config import NiceGUISettings
 from slumber.plugins.ui.nicegui.pages.complete import render as render_complete_page
 from slumber.plugins.ui.nicegui.pages.login import render as render_login_page
 from slumber.plugins.ui.nicegui.pages.procedure import render as render_procedure_page
@@ -22,6 +23,8 @@ from slumber.supabase.auth.client import load_session
 from slumber.supabase.utils import SUPABASE_INSTALL_HINT, is_supabase_extra_installed
 
 if TYPE_CHECKING:
+    from pydantic import BaseModel
+
     from slumber.runtime.run import RunContext
     from slumber.schemas.condition import Condition
     from slumber.schemas.study import Study
@@ -38,7 +41,7 @@ LOGO_PATH = PACKAGE_ROOT / "docs/assets/logo.png"
 FAVICON_PATH = PACKAGE_ROOT / "docs/assets/favicon.png"
 
 
-class NiceGUIBackend:
+class NiceGUIBackend(UIBackend):
     """Web-based participant UI backend using NiceGUI.
 
     Provides login, welcome, procedure execution, sleep monitoring,
@@ -46,12 +49,13 @@ class NiceGUIBackend:
     events with optional guards.
     """
 
+    ui_settings_model: ClassVar[type["BaseModel"] | None] = NiceGUISettings
+
     def run(
         self,
         study: Study,
         condition: Condition,
         context: RunContext,
-        config: dict[str, Any],
     ) -> None:
         """Run the full participant UI lifecycle.
 
@@ -62,9 +66,9 @@ class NiceGUIBackend:
             study: Loaded study manifest.
             condition: The condition to run.
             context: Run context (IDs for study, participant, session, run).
-            config: UI backend config from ``study.ui.config``.
         """
-        nicegui_cfg = NiceGUIConfig.model_validate(config)
+        assert isinstance(self._settings, NiceGUISettings)
+        nicegui_cfg = self._settings
 
         authenticated = False
         first_page = "welcome"
@@ -78,12 +82,12 @@ class NiceGUIBackend:
             authenticated = _check_auth()
             first_page = "login" if not authenticated else "welcome"
 
-        logo_url = _serve_logo(config)
+        logo_url = _serve_logo()
         state = AppState(
             study=study,
             condition=condition,
             context=context,
-            ui_config=nicegui_cfg,
+            ui_settings=nicegui_cfg,
             authenticated=authenticated,
             current_page=first_page,
             logo_url=logo_url,
@@ -113,32 +117,30 @@ class NiceGUIBackend:
 
             page_content()
 
-        favicon = _find_favicon_path(config)
+        favicon = _default_favicon_path()
         ui.run(
             title=study.name,
             favicon=favicon,
-            dark=config.get("dark", None),
-            port=config.get("port", 8080),
+            dark=nicegui_cfg.dark,
+            port=nicegui_cfg.port,
             reload=False,
-            show=config.get("show", True),
+            show=nicegui_cfg.show,
         )
 
 
-def _find_logo_path(config: dict[str, Any]) -> Path | None:
-    """Resolve the logo file path from config or default location."""
-    logo_path = config.get("logo", LOGO_PATH)
-    return logo_path if logo_path and logo_path.is_file() else None
+def _default_logo_path() -> Path | None:
+    """Package logo used for the NiceGUI UI (not study-configurable)."""
+    return LOGO_PATH if LOGO_PATH.is_file() else None
 
 
-def _find_favicon_path(config: dict[str, Any]) -> Path | None:
-    """Resolve the favicon file path from config or default location."""
-    favicon_path = config.get("favicon", FAVICON_PATH)
-    return favicon_path if favicon_path and favicon_path.is_file() else None
+def _default_favicon_path() -> Path | None:
+    """Package favicon used for the NiceGUI UI (not study-configurable)."""
+    return FAVICON_PATH if FAVICON_PATH.is_file() else None
 
 
-def _serve_logo(config: dict[str, Any]) -> str | None:
-    """Serve the logo file and return its URL, or None if not found."""
-    path = _find_logo_path(config)
+def _serve_logo() -> str | None:
+    """Serve the SLUMBER package logo and return its URL, or None if not found."""
+    path = _default_logo_path()
     if path is None:
         return None
 

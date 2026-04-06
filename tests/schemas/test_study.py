@@ -12,12 +12,12 @@ class TestUI:
     def test_valid_minimal(self) -> None:
         ui = UI(backend="headless")
         assert ui.backend == "headless"
-        assert ui.config == {}
+        assert ui.settings == {}
 
     def test_valid_with_config(self) -> None:
-        ui = UI(backend="headless", config={"theme": "dark"})
+        ui = UI(backend="headless", settings={"theme": "dark"})
         assert ui.backend == "headless"
-        assert ui.config["theme"] == "dark"
+        assert ui.settings["theme"] == "dark"
 
     def test_backend_required(self) -> None:
         with pytest.raises(ValidationError) as exc_info:
@@ -98,10 +98,10 @@ class TestStudy:
             study_id="ld-2025",
             name="Lucid Dreaming Pilot",
             conditions_dir="conditions",
-            ui=UI(backend="headless", config={"theme": "dark"}),
+            ui=UI(backend="headless", settings={"theme": "dark"}),
         )
         assert study.conditions_dir == "conditions"
-        assert study.ui.config["theme"] == "dark"
+        assert study.ui.settings["theme"] == "dark"
 
     def test_study_id_required(self) -> None:
         with pytest.raises(ValidationError):

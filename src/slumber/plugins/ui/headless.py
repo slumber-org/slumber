@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, ClassVar
 
 from loguru import logger
+from pydantic import BaseModel
+
+from slumber.plugins.ui.base import UIBackend
 
 if TYPE_CHECKING:
     from slumber.runtime.run import RunContext
@@ -12,7 +15,7 @@ if TYPE_CHECKING:
     from slumber.schemas.study import Study
 
 
-class HeadlessUIBackend:
+class HeadlessUIBackend(UIBackend):
     """UI backend that does not display a window; logs procedures and tasks.
 
     Entry-point key: ``headless``. Ignores triggers and guards — runs all
@@ -20,12 +23,13 @@ class HeadlessUIBackend:
     (e.g. validate, automated runs, CI).
     """
 
+    ui_settings_model: ClassVar[type[BaseModel] | None] = None
+
     def run(
         self,
         study: "Study",
         condition: "Condition",
         context: "RunContext",
-        config: dict[str, Any],
     ) -> None:
         """Log all procedures and their steps; no user interaction."""
         logger.info(

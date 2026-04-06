@@ -1,4 +1,4 @@
-"""Plugin system: registry, types, and built-in units/tasks/UI backends."""
+"""Plugin system: registry and built-in units/tasks/UI backends."""
 
 from slumber.plugins.errors import PluginNotFoundError
 from slumber.plugins.registry import (
@@ -6,7 +6,7 @@ from slumber.plugins.registry import (
     PluginRegistry,
     get_registry,
 )
-from slumber.plugins.types import UIBackend
+from slumber.plugins.ui.base import UIBackend
 from slumber.plugins.units import build_unit_from_settings
 
 __all__ = [

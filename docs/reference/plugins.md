@@ -10,7 +10,7 @@ The framework discovers **units**, **tasks**, and **UI backends** via Python ent
 | `slumber.tasks` | Create and validate procedure tasks | Procedure runtime |
 | `slumber.ui_backends` | UI backends (run procedures without/with GUI) | Study run |
 
-Register your plugin in `pyproject.toml`. For `slumber.units`, register the **Unit class** (ez.Unit subclass); the registry stores the class; use `build_unit_from_settings(unit_class, settings)` to build instances. For `slumber.tasks`, register a **Task subclass** (the class is stored; use `build_task_from_settings` to build instances from step settings). For `slumber.ui_backends`, the entry point may be a class; the registry will instantiate it (no arguments).
+Register your plugin in `pyproject.toml`. For `slumber.units`, register the **Unit class** (ez.Unit subclass); the registry stores the class; use `build_unit_from_settings(unit_class, settings)` to build instances. For `slumber.tasks`, register a **Task subclass** (the class is stored; use `build_task_from_settings` to build instances from step settings). For `slumber.ui_backends`, register a **`UIBackend` subclass** (the class is stored; the orchestrator instantiates it per run, calls `configure(study.ui.settings)`, then `run`).
 
 ```toml
 [project.entry-points."slumber.tasks"]
@@ -85,9 +85,8 @@ You can use plain `ez.Settings` (e.g. dataclass-style) if you don’t need valid
 
 ### UI backend (`slumber.ui_backends`)
 
-- **Resolved as:** An object implementing the **UIBackend** protocol:
-  - `run(study, condition, context, config) -> None` — run the full UI lifecycle for a condition. The backend owns procedure dispatch, page navigation, and event handling.
-- **Usage:** `slumber study run` loads the backend from `study.ui.backend` and calls `run` with the `Study`, selected `Condition`, `RunContext`, and UI config dict. The backend is responsible for iterating procedures (e.g. headless runs them sequentially; NiceGUI dispatches them via session events).
+- **Resolved as:** A **class** subclassing **`UIBackend`** (`slumber.plugins.ui.base`). The registry stores the class. Each run constructs an instance, calls `configure(study.ui.settings)`, then `run(study, condition, context)`. Declare optional `ui_settings_model` (Pydantic model) or `None` if `ui.settings` must be empty.
+- **Usage:** The orchestrator resolves the backend class, builds an instance, validates UI settings, and runs the full participant UI lifecycle (procedure iteration, pages, events).
 
 ## Built-in plugins
 

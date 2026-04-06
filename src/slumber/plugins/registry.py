@@ -16,7 +16,7 @@ except ImportError:
 from loguru import logger
 
 from slumber.plugins.errors import PluginNotFoundError
-from slumber.plugins.types import UIBackend
+from slumber.plugins.ui.base import UIBackend
 
 import ezmsg.core as ez
 
@@ -43,26 +43,19 @@ def _resolve_plugin_for_group(
 
     Units and tasks must be the expected class type; otherwise we warn and skip.
     """
-    if group in [EntryPointGroup.UNITS, EntryPointGroup.TASKS]:
-        if isinstance(loaded_object, type) and issubclass(
-            loaded_object, _ENTRY_POINT_GROUP_TO_CLASS[group]
-        ):
-            return loaded_object
+    if isinstance(loaded_object, type) and issubclass(
+        loaded_object, _ENTRY_POINT_GROUP_TO_CLASS[group]
+    ):
+        return loaded_object
 
-        logger.warning(
-            "Skipping {}[{}]: expected {!r} subclass, got {!r}.",
-            group.value,
-            name,
-            _ENTRY_POINT_GROUP_TO_CLASS[group].__name__,
-            type(loaded_object).__name__,
-        )
-        return None
-
-    # UI backends: store instance if it's a class, else store as-is
-    if isinstance(loaded_object, type):
-        return loaded_object()
-
-    return loaded_object
+    logger.warning(
+        "Skipping {}[{}]: expected {!r} subclass, got {!r}.",
+        group.value,
+        name,
+        _ENTRY_POINT_GROUP_TO_CLASS[group].__name__,
+        type(loaded_object).__name__,
+    )
+    return None
 
 
 def _load_entry_points(group: EntryPointGroup) -> dict[str, Any]:
@@ -70,7 +63,7 @@ def _load_entry_points(group: EntryPointGroup) -> dict[str, Any]:
 
     For slumber.units: only ez.Unit subclasses are stored (the class).
     For slumber.tasks: only Task subclasses are stored (the class).
-    For slumber.ui_backends: classes are instantiated; other objects stored as-is.
+    For slumber.ui_backends: only UIBackend subclasses are stored (the class).
     Invalid units/tasks are skipped with a warning.
     """
     result: dict[str, Any] = {}
@@ -103,7 +96,8 @@ class PluginRegistry:
 
     def __init__(self) -> None:
         self._plugins: dict[
-            EntryPointGroup, dict[str, type[Task] | type[ez.Unit] | UIBackend]
+            EntryPointGroup,
+            dict[str, type[Task] | type[ez.Unit] | type[UIBackend]],
         ] = defaultdict(dict)
         self._load_all()
 
@@ -114,7 +108,7 @@ class PluginRegistry:
 
     def get_plugin(
         self, group: EntryPointGroup, key: str
-    ) -> type[Task] | type[ez.Unit] | UIBackend:
+    ) -> type[Task] | type[ez.Unit] | type[UIBackend]:
         """Return the plugin for the given group and key.
 
         Args:

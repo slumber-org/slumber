@@ -28,7 +28,7 @@ def render(state: AppState, refresh: object) -> None:
         state: App state (must have active_procedures set).
         refresh: Callable to refresh the UI after state changes.
     """
-    cfg = state.ui_config.procedure
+    cfg = state.ui_settings.procedure
     procedure = state.current_procedure
     proc_title = state.current_procedure_title
     step = state.current_step
