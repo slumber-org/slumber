@@ -1,0 +1,43 @@
+[project]
+name = "slumber-zmax"
+version = "0.1.0"
+description = "SLUMBER extension for ZMax headband"
+readme = "README.md"
+authors = [
+  { name = "Ali Saberi", email = "ali.saberi96@gmail.com" },
+]
+requires-python = ">=3.10"
+dependencies = [
+  "slumber",
+  "somnio",
+]
+
+[project.entry-points."slumber.units"]
+zmax = "slumber_zmax.unit:ZMax"
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    {include-group = "lint"},
+    {include-group = "test"},
+    "pre-commit>=4.5.0",
+]
+lint = [
+    "ruff>=0.14.6",
+]
+test = [
+    "pytest>=9.0.2",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+extend-select = ["TD001", "TD007"]
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = "dynamic"

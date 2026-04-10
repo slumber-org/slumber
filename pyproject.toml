@@ -15,6 +15,7 @@ dependencies = [
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
     "typer>=0.24.1",
+    "slumber-zmax",
 ]
 
 [project.scripts]
@@ -64,8 +65,16 @@ test = [
     "pytest>=9.0.2",
 ]
 
+[tool.uv.workspace]
+members = ["extensions/*"]
+
 [tool.uv.dependency-groups]
 dev = {requires-python = ">=3.12"}
+
+[tool.uv.sources]
+slumber = { workspace = true }
+slumber-zmax = { workspace = true }
+somnio = { path = "../../somnio", editable = true }
 
 [tool.pytest.ini_options]
 markers = [
@@ -77,10 +86,6 @@ markers = [
 convention = "google"
 
 [tool.ruff.lint]
-# Enforce a consistent TODO convention:
-# - Use TODO (not FIXME/XXX)
-# - Keep formatting consistent after `TODO:` / `TODO(name):`
-# Note: We intentionally do NOT require authors (TD002) or issue links (TD003).
 extend-select = ["TD001", "TD007"]
 
 [tool.ruff.format]
