@@ -88,38 +88,74 @@ Required in `.env` (see `.env.example`):
 
 ## Python Style
 
+### Structure & Boundaries
+
+- Keep **modules, classes, and functions small** and single-purpose; split when responsibilities diverge.
+- Prefer a **clear module hierarchy** under `src/slumber/` (domain-first), not "mega" modules.
+- Avoid deep import spaghetti; introduce intermediate modules or interfaces when needed.
+- Keep I/O at the edges; keep core logic pure/testable when practical.
+- Prefer explicit errors and validated inputs over silent fallbacks.
+
+### Naming
+
+- Use **complete, meaningful names**; avoid unclear abbreviations.
+- **Constants**: `UPPER_SNAKE_CASE`
+- **Module-private**: leading underscore (e.g. `_parse_header`)
+- **Instance-private**: `self._field` (do not expose implicitly)
+- Prefer verbs for functions (`load_records`) and nouns for types (`RecordLoader`).
+
+### APIs, Typing, and Docstrings
+
+- Use **type hints** for public functions/classes and non-trivial internals.
+- Use **Google-style docstrings** (enforced by ruff pydocstyle `convention = "google"`).
+- Docstrings should explain **intent/contract** (Args/Returns/Raises), not restate obvious code.
+
+### Comments & TODOs
+
+- Write **only necessary comments** (non-obvious rationale, trade-offs, constraints).
+- Use `TODO:` for follow-ups; do not use `FIXME`/`XXX`.
+
+### Logging
+
 - Use **loguru** for all logging (`from loguru import logger`). Never use stdlib `logging` in new code.
 - CLI commands expose a `-v`/`--verbose` flag for increased verbosity.
-- Type hints required for all public functions/classes; use **Google-style docstrings** (enforced by ruff pydocstyle).
-- Use `TODO:` for follow-ups; do not use `FIXME`/`XXX`.
-- Keep modules small and single-purpose; domain-first module hierarchy under `src/slumber/`.
-- Cross-cutting helpers go in `src/slumber/utils/`; subsystem-specific helpers co-locate in that subsystem.
+- **Run** (study run / participant app): configure logging from study settings via `runs.logging` — a **handlers** list of dicts, each passed as kwargs to loguru `logger.add()` (sink, level, format, rotation, retention, compression, etc.); support placeholders in sink paths (e.g. `run_id`).
+
+### Utilities Placement
+
+- Cross-cutting helpers go in `src/slumber/utils/` (used broadly across the codebase).
+- If a helper is only used within a specific subsystem, **co-locate** it there (e.g. `src/slumber/<submodule>/utils.py`).
+- Avoid "misc" util dumping; utilities should have a clear, stable purpose.
+
+### Test Layout & DRY
+
 - **Test layout mirrors the package**: `tests/config/` → `slumber.config`, `tests/cli/` → `slumber.cli`, etc. Only use top-level `tests/` for cross-cutting smoke/integration tests.
+- Do not duplicate logic; **extract shared code** into reusable helpers/modules when it improves clarity.
+- In tests, avoid copy/paste setup: prefer **shared fixtures** (`tests/conftest.py`) and parametrization.
+- Keep fixtures focused and composable; don't build overly generic "god fixtures".
 
 ## Legacy Reference
 
-The original SLUMBER codebase (a specific lucid dreaming study) lives at:
+This repository (`slumber-org/slumber`) is the **new canonical framework**. The original SLUMBER codebase was built for a specific LD (lucid dreaming) induction study and contains a mature end-to-end implementation (devices, `ezmsg` DAG wiring, and a participant-facing GUI). We keep it as a **reference and migration source**, but **do not treat it as the framework baseline**.
+
 - Remote: `https://github.com/alitsaberi/slumber`
 - Local: `/Users/alisaberi/Desktop/Projects/slumber`
+- Notable legacy characteristics: Qt/PySide6 UI, YAML configs coupling GUI procedures + DAG components, `ezmsg` processing backbone.
 
-**Before implementing or refactoring any feature**, check the legacy repo for existing implementations. Key legacy locations:
+### CRITICAL: Before refactoring or implementing any feature
+
+1. **Check the legacy codebase** at `/Users/alisaberi/Desktop/Projects/slumber` for existing implementations.
+2. **Search for related functionality** to understand what features exist, how they're implemented, what edge cases matter, and what patterns should be preserved.
+3. **Compare implementations** to ensure feature parity and that important aspects aren't lost.
+4. **Reference legacy code** when defining APIs, schemas, or interfaces to ensure compatibility.
+
+Key legacy locations:
 - DAG schema: `slumber/models/dag.py`
 - Procedure/Task schema: `slumber/models/gui.py`
 - Condition load/sync: `slumber/models/condition.py`, `slumber/scripts/update_conditions.py`
 
-What to port into **core**: config schemas, plugin interfaces, logging/audit, orchestration primitives.
-What to port as **extensions** (`slumber.ext.*`): device integrations (ZMax, Polar), processing pipelines, participant UI (NiceGUI preferred over legacy Qt).
+### What should (and should not) be ported
 
-## Roadmap (Stage 1 — current)
-
-Currently on **Stage 1** (core contract). The implementation plan lives in `.cursor/plans/stage_1_implementation_plan_01557d31.plan.md`.
-
-Completed tasks (Tasks 1–6): schemas, study init, config load/validate, plugin registry, Supabase DB schema, Supabase Auth + participant/session CRUD.
-
-Pending tasks:
-- **Task 7**: `slumber condition sync` — upsert conditions from `conditions/` into Supabase
-- **Task 8**: CLI skeleton refinement, `slumber doctor`, loguru verbose flag
-- **Task 9**: Run directory layout + run logging from `study.logging`
-- **Task 10**: `slumber study run` (minimal, headless), optional Sentry init
-
-Future stages: Stage 2 (NiceGUI shell), Stage 3 (ZMax, HDF5, survey widgets, packaging), Stage 4 (docs), Stage 5 (coverage gates + CI).
+- **Port into core** (only if broadly useful): config schemas, plugin interfaces, logging/audit, orchestration primitives.
+- **Port as extensions** (`slumber.ext.*`): device integrations (ZMax, Polar), processing pipelines, participant UI (NiceGUI preferred over legacy Qt).
+- **Keep legacy-only**: study-specific copy, instructions, surveys, and tuning parameters that are not generally applicable.
