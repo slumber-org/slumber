@@ -76,6 +76,7 @@ dev = {requires-python = ">=3.12"}
 [tool.uv.sources]
 slumber = { workspace = true }
 slumber-zmax = { workspace = true }
+slumber-audio = { workspace = true }
 # TODO: Switch somnio back to PyPI (remove git source override).
 somnio = { git = "https://github.com/alitsaberi/somnio.git" }
 
