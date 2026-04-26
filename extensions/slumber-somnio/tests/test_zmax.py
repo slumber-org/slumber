@@ -1,12 +1,12 @@
 import ezmsg.core as ez
 import pytest
 
-pytest.importorskip("slumber-zmax")
+pytest.importorskip("slumber_somnio")
 
 from somnio.devices.zmax import DataType as ZMaxDataType
 from somnio.devices.zmax.enums import LEDColor
 
-from slumber_zmax.unit import ZMaxUnit, ZMaxStimulationSignal, ZMaxUnitSettings
+from slumber_somnio.units.zmax import ZMaxUnit, ZMaxStimulationSignal, ZMaxUnitSettings
 
 
 def test_settings_coerces_data_types_from_strings() -> None:

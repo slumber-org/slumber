@@ -244,8 +244,8 @@ def test_list_sessions_with_study_id_filters_by_participant_ids() -> None:
     sess_chain.in_.return_value.execute.return_value = sess_response
     sess_table = MagicMock()
     sess_table.select.return_value = sess_chain
-    mock_client.table.side_effect = (
-        lambda name: part_table if name == "participant" else sess_table
+    mock_client.table.side_effect = lambda name: (
+        part_table if name == "participant" else sess_table
     )
 
     result = list_sessions(mock_client, study_id="s1")

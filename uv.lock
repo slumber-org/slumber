@@ -11,7 +11,7 @@ resolution-markers = [
 members = [
     "slumber",
     "slumber-audio",
-    "slumber-zmax",
+    "slumber-somnio",
 ]
 
 [[package]]
@@ -2778,14 +2778,14 @@ nicegui = [
 sentry = [
     { name = "sentry-sdk" },
 ]
+somnio = [
+    { name = "slumber-somnio" },
+]
 supabase = [
     { name = "alembic" },
     { name = "psycopg2-binary" },
     { name = "sqlmodel" },
     { name = "supabase" },
-]
-zmax = [
-    { name = "slumber-zmax" },
 ]
 
 [package.dev-dependencies]
@@ -2820,12 +2820,12 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "sentry-sdk", marker = "extra == 'sentry'", specifier = ">=2.0.0" },
-    { name = "slumber-zmax", marker = "extra == 'zmax'", editable = "extensions/slumber-zmax" },
+    { name = "slumber-somnio", marker = "extra == 'somnio'", editable = "extensions/slumber-somnio" },
     { name = "sqlmodel", marker = "extra == 'supabase'", specifier = ">=0.0.37" },
     { name = "supabase", marker = "extra == 'supabase'", specifier = ">=2.10.0" },
     { name = "typer", specifier = ">=0.24.1" },
 ]
-provides-extras = ["zmax", "supabase", "sentry", "nicegui"]
+provides-extras = ["somnio", "supabase", "sentry", "nicegui"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -2884,9 +2884,9 @@ lint = [{ name = "ruff", specifier = ">=0.14.6" }]
 test = [{ name = "pytest", specifier = ">=9.0.2" }]
 
 [[package]]
-name = "slumber-zmax"
+name = "slumber-somnio"
 version = "0.1.0"
-source = { editable = "extensions/slumber-zmax" }
+source = { editable = "extensions/slumber-somnio" }
 dependencies = [
     { name = "slumber" },
     { name = "somnio" },
@@ -2923,7 +2923,7 @@ test = [{ name = "pytest", specifier = ">=9.0.2" }]
 [[package]]
 name = "somnio"
 version = "0.1.0"
-source = { git = "https://github.com/alitsaberi/somnio.git#9b01afa48a5216bbd03dedba01e9c5b9421ad97c" }
+source = { git = "https://github.com/alitsaberi/somnio.git#0960eb5d21ed0b442dd74f8f1b9de4017cde2be8" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
