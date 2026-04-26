@@ -6,7 +6,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from slumber.runtime.run import run_context_as_dict, RunContext
+from slumber.runtime.run import resolve_path_template, RunContext
 from slumber.schemas.study import Study
 
 
@@ -21,8 +21,7 @@ def configure_run_logging(
     For each handler:
 
     - Placeholders (e.g. ``{run_id}``) in the sink string are expanded using
-      the run context. ``{run_dir}`` is also available as the string form of
-      run_dir.
+      the run context.
     - If the expanded sink path is relative, it is resolved relative to run_dir.
     - If the handler does not include a ``level`` key, study.logging.level is used.
 
@@ -36,7 +35,6 @@ def configure_run_logging(
         deregister handlers when the run ends.
     """
     handler_ids: list[int] = []
-    ctx_dict = run_context_as_dict(context)
 
     for handler_config in study.logging.handlers:
         kwargs: dict = dict(handler_config)
@@ -45,11 +43,11 @@ def configure_run_logging(
             kwargs["level"] = study.logging.level
 
         if "sink" in kwargs and isinstance(kwargs["sink"], str):
-            sink_str = kwargs["sink"].format(**ctx_dict, run_dir=str(run_dir))
-            sink_path = Path(sink_str)
-            if not sink_path.is_absolute():
-                sink_path = run_dir / sink_path
-            kwargs["sink"] = sink_path
+            kwargs["sink"] = resolve_path_template(
+                kwargs["sink"],
+                context,
+                base_dir=run_dir,
+            )
 
         handler_ids.append(logger.add(**kwargs))
 

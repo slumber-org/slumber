@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 
 from slumber.runtime import RunContext, configure_run_logging
-from slumber.schemas.study import RunLoggingConfig, Study
+from slumber.schemas.study import LoggingConfig, Study
 
 
 def _ctx() -> RunContext:
@@ -22,7 +22,7 @@ def _study(handlers: list[dict], level: str = "INFO") -> Study:
     return Study(
         study_id="s1",
         name="S1",
-        logging=RunLoggingConfig(level=level, handlers=handlers),
+        logging=LoggingConfig(level=level, handlers=handlers),
     )
 
 
@@ -50,13 +50,6 @@ class TestApplyRunLogging:
         with patch("slumber.runtime.logging.logger.add", return_value=1) as mock_add:
             configure_run_logging(_study([{"sink": "{run_id}.log"}]), _ctx(), tmp_path)
         assert mock_add.call_args.kwargs["sink"] == tmp_path / "r001.log"
-
-    def test_run_dir_placeholder_in_sink(self, tmp_path: Path) -> None:
-        with patch("slumber.runtime.logging.logger.add", return_value=1) as mock_add:
-            configure_run_logging(
-                _study([{"sink": "{run_dir}/out.log"}]), _ctx(), tmp_path
-            )
-        assert mock_add.call_args.kwargs["sink"] == tmp_path / "out.log"
 
     def test_absolute_sink_not_modified(self, tmp_path: Path) -> None:
         abs_sink = tmp_path / "abs" / "run.log"
