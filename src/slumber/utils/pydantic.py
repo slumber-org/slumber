@@ -39,4 +39,3 @@ def coerce_enum_by_name(enum_type: type[EnumT]) -> Callable[[str | EnumT], EnumT
             ) from exc
 
     return _coerce
-
