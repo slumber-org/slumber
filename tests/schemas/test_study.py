@@ -1,9 +1,9 @@
-"""Tests for Study, RunLayout, UI, and RunLoggingConfig schemas."""
+"""Tests for Study, RunLayout, UI, and LoggingConfig schemas."""
 
 import pytest
 from pydantic import ValidationError
 
-from slumber.schemas import RunLayout, RunLoggingConfig, Study, UI
+from slumber.schemas import RunLayout, LoggingConfig, Study, UI
 
 
 class TestUI:
@@ -57,16 +57,16 @@ class TestRunLayout:
         assert "study_id" in layout.layout
 
 
-class TestRunLoggingConfig:
-    """Tests for RunLoggingConfig schema."""
+class TestLoggingConfig:
+    """Tests for LoggingConfig schema."""
 
     def test_valid_defaults(self) -> None:
-        cfg = RunLoggingConfig()
+        cfg = LoggingConfig()
         assert cfg.level == "INFO"
         assert cfg.handlers == []
 
     def test_valid_with_handlers(self) -> None:
-        cfg = RunLoggingConfig(
+        cfg = LoggingConfig(
             level="DEBUG",
             handlers=[
                 {"sink": "stderr", "level": "INFO"},

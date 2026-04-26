@@ -15,6 +15,8 @@ from pydantic import (
     model_validator,
 )
 
+from slumber.schemas.audit import AuditConfig
+
 if TYPE_CHECKING:
     from slumber.schemas.condition import Condition
 
@@ -78,8 +80,8 @@ class RunLayout(BaseModel):
         return self
 
 
-class RunLoggingConfig(BaseModel):
-    """Logging configuration for study runs.
+class LoggingConfig(BaseModel):
+    """Logging configuration.
 
     Handlers are passed as kwargs to loguru logger.add(). Sink paths may
     contain placeholders (e.g. run_id) substituted at run start.
@@ -121,13 +123,17 @@ class Study(BaseModel):
         default_factory=RunLayout,
         description="Run output directory layout.",
     )
-    logging: RunLoggingConfig = Field(
-        default_factory=RunLoggingConfig,
-        description="Logging config for runs (level + loguru handlers).",
-    )
     ui: UI = Field(
         default_factory=UI,
-        description="Selected UI backend and config.",
+        description="Selected UI backend and configuration.",
+    )
+    audit: AuditConfig = Field(
+        default_factory=AuditConfig,
+        description="Audit log configuration.",
+    )
+    logging: LoggingConfig = Field(
+        default_factory=LoggingConfig,
+        description="Logging configuration.",
     )
 
     @field_validator("study_id")

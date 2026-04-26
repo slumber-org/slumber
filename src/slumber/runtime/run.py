@@ -33,6 +33,51 @@ def run_context_as_dict(context: RunContext) -> dict[str, str]:
     return dataclasses.asdict(context)
 
 
+def format_with_run_context(template: str, context: RunContext, **extra) -> str:
+    """Format a string template using run context placeholders.
+
+    Args:
+        template: String with placeholders (e.g. ``"{run_id}.log"``).
+        context: Run context values for placeholder expansion.
+        **extra: Additional placeholders to inject.
+
+    Returns:
+        Formatted string with placeholders expanded.
+    """
+    return template.format(**run_context_as_dict(context), **extra)
+
+
+def resolve_path_template(
+    template: str,
+    context: RunContext,
+    *,
+    base_dir: Path | None = None,
+    **extra: str,
+) -> Path:
+    """Resolve a formatted path template relative to a base directory.
+
+    This expands placeholders in *template* using :class:`RunContext` (and any
+    *extra* placeholders), then resolves the resulting path relative to
+    *base_dir* when it is not already absolute.
+
+    Args:
+        template: Path template string (may be relative or absolute).
+        context: Run context values for placeholder expansion.
+        base_dir: Directory used to resolve relative paths. Optional if *template* is absolute.
+        **extra: Additional placeholders to inject for formatting.
+
+    Returns:
+        Resolved path (absolute if template is absolute, otherwise under base_dir).
+    """
+    expanded = format_with_run_context(template, context, **extra)
+    path = Path(expanded)
+    if not path.is_absolute():
+        if base_dir is None:
+            raise ValueError("base_dir is required when template is relative")
+        path = base_dir / path
+    return path.resolve()
+
+
 def resolve_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
     """Resolve the run directory path for a given run context.
 
@@ -48,8 +93,8 @@ def resolve_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
     Returns:
         Resolved (absolute) path to the run directory.
     """
-    layout = study.runs.layout.format(**run_context_as_dict(context))
-    return (study_dir / study.runs.base_directory / layout).resolve()
+    base_dir = study_dir / study.runs.base_directory
+    return resolve_path_template(study.runs.layout, context, base_dir=base_dir)
 
 
 def create_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
