@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+#loadingIndicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+#errorContainer {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+#surveyContainer {
+  height: 100%;
+  width: 100%;
+}
+
+#surveyContainer .sd-root-modern {
+  width: 100% !important;
+  /* Force both “unfilled” and “filled” track colors to the same grey */
+  --sjs-postcss-fix-slider-path-color: #777777;
+  --sjs-postcss-fix-slider-path-color-filled: #777777;
+  /* Optional: thumb color, if you want it greyscale too */
+  --sjs-postcss-fix-slider-thumb-color: #DDDDDD;
+}
+
+#surveyContainer .sd-container-modern {
+  padding: 0px 0px !important;
+  width: 100% !important;
+}
+
+#surveyContainer .sd-body {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0px 0px !important;
+  padding: 20px 20px !important;
+}
+
+#surveyContainer .sd-page {
+  padding: 0px 20px !important;
+  margin: 20px 0px !important;
+}
+
+/* Navigation buttons spacing control */
+#surveyContainer .sd-action-bar {
+  padding: 0 !important;
+  margin: 0px 20px !important;
+}

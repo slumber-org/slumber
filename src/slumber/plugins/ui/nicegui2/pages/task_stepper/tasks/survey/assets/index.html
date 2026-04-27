@@ -1,0 +1,64 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Survey Interface</title>
+
+    <!-- External Dependencies -->
+    <link href="./css/survey-core.min.css" type="text/css" rel="stylesheet" />
+    <link href="./css/survey-styles.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="./js/survey.core.min.js"></script>
+    <script type="text/javascript" src="./js/survey-js-ui.min.js"></script>
+    <script type="text/javascript" src="./js/themes/sharp-dark.min.js"></script>
+    <script type="text/javascript" src="./js/markdown-it.min.js"></script>
+    <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    
+    <!-- Application Scripts -->
+    <script type="text/javascript" src="./js/logger.js"></script>
+    <script type="text/javascript" src="./js/channel-manager.js"></script>
+    <script type="text/javascript" src="./js/survey-manager.js"></script>
+    <script type="text/javascript" src="./js/voicetext-widget.js"></script>
+    <script type="text/javascript" src="./js/voice-widget.js"></script>
+  </head>
+
+  <body>
+    <div id="loadingIndicator" class="loading-state">Loading survey...</div>
+    <div id="errorContainer" class="error-message" style="display: none"></div>
+    <div id="surveyContainer" role="main" aria-label="Survey Form"></div>
+
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof Survey === "undefined") {
+          Logger.error('Init', "SurveyJS library not found");
+          return;
+        }
+
+        const surveyPath = getQueryParam("survey_path");
+        if (!surveyPath) {
+          Logger.error('Init', "No survey path provided");
+          return;
+        }
+
+        fetch(surveyPath)
+          .then((response) => {
+            document.getElementById("loadingIndicator").style.display = "none";
+            if (!response.ok) {
+              throw new Error("Failed to load survey JSON");
+            }
+            return response.json();
+          })
+          .then((surveyJson) => {
+            const survey = initializeSurvey(surveyJson);
+            survey.render(document.getElementById("surveyContainer"));
+          })
+          .catch((error) => {
+            Logger.error('Init', "Survey loading failed", error);
+          });
+      });
+
+      new QWebChannel(qt.webChannelTransport, function (channel) {
+        ChannelManager.init(channel);
+      });
+    </script>
+  </body>
+</html>
