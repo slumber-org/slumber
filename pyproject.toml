@@ -26,6 +26,7 @@ instruction = "slumber.plugins.tasks.instruction:InstructionTask"
 [project.entry-points."slumber.ui_backends"]
 headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
 nicegui = "slumber.plugins.ui.nicegui:NiceGUIBackend"
+nicegui2 = "slumber.plugins.ui.nicegui2:NiceGUI2Backend"
 
 [project.optional-dependencies]
 zmax = [
