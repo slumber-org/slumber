@@ -100,6 +100,8 @@ from typing import Callable
 
 from nicegui import ui
 
+from typing import TYPE_CHECKING
+
 from slumber.plugins.ui.nicegui2.shell.shell import render_shell
 from slumber.plugins.ui.nicegui2.shell.settings import ShellSettings
 from slumber.plugins.ui.nicegui2.pages.template.settings import TemplateSettings
