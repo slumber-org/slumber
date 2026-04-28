@@ -1,1 +1,1 @@
-"""Dark theme package."""
+"""Light theme package."""
