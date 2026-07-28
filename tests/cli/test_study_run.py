@@ -49,7 +49,7 @@ def study_dir(tmp_path: Path) -> Path:
 def _invoke_scheduled(runner: CliRunner, study_dir: Path) -> object:
     return runner.invoke(
         app,
-        ["study", "run", "--study-dir", str(study_dir), "--scheduled"],
+        ["study", "run-scheduled", "--study-dir", str(study_dir)],
     )
 
 
@@ -336,10 +336,9 @@ class TestStudyRunScheduledCLI:
             app,
             [
                 "study",
-                "run",
+                "run-scheduled",
                 "--study-dir",
                 str(tmp_path / "nonexistent"),
-                "--scheduled",
             ],
         )
         assert result.exit_code == 1
@@ -389,33 +388,13 @@ class TestStudyRunLocalCLI:
         assert result.exit_code == 0, result.output
         assert "sub-p1" in result.output
 
-    def test_requires_condition_or_scheduled(
-        self, runner: CliRunner, study_dir: Path
-    ) -> None:
+    def test_requires_condition(self, runner: CliRunner, study_dir: Path) -> None:
         result = runner.invoke(
             app,
             ["study", "run", "--study-dir", str(study_dir)],
         )
-        assert result.exit_code == 1
-        assert "--condition" in result.output or "scheduled" in result.output.lower()
-
-    def test_rejects_condition_with_scheduled(
-        self, runner: CliRunner, study_dir: Path
-    ) -> None:
-        result = runner.invoke(
-            app,
-            [
-                "study",
-                "run",
-                "--study-dir",
-                str(study_dir),
-                "--scheduled",
-                "--condition",
-                "ctrl",
-            ],
-        )
-        assert result.exit_code == 1
-        assert "Do not pass --condition" in result.output
+        assert result.exit_code != 0
+        assert "--condition" in result.output
 
     def test_exits_on_missing_study_dir(
         self, runner: CliRunner, tmp_path: Path

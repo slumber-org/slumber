@@ -247,11 +247,34 @@ class TestStudyInitCLI:
         assert result.exit_code == 0
         assert not (tmp_path / "z" / ".gitignore").exists()
 
+
+class TestStudyRegisterCLI:
+    """Tests for slumber study register (separate from init; Supabase-only)."""
+
+    @pytest.fixture
+    def runner(self) -> CliRunner:
+        return CliRunner()
+
     @pytest.mark.supabase
     def test_register_calls_supabase_create_study(
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
-        """With --register, CLI calls Supabase create_study after filesystem init."""
+        """study register loads the manifest and calls Supabase create_study."""
+        init_result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "reg-study",
+                "--name",
+                "Reg Study",
+            ],
+        )
+        assert init_result.exit_code == 0
+
         with (
             patch("slumber.supabase.auth.get_client") as mock_get_client,
             patch("slumber.supabase.backend.study.create_study") as mock_create,
@@ -261,14 +284,9 @@ class TestStudyInitCLI:
                 app,
                 [
                     "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "reg-study",
-                    "--name",
-                    "Reg Study",
-                    "--register",
+                    "register",
+                    "--study-dir",
+                    str(tmp_path / "reg-study"),
                 ],
             )
         assert result.exit_code == 0
@@ -277,5 +295,4 @@ class TestStudyInitCLI:
         call_args = mock_create.call_args[0]
         assert call_args[1] == "reg-study"
         assert call_args[2] == "Reg Study"
-        assert "Created study at" in result.output
         assert "Registered study 'reg-study'" in result.output

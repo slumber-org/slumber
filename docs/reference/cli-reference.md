@@ -19,6 +19,12 @@ slumber --verbose study validate --study-dir .
 slumber --env .env.dev condition sync --study-dir my-study
 ```
 
+!!! note
+    `auth`, `condition`, `db`, `participant`, `session`, and the database-backed
+    `study register` / `study run-scheduled` commands only appear in `--help`
+    (and only work) when a database-backed extra — currently `slumber[supabase]`
+    — is installed. Run `slumber doctor` to check what's available.
+
 ## slumber doctor
 
 Check the environment, Supabase connectivity, and dependencies. Run this to diagnose setup issues before using other commands.
@@ -80,23 +86,9 @@ slumber study init --base-dir . --study-id my-study --name "My Study"
 | `--no-env-example` | — | Skip creating `.env` inside the study folder. |
 | `--no-gitignore` | — | Skip creating `.gitignore` inside the study folder. |
 
-Creates `<study-id>/` with `study.yaml`, empty `conditions/` and `assets/` directories, an optional `.env` (from the study template), and `.gitignore`. Also registers the study in Supabase (requires `SUPABASE_SERVICE_ROLE_KEY`).
+Creates `<study-id>/` with `study.yaml`, empty `conditions/` and `assets/` directories, an optional `.env` (from the study template), and `.gitignore`. Purely local — does not contact a database. To register the study remotely afterwards, run `slumber study register` (see below).
 
 See [Study setup](../user-guide/study-setup.md) for full details.
-
-### slumber study run
-
-Run the scheduled session for the current user:
-
-```bash
-slumber study run --study-dir path/to/my-study
-```
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--study-dir`, `-d` | — | Path to the study folder. Also read from `STUDY_DIR`. |
-
-Requires `slumber auth login` first. Looks up the authenticated user's participant record in the study, finds the session whose start window contains the current time, creates a Run record in the database, and executes the session's condition via the UI backend. Condition, participant, session, and run ID are all derived from Supabase — no manual flags required. Set `SENTRY_DSN` to enable Sentry monitoring. See [Running a study](../user-guide/study-run.md).
 
 ### slumber study validate
 
@@ -114,9 +106,60 @@ export STUDY_DIR=path/to/my-study && slumber study validate
 
 Exits `0` on success (prints study name and condition list); exits `1` with a path-specific error on any validation failure. See [Config loading and validation](../user-guide/config-validation.md).
 
+### slumber study run
+
+Run a condition from disk:
+
+```bash
+slumber study run --study-dir path/to/my-study --condition ctrl
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--study-dir`, `-d` | — | Path to the study folder. Also read from `STUDY_DIR`. |
+| `--condition`, `-c` | — | Required. Condition `name` from the study's condition files. |
+
+Local run: generates a new run id (UUID), does not contact a database, and does not require `slumber auth login`. Set `PARTICIPANT_ID` in the environment only if your run layout uses `{participant_id}`. Set `SENTRY_DSN` to enable Sentry monitoring. See [Running a study](../user-guide/study-run.md).
+
+For a database-backed scheduled session instead, see `slumber study run-scheduled` below.
+
+### slumber study register
+
+*Requires `slumber[supabase]`.*
+
+Register an existing study folder's manifest in Supabase:
+
+```bash
+slumber study register --study-dir path/to/my-study
+```
+
+| Option | Description |
+|--------|-------------|
+| `--study-dir`, `-d` | Path to the study folder. Also read from `STUDY_DIR`. |
+
+Loads `study.yaml` and inserts a `Study` row via the Supabase service role. Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+
+### slumber study run-scheduled
+
+*Requires `slumber[supabase]`.*
+
+Run the scheduled session for the current user:
+
+```bash
+slumber study run-scheduled --study-dir path/to/my-study
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--study-dir`, `-d` | — | Path to the study folder. Also read from `STUDY_DIR`. |
+
+Requires `slumber auth login` first. Looks up the authenticated user's participant record in the study, finds the session whose start window contains the current time, creates a Run record in the database, and executes the session's condition via the UI backend. Condition, participant, session, and run ID are all derived from Supabase — no manual flags required. Set `SENTRY_DSN` to enable Sentry monitoring. See [Running a study](../user-guide/study-run.md).
+
 ## slumber condition
 
 ### slumber condition sync
+
+*Requires `slumber[supabase]`.*
 
 Push condition YAML files from the study folder into Supabase:
 
@@ -137,6 +180,8 @@ Requires `SUPABASE_SERVICE_ROLE_KEY`. See [Condition sync](../user-guide/conditi
 
 ## slumber auth
 
+*Requires `slumber[supabase]`.*
+
 | Command | Description |
 |---------|-------------|
 | `slumber auth login --email E [--password P]` | Sign in; store session for subsequent commands. Prompts for password if omitted. |
@@ -149,7 +194,7 @@ Session is persisted to `~/.config/slumber/session.json`. Override with `SLUMBER
 
 ## slumber participant
 
-Researcher commands — use `SUPABASE_SERVICE_ROLE_KEY`.
+*Requires `slumber[supabase]`.* Researcher commands — use `SUPABASE_SERVICE_ROLE_KEY`.
 
 | Command | Description |
 |---------|-------------|
@@ -160,7 +205,7 @@ Options can also be set via `STUDY_ID`, `PARTICIPANT_ID`, `USER_ID` env vars.
 
 ## slumber session
 
-Researcher commands — use `SUPABASE_SERVICE_ROLE_KEY`.
+*Requires `slumber[supabase]`.* Researcher commands — use `SUPABASE_SERVICE_ROLE_KEY`.
 
 | Command | Description |
 |---------|-------------|
@@ -173,7 +218,7 @@ Datetimes use ISO 8601 format (e.g. `2025-10-01T22:00:00+00:00` or `2025-10-01T2
 
 ## slumber db
 
-Database migration commands (Alembic / Postgres). Requires `DATABASE_URL`.
+*Requires `slumber[supabase]`.* Database migration commands (Alembic / Postgres). Requires `DATABASE_URL`.
 
 | Command | Description |
 |---------|-------------|

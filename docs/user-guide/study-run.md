@@ -1,16 +1,42 @@
 # Running a study
 
-`slumber study run` is the main command for executing a study session. It looks up the authenticated user's scheduled session, creates the run output directory, configures loguru from `study.logging`, runs each procedure in the session's condition through the configured UI backend, and writes a metadata file to the run directory.
+There are two ways to run a study, and both share the run directory, run logging, and Sentry behaviour described below:
+
+- **`slumber study run`** — local run from disk. You pass `--condition` explicitly; nothing is read from or written to a database. Useful for local testing/development, and for running SLUMBER without the `supabase` extra at all.
+- **`slumber study run-scheduled`** *(requires `slumber[supabase]`)* — resolves the authenticated user's scheduled session and condition from Supabase and records a run row.
+
+## slumber study run (local)
+
+```bash
+slumber study run --study-dir path/to/my-study --condition ctrl
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--study-dir`, `-d` | — | Path to the study folder. Also read from `STUDY_DIR`. |
+| `--condition`, `-c` | — | Required. Condition `name` from the study's condition files. |
+
+### What happens during a local run
+
+1. **Study is loaded** — manifest and all condition files are validated.
+2. **A new run id is generated** (UUID). Set `PARTICIPANT_ID` in the environment only if your run layout uses `{participant_id}`; there is no session.
+3. **Sentry is initialized** (optional) — if `SENTRY_DSN` is set, Sentry is started and tagged with `study_id`.
+4. **Run directory is created** — resolved from `study.runs.base_directory` and `study.runs.layout` with the run context placeholders.
+5. **Run logging is applied** — loguru handlers from `study.logging.handlers` are added (placeholders like `{run_id}` are expanded).
+6. **Procedures are executed** — each procedure in the condition is passed to the UI backend (`study.ui.backend`, default: `headless`).
+7. **Logging handlers are removed** when the run finishes (even on error).
+
+## slumber study run-scheduled
+
+*Requires `slumber[supabase]`.*
+
+Looks up the authenticated user's scheduled session, creates the run output directory, configures loguru from `study.logging`, runs each procedure in the session's condition through the configured UI backend, and writes a metadata file to the run directory.
 
 Requires `slumber auth login` before running.
 
-## Quick start
-
 ```bash
-slumber study run --study-dir path/to/my-study
+slumber study run-scheduled --study-dir path/to/my-study
 ```
-
-## Options
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -18,7 +44,7 @@ slumber study run --study-dir path/to/my-study
 
 Condition, participant, session, and run ID are all resolved from Supabase automatically. No manual arguments are needed.
 
-## What happens during a run
+### What happens during a scheduled run
 
 1. **Study is loaded** — manifest and all condition files are validated.
 2. **Participant is resolved** — the authenticated user's participant record is fetched from Supabase.
@@ -122,7 +148,7 @@ slumber session create --study-id my-study --participant-id sub-001 \
 slumber study validate --study-dir my-study
 
 # 7. Run the study (participant side, during the scheduled window)
-slumber study run --study-dir my-study
+slumber study run-scheduled --study-dir my-study
 ```
 
 The run output is written to `my-study/runs/sub-sub-001/ses-<session-id>/run-<run-id>/`.
