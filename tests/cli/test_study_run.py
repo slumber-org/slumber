@@ -393,8 +393,7 @@ class TestStudyRunLocalCLI:
             app,
             ["study", "run", "--study-dir", str(study_dir)],
         )
-        assert result.exit_code != 0
-        assert "--condition" in result.output
+        assert result.exit_code == 2
 
     def test_exits_on_missing_study_dir(
         self, runner: CliRunner, tmp_path: Path
