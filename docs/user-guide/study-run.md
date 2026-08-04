@@ -118,7 +118,10 @@ slumber auth login --email researcher@example.com
 # 2. Create the study folder
 slumber study init --base-dir . --study-id my-study --name "My Study"
 
-# 3. Add a condition YAML
+# 3. Register the study in Supabase
+slumber study register --study-dir my-study
+
+# 4. Add a condition YAML
 cat > my-study/conditions/ctrl.yaml << 'EOF'
 name: ctrl
 procedures:
@@ -135,19 +138,19 @@ dag:
   process_components: []
 EOF
 
-# 4. Sync conditions into Supabase
+# 5. Sync conditions into Supabase
 slumber condition sync --study-dir my-study
 
-# 5. Create a participant and schedule a session (researcher side)
+# 6. Create a participant and schedule a session (researcher side)
 slumber participant create --study-id my-study --participant-id sub-001 --user-id <auth-user-uuid>
 slumber session create --study-id my-study --participant-id sub-001 \
   --earliest-start-at 2025-10-01T20:00:00Z --latest-start-at 2025-10-01T23:59:00Z \
   --condition-id my-study_ctrl
 
-# 6. Validate the study
+# 7. Validate the study
 slumber study validate --study-dir my-study
 
-# 7. Run the study (participant side, during the scheduled window)
+# 8. Run the study (participant side, during the scheduled window)
 slumber study run-scheduled --study-dir my-study
 ```
 
