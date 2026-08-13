@@ -4,7 +4,7 @@ globs: **/*.py
 alwaysApply: true
 ---
 
-## Python style (repo-wide)
+## Python style
 
 - **Structure & boundaries**
   - Keep **modules, classes, and functions small** and single-purpose; split when responsibilities diverge.
@@ -23,6 +23,23 @@ alwaysApply: true
   - Use **type hints** for public functions/classes and non-trivial internals.
   - Use **Google-style docstrings** (this repo enforces it via Ruff pydocstyle `convention = "google"`).
   - Docstrings should explain **intent/contract** (Args/Returns/Raises), not restate obvious code.
+
+- **String formatting**
+  - Prefer **f-strings** for interpolated strings (`f"run {run_id}"`).
+  - Avoid `%` formatting and `.format()` when an f-string is clearer.
+  - Exception: keep `.format()` for **template substitution** (e.g. user-configured layout strings with named placeholders).
+
+  ```python
+  # Prefer
+  typer.echo(f"Synced {count} condition(s) for study {study_id!r}.")
+
+  # Avoid
+  typer.echo("Synced {} condition(s) for study {!r}.".format(count, study_id))
+  logger.info("Run %s failed", run_id)
+
+  # OK — external template, not inline interpolation
+  path = layout.format(**context)
+  ```
 
 - **Comments & TODOs**
   - Write **only necessary comments** (non-obvious rationale, trade-offs, constraints).

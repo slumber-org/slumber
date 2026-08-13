@@ -37,7 +37,7 @@ test = [
 convention = "google"
 
 [tool.ruff.lint]
-extend-select = ["TD001", "TD007"]
+extend-select = ["TD001", "TD007", "UP031", "UP032"]
 
 [tool.ruff.format]
 docstring-code-format = true

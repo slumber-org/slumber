@@ -90,6 +90,7 @@ jobs:
             - Obvious logic errors with incorrect behavior
             - Clear performance anti-patterns with measurable impact
             - Definitive security vulnerabilities
+            - Python string formatting: prefer f-strings over `%` formatting, `.format()`, or `+` concatenation when building interpolated strings; flag clear violations as ✨ Improvement (skip user/config template strings that intentionally use `.format()` with named placeholders)
             - Contributor convention violations that are objectively checkable from this PR (branch/base target, commit message style, docs conventions like headings/relative links/kebab-case/fenced code blocks)
           - Avoid duplicates: skip if similar feedback already exists on or near the same lines.
 

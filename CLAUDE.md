@@ -109,6 +109,7 @@ Required in `.env` (see `.env.example`):
 - Use **type hints** for public functions/classes and non-trivial internals.
 - Use **Google-style docstrings** (enforced by ruff pydocstyle `convention = "google"`).
 - Docstrings should explain **intent/contract** (Args/Returns/Raises), not restate obvious code.
+- Prefer **f-strings** for interpolated strings; avoid `%` formatting and `.format()` when an f-string is clearer (keep `.format()` for config/layout templates).
 
 ### Comments & TODOs
 
