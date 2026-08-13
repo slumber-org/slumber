@@ -8,15 +8,11 @@ from typing import Annotated
 import ezmsg.core as ez
 from loguru import logger
 from pydantic import BeforeValidator, ConfigDict, Field, IPvAnyAddress
-
 from slumber.plugins.units import Settings
-from slumber.utils.retry import retry_async
 from slumber.utils.pydantic import coerce_enum_by_name
+from slumber.utils.retry import retry_async
 from somnio.data.timeseries import Sample
 from somnio.devices.zmax import (
-    ConnectionClosedError,
-    DataType,
-    LEDColor,
     DEFAULT_IP,
     DEFAULT_PORT,
     LED_MAX_INTENSITY,
@@ -26,9 +22,13 @@ from somnio.devices.zmax import (
     STIMULATION_MAX_REPETITIONS,
     STIMULATION_MIN_DURATION_S,
     STIMULATION_MIN_REPETITIONS,
+    ConnectionClosedError,
+    DataType,
+    LEDColor,
+)
+from somnio.devices.zmax import (
     ZMax as ZMaxClient,
 )
-
 
 NOMINAL_SAMPLE_PERIOD_NS = int(1e9 / SAMPLE_RATE)
 
@@ -198,7 +198,7 @@ class ZMaxUnit(ez.Unit):
         if self.STATE.zmax is not None:
             try:
                 self.STATE.zmax.disconnect()
-            except Exception as exc:
+            except OSError as exc:
                 logger.warning("Error disconnecting ZMax: {}", exc)
 
     @ez.subscriber(INPUT_DATA_COLLECTION_ENABLED)
@@ -271,7 +271,7 @@ class ZMaxUnit(ez.Unit):
 
         try:
             self.STATE.zmax.stimulate_sequential(**signal.model_dump())
-        except Exception as exc:
+        except (OSError, ValueError) as exc:
             logger.warning("ZMax stimulation failed: {}", exc)
 
     def _get_current_timestamp_ns(self) -> int:

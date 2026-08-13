@@ -111,13 +111,16 @@ class TestRunStudy:
     def test_cleans_up_log_handlers_on_success(self, tmp_path: Path) -> None:
         study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)
         removed: list[int] = []
-        with patch(
-            "slumber.runtime.orchestrator.configure_run_logging", return_value=[42, 43]
-        ):
-            with patch(
+        with (
+            patch(
+                "slumber.runtime.orchestrator.configure_run_logging",
+                return_value=[42, 43],
+            ),
+            patch(
                 "slumber.runtime.orchestrator.logger.remove", side_effect=removed.append
-            ):
-                run_study(study, "ctrl", _ctx(), study_dir)
+            ),
+        ):
+            run_study(study, "ctrl", _ctx(), study_dir)
         assert sorted(removed) == [42, 43]
 
     def test_cleans_up_log_handlers_on_error(self, tmp_path: Path) -> None:
@@ -127,23 +130,25 @@ class TestRunStudy:
         mock_backend.run.side_effect = RuntimeError("boom")
         mock_registry = MagicMock()
 
-        with patch(
-            "slumber.runtime.orchestrator.resolve_ui_backend_from_ui",
-            return_value=mock_backend,
-        ):
-            with patch(
+        with (
+            patch(
+                "slumber.runtime.orchestrator.resolve_ui_backend_from_ui",
+                return_value=mock_backend,
+            ),
+            patch(
                 "slumber.runtime.orchestrator.configure_run_logging", return_value=[99]
-            ):
-                with patch(
-                    "slumber.runtime.orchestrator.logger.remove",
-                    side_effect=removed.append,
-                ):
-                    with pytest.raises(RuntimeError, match="boom"):
-                        run_study(
-                            study,
-                            "ctrl",
-                            _ctx(),
-                            study_dir,
-                            registry=mock_registry,
-                        )
+            ),
+            patch(
+                "slumber.runtime.orchestrator.logger.remove",
+                side_effect=removed.append,
+            ),
+            pytest.raises(RuntimeError, match="boom"),
+        ):
+            run_study(
+                study,
+                "ctrl",
+                _ctx(),
+                study_dir,
+                registry=mock_registry,
+            )
         assert removed == [99]

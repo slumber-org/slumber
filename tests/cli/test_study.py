@@ -8,8 +8,8 @@ import pytest
 from typer.testing import CliRunner
 
 from slumber.cli.main import app
-from slumber.schemas.study import DEFAULT_ASSETS_DIR_NAME, DEFAULT_CONDITIONS_DIR_NAME
 from slumber.config import init_study
+from slumber.schemas.study import DEFAULT_ASSETS_DIR_NAME, DEFAULT_CONDITIONS_DIR_NAME
 
 
 class TestInitStudy:

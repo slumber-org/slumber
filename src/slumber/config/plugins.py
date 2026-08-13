@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pydantic import ValidationError
-
 from slumber.plugins import EntryPointGroup, PluginNotFoundError, get_registry
 from slumber.plugins.tasks import build_task_from_settings
 from slumber.plugins.ui import build_ui_backend_from_settings
@@ -20,7 +18,7 @@ if TYPE_CHECKING:
     from slumber.schemas.condition import Condition
     from slumber.schemas.dag import Component
     from slumber.schemas.procedure import Step
-    from slumber.schemas.study import Study, UI
+    from slumber.schemas.study import UI, Study
 
 
 def _format_snippet(msg: str, max_len: int = 80) -> str:
@@ -30,8 +28,8 @@ def _format_snippet(msg: str, max_len: int = 80) -> str:
 
 
 def _validate_dag_components(
-    condition: "Condition",
-    registry: "PluginRegistry",
+    condition: Condition,
+    registry: PluginRegistry,
 ) -> list[str]:
     """Validate DAG components (unit_type + settings) against unit plugins."""
     errors: list[str] = []
@@ -43,7 +41,7 @@ def _validate_dag_components(
                 f"Condition {condition.name!r}, DAG component {comp.name!r} "
                 f"(unit_type {e.key!r}): plugin not found. Available: {e.available}."
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             errors.append(
                 f"Condition {condition.name!r}, DAG component {comp.name!r} "
                 f"(unit_type {comp.unit_type!r}): {_format_snippet(str(e))}."
@@ -52,8 +50,8 @@ def _validate_dag_components(
 
 
 def _validate_procedure_steps(
-    condition: "Condition",
-    registry: "PluginRegistry",
+    condition: Condition,
+    registry: PluginRegistry,
 ) -> list[str]:
     """Validate procedure steps (task_type + settings) against task plugins."""
     errors: list[str] = []
@@ -67,7 +65,7 @@ def _validate_procedure_steps(
                     f"step (task_type {e.key!r}): plugin not found. "
                     f"Available: {e.available}."
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 errors.append(
                     f"Condition {condition.name!r}, procedure {proc_name!r}, "
                     f"step (task_type {step.task_type!r}): "
@@ -77,8 +75,8 @@ def _validate_procedure_steps(
 
 
 def _validate_condition_plugins(
-    condition: "Condition",
-    registry: "PluginRegistry",
+    condition: Condition,
+    registry: PluginRegistry,
 ) -> list[str]:
     """Validate a condition's DAG unit settings and procedure steps via plugins.
 
@@ -99,7 +97,7 @@ def _validate_condition_plugins(
     return errors
 
 
-def _validate_ui_backend(study: "Study", registry: "PluginRegistry") -> list[str]:
+def _validate_ui_backend(study: Study, registry: PluginRegistry) -> list[str]:
     """Validate the UI backend and its settings against the registry."""
     errors: list[str] = []
     try:
@@ -108,37 +106,37 @@ def _validate_ui_backend(study: "Study", registry: "PluginRegistry") -> list[str
         errors.append(
             f"UI backend {e.key!r}: plugin not found. Available: {e.available}."
         )
-    except (ValueError, ValidationError) as e:
+    except Exception as e:  # noqa: BLE001
         errors.append(
             f"UI backend {study.ui.backend!r} settings invalid: {_format_snippet(str(e))}."
         )
     return errors
 
 
-def resolve_ui_backend_from_ui(ui: "UI", registry: "PluginRegistry") -> UIBackend:
+def resolve_ui_backend_from_ui(ui: UI, registry: PluginRegistry) -> UIBackend:
     """Load the UI backend class from the registry and build a configured instance."""
     backend_class = registry.get_plugin(EntryPointGroup.UI_BACKENDS, ui.backend)
     return build_ui_backend_from_settings(backend_class, ui.settings)
 
 
 def resolve_unit_from_component(
-    component: "Component",
-    registry: "PluginRegistry",
-) -> "ez.Unit":
+    component: Component,
+    registry: PluginRegistry,
+) -> ez.Unit:
     """Load the unit class from the registry and build a configured instance."""
     unit_class = registry.get_plugin(EntryPointGroup.UNITS, component.unit_type)
     return build_unit_from_settings(unit_class, component.settings)
 
 
-def resolve_task_from_step(step: "Step", registry: "PluginRegistry") -> "Task":
+def resolve_task_from_step(step: Step, registry: PluginRegistry) -> Task:
     """Load the task class from the registry and build a validated instance."""
     task_class = registry.get_plugin(EntryPointGroup.TASKS, step.task_type)
     return build_task_from_settings(task_class, step.settings)
 
 
 def validate_study_plugins(
-    study: "Study",
-    registry: "PluginRegistry | None" = None,
+    study: Study,
+    registry: PluginRegistry | None = None,
 ) -> None:
     """Validate UI backend and all conditions' plugins for a study.
 

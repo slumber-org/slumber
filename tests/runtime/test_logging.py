@@ -3,7 +3,6 @@
 from pathlib import Path
 from unittest.mock import patch
 
-
 from slumber.runtime import RunContext, configure_run_logging
 from slumber.schemas.study import LoggingConfig, Study
 

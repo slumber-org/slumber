@@ -27,9 +27,9 @@ class HeadlessUIBackend(UIBackend):
 
     def run(
         self,
-        study: "Study",
-        condition: "Condition",
-        context: "RunContext",
+        study: Study,
+        condition: Condition,
+        context: RunContext,
     ) -> None:
         """Log all procedures and their steps; no user interaction."""
         logger.info(

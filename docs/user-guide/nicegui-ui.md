@@ -121,6 +121,7 @@ The callable receives a `SessionState` object and returns `bool`:
 ```python
 from slumber.runtime.events import SessionState
 
+
 def is_rem_awakening(state: SessionState) -> bool:
     return state.get("last_arousal_type") == "rem"
 ```

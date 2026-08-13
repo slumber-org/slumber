@@ -10,14 +10,14 @@ from alembic import context
 from sqlalchemy import create_engine
 from sqlmodel import SQLModel
 
-from slumber.supabase.utils import get_database_url
-from slumber.supabase.models import (  # noqa: E402, F401
+from slumber.supabase.models import (  # noqa: F401
     Condition,
     Participant,
     Run,
     Session,
     Study,
 )
+from slumber.supabase.utils import get_database_url
 
 # Ensure src is on path so slumber is importable when running alembic.
 _src = Path(__file__).resolve().parent.parent / "src"

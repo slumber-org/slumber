@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from slumber.supabase.backend.condition import generate_condition_id, sync_conditions
 from slumber.schemas.condition import Condition
+from slumber.supabase.backend.condition import generate_condition_id, sync_conditions
 
 
 def _make_condition(name: str = "condition_1") -> Condition:

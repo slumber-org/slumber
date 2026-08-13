@@ -87,7 +87,8 @@ def _handle_login(
         state.authenticated = True
         state.current_page = "welcome"
         refresh()  # type: ignore[operator]
-    except Exception as exc:
+    # TODO: [refactor] catch typed auth/SDK errors (AuthApiError, OSError, ValueError)
+    except Exception as exc:  # noqa: BLE001
         logger.warning("Login failed for {}: {}", email, exc)
         error_label.text = str(exc)
         error_label.set_visibility(True)

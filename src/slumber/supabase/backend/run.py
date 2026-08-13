@@ -19,7 +19,7 @@ class RunStatus(StrEnum):
     FAILED = "failed"
 
 
-def create_run(client: "Client", session_id: int) -> dict:
+def create_run(client: Client, session_id: int) -> dict:
     """Insert a new run row with status 'running' and return it.
 
     The run_directory is initially empty and updated once the local directory
@@ -47,7 +47,7 @@ def create_run(client: "Client", session_id: int) -> dict:
 
 
 def update_run(
-    client: "Client",
+    client: Client,
     run_id: int,
     *,
     status: RunStatus,

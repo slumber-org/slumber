@@ -58,7 +58,7 @@ def build_unit_from_settings(
     if settings is not None and not isinstance(settings, dict):
         raise ValueError(f"settings must be a dict or None, got {type(settings)}.")
 
-    settings_type = getattr(unit_cls, "SETTINGS")
+    settings_type = unit_cls.SETTINGS
 
     if settings_type is None:
         if settings is not None:

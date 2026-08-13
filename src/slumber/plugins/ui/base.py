@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from pydantic import BaseModel
 
@@ -43,9 +43,9 @@ class UIBackend(ABC):
     @abstractmethod
     def run(
         self,
-        study: "Study",
-        condition: "Condition",
-        context: "RunContext",
+        study: Study,
+        condition: Condition,
+        context: RunContext,
     ) -> None:
         """Run the full UI lifecycle for a condition."""
         ...

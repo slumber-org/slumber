@@ -148,7 +148,7 @@ class TestResolveCallable:
             resolve_callable("os.path:nonexistent_func_xyz")
 
     def test_non_callable(self) -> None:
-        with pytest.raises(ValueError, match="non-callable"):
+        with pytest.raises(TypeError, match="non-callable"):
             resolve_callable("os.path:sep")
 
 

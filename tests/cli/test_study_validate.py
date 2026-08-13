@@ -29,8 +29,6 @@ def _mock_registry_for_validate_success() -> MagicMock:
     class _DummySettings(Settings):
         """Minimal settings so build_unit_from_settings and ez.Unit accept the unit."""
 
-        pass
-
     class _DummyUnit(ez.Unit):
         SETTINGS = _DummySettings
 

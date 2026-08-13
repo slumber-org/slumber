@@ -49,7 +49,7 @@ class NiceGUIBackend(UIBackend):
     events with optional guards.
     """
 
-    ui_settings_model: ClassVar[type["BaseModel"] | None] = NiceGUISettings
+    ui_settings_model: ClassVar[type[BaseModel] | None] = NiceGUISettings
 
     def run(
         self,
@@ -155,8 +155,4 @@ def _serve_logo() -> str | None:
 
 def _check_auth() -> bool:
     """Check if a valid Supabase session exists."""
-    try:
-        session = load_session()
-        return session is not None
-    except Exception:
-        return False
+    return load_session() is not None

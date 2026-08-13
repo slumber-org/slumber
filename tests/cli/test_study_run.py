@@ -14,7 +14,6 @@ from typer.testing import CliRunner
 from slumber.cli.main import app
 from slumber.config import init_study
 
-
 _MINIMAL_CONDITION = """\
 name: ctrl
 procedures:

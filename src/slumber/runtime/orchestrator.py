@@ -12,7 +12,7 @@ from loguru import logger
 from slumber.config.plugins import resolve_ui_backend_from_ui
 from slumber.plugins import get_registry
 from slumber.runtime.logging import configure_run_logging
-from slumber.runtime.run import create_run_dir, RunContext
+from slumber.runtime.run import RunContext, create_run_dir
 
 if TYPE_CHECKING:
     from slumber.plugins.registry import PluginRegistry
@@ -42,11 +42,11 @@ def _write_run_metadata(
 
 
 def run_study(
-    study: "Study",
+    study: Study,
     condition_name: str,
     context: RunContext,
     study_dir: Path,
-    registry: "PluginRegistry | None" = None,
+    registry: PluginRegistry | None = None,
 ) -> Path:
     """Run a study condition: set up the run directory and execute all procedures.
 

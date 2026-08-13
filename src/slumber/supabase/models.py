@@ -10,8 +10,9 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import TIMESTAMP, TEXT, UniqueConstraint, func, text
-from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, UUID as PG_UUID
+from sqlalchemy import TEXT, TIMESTAMP, UniqueConstraint, func, text
+from sqlalchemy.dialects.postgresql import JSONB, ExcludeConstraint
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlmodel import Column, Field, SQLModel
 
 from slumber.utils.time import utc_now

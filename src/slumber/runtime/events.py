@@ -7,7 +7,8 @@ backend (NiceGUI, headless, etc.).
 from __future__ import annotations
 
 import importlib
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
@@ -89,7 +90,7 @@ def resolve_callable(dotted_path: str) -> Callable[..., Any]:
             f"Module {module_path!r} has no attribute {attr_name!r}."
         ) from exc
     if not callable(obj):
-        raise ValueError(f"{dotted_path!r} resolved to a non-callable object.")
+        raise TypeError(f"{dotted_path!r} resolved to a non-callable object.")
     return obj
 
 
@@ -153,9 +154,9 @@ def evaluate_guard(
 
 def get_triggered_procedures(
     event: str,
-    procedures: dict[str, "Procedure"],
+    procedures: dict[str, Procedure],
     state: SessionState,
-) -> list[tuple[str, "Procedure"]]:
+) -> list[tuple[str, Procedure]]:
     """Return procedures whose trigger matches *event* and whose guard passes.
 
     Results are returned in the order procedures appear in the dict
@@ -169,7 +170,7 @@ def get_triggered_procedures(
     Returns:
         List of ``(name, procedure)`` tuples for procedures that should run.
     """
-    triggered: list[tuple[str, "Procedure"]] = []
+    triggered: list[tuple[str, Procedure]] = []
     for name, procedure in procedures.items():
         if procedure.trigger != event:
             continue

@@ -9,8 +9,7 @@ from pydantic import BaseModel, Field, ValidationError
 from slumber.schemas.dag import DAG
 from slumber.schemas.procedure import Procedure
 from slumber.utils.errors import format_validation_error
-from slumber.utils.yaml import load_and_validate
-from slumber.utils.yaml import EXTENSIONS
+from slumber.utils.yaml import EXTENSIONS, load_and_validate
 
 
 class Condition(BaseModel):

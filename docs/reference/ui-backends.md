@@ -46,10 +46,10 @@ Mutable key-value store tracking runtime state during a session:
 from slumber.runtime.events import SessionState
 
 state = SessionState()
-state.handle_event("wake_up")    # auto-increments awakening_count
-state.set("custom_key", "value") # arbitrary keys
-state.get("custom_key")          # → "value"
-state.awakening_count             # → 1
+state.handle_event("wake_up")  # auto-increments awakening_count
+state.set("custom_key", "value")  # arbitrary keys
+state.get("custom_key")  # → "value"
+state.awakening_count  # → 1
 ```
 
 ### Guard Evaluation
@@ -57,10 +57,10 @@ state.awakening_count             # → 1
 ```python
 from slumber.runtime.events import evaluate_guard
 
-evaluate_guard(None, state)                      # always True
-evaluate_guard({"awakening_count": 1}, state)     # exact match
+evaluate_guard(None, state)  # always True
+evaluate_guard({"awakening_count": 1}, state)  # exact match
 evaluate_guard({"awakening_count": {"gt": 1}}, state)  # comparison
-evaluate_guard("my_module:my_func", state)        # Python callable
+evaluate_guard("my_module:my_func", state)  # Python callable
 ```
 
 ### Procedure Matching
@@ -79,10 +79,13 @@ The NiceGUI backend uses a renderer dispatch to map `task_type` to render functi
 ```python
 from slumber.plugins.ui.nicegui.renderers import register_renderer, get_renderer
 
+
 def render_my_task(step, container):
     from nicegui import ui
+
     with container:
         ui.label(f"Custom: {step.settings}")
+
 
 register_renderer("my_task", render_my_task)
 ```

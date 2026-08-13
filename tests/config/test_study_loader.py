@@ -24,9 +24,11 @@ class TestDiscoverStudyDir:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.delenv("STUDY_DIR", raising=False)
-        with patch.object(Path, "cwd", return_value=tmp_path):
-            with pytest.raises(FileNotFoundError, match="Study manifest"):
-                resolve_study_dir()
+        with (
+            patch.object(Path, "cwd", return_value=tmp_path),
+            pytest.raises(FileNotFoundError, match="Study manifest"),
+        ):
+            resolve_study_dir()
 
     def test_returns_study_dir_when_explicit_and_has_manifest(
         self, tmp_path: Path

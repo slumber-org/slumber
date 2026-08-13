@@ -67,7 +67,7 @@ class RunLayout(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_layout(self) -> "RunLayout":
+    def validate_layout(self) -> RunLayout:
         from slumber.runtime.run import VALID_RUN_LAYOUT_KEYS
 
         placeholders = re.findall(r"\{(\w+)\}", self.layout)
@@ -107,7 +107,7 @@ class Study(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     _manifest_path: Path | None = PrivateAttr(default=None)
-    _conditions: list["Condition"] = PrivateAttr(default_factory=list)
+    _conditions: list[Condition] = PrivateAttr(default_factory=list)
 
     study_id: str = Field(..., min_length=1, description="Unique study identifier.")
     name: str = Field(..., min_length=1, description="Human-readable study name.")
@@ -159,7 +159,7 @@ class Study(BaseModel):
         return self._manifest_path
 
     @property
-    def conditions(self) -> list["Condition"]:
+    def conditions(self) -> list[Condition]:
         """Conditions loaded from the study directory (set by load_study())."""
         return self._conditions
 

@@ -28,7 +28,7 @@ def init_sentry(study_id: str) -> bool:
         return False
 
     try:
-        import sentry_sdk  # noqa: PLC0415
+        import sentry_sdk
 
         sentry_sdk.init(dsn=dsn)
         sentry_sdk.set_tag("study_id", study_id)

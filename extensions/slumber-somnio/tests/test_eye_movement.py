@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-
 import ezmsg.core as ez
 import pytest
+from pydantic import ValidationError
 
 pytest.importorskip("slumber_somnio")
 
@@ -14,14 +14,13 @@ from slumber_somnio.units.eye_movement import (
     EyeMovementDetectionUnit,
 )
 
-
 # ---------------------------------------------------------------------------
 # Settings validation
 # ---------------------------------------------------------------------------
 
 
 def test_settings_requires_left_and_right_channel() -> None:
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         EyeMovementDetectionSettings.model_validate({})
 
 
@@ -54,7 +53,7 @@ def test_settings_defaults_match_somnio_defaults() -> None:
 
 
 def test_settings_rejects_negative_amplitude() -> None:
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         EyeMovementDetectionSettings.model_validate(
             {
                 "left_channel": "EOG_L",

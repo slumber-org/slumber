@@ -22,7 +22,6 @@ from slumber.supabase.utils import exit_unless_supabase_extra_installed
 from slumber.utils.errors import format_validation_error
 from slumber.utils.time import utc_now
 
-
 DEFAULT_STUDY_ID = "new_study"
 DEFAULT_BASE_DIR = Path(".")
 DEFAULT_STUDY_NAME = "New Study"
@@ -123,7 +122,8 @@ def _persist_scheduled_run_outcome(
         update_kwargs["run_directory"] = str(run_dir)
     try:
         update_run(client, run_row["id"], **update_kwargs)
-    except Exception as update_exc:
+    # TODO: [refactor] catch typed backend/network errors instead of Exception
+    except Exception as update_exc:  # noqa: BLE001
         logger.warning(
             "Failed to record run {} status {!r}: {}",
             run_row["id"],
@@ -344,7 +344,7 @@ def run_study_command(
     run_dir: Path | None = None
     try:
         run_dir = _execute_study_run(study, condition_name, context, resolved_dir)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - persist FAILED for any run error
         run_error = e
     finally:
         if scheduled:

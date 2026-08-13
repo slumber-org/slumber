@@ -4,7 +4,7 @@ pytest.importorskip("slumber_audio")
 
 import ezmsg.core as ez
 
-from slumber_audio.units import AudioPlayRequest, AudioPlayerSettings, AudioPlayerUnit
+from slumber_audio.units import AudioPlayerSettings, AudioPlayerUnit, AudioPlayRequest
 
 
 def test_unit_is_ezmsg_unit_subclass() -> None:

@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from slumber.schemas import Component, Connection, DAG
+from slumber.schemas import DAG, Component, Connection
 
 
 class TestComponent:

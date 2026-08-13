@@ -13,12 +13,11 @@ try:
 except ImportError:
     from importlib_metadata import entry_points  # type: ignore[import-untyped]
 
+import ezmsg.core as ez
 from loguru import logger
 
 from slumber.plugins.errors import PluginNotFoundError
 from slumber.plugins.ui.base import UIBackend
-
-import ezmsg.core as ez
 
 
 class EntryPointGroup(str, Enum):
@@ -81,7 +80,7 @@ def _load_entry_points(group: EntryPointGroup) -> dict[str, Any]:
             to_store = _resolve_plugin_for_group(group, entry_point.name, loaded)
             if to_store is not None:
                 result[entry_point.name] = to_store
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001
             logger.warning(
                 "Failed to load plugin {}[{}]: {}",
                 group.value,
@@ -97,7 +96,7 @@ class PluginRegistry:
     def __init__(self) -> None:
         self._plugins: dict[
             EntryPointGroup,
-            dict[str, type[Task] | type[ez.Unit] | type[UIBackend]],
+            dict[str, type[Task | ez.Unit | UIBackend]],
         ] = defaultdict(dict)
         self._load_all()
 
@@ -108,7 +107,7 @@ class PluginRegistry:
 
     def get_plugin(
         self, group: EntryPointGroup, key: str
-    ) -> type[Task] | type[ez.Unit] | type[UIBackend]:
+    ) -> type[Task | ez.Unit | UIBackend]:
         """Return the plugin for the given group and key.
 
         Args:

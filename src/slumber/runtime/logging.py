@@ -6,7 +6,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from slumber.runtime.run import resolve_path_template, RunContext
+from slumber.runtime.run import RunContext, resolve_path_template
 from slumber.schemas.study import Study
 
 

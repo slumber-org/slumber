@@ -19,12 +19,7 @@ def build_ui_backend_from_settings(
 
     Returns:
         Backend instance after ``configure(settings)``.
-
-    Raises:
-        ValueError: If ``settings`` is not a ``dict``.
     """
-    if not isinstance(settings, dict):
-        raise ValueError(f"settings must be a dict, got {type(settings).__name__}.")
     backend = backend_class()
     backend.configure(settings)
     return backend

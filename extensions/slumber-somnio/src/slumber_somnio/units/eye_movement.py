@@ -7,7 +7,6 @@ from collections.abc import AsyncGenerator
 import ezmsg.core as ez
 from loguru import logger
 from pydantic import Field
-
 from slumber.plugins.units import Settings
 from somnio.data.annotations import Event
 from somnio.data.timeseries import TimeSeries
@@ -175,33 +174,29 @@ class EyeMovementDetectionUnit(ez.Unit):
             ``(OUTPUT_PRIMITIVES, list[Event])`` when primitive events are detected.
         """
 
-        try:
-            sequences, primitives = detect_lr_eye_movements(
-                ts,
-                self.SETTINGS.left_channel,
-                self.SETTINGS.right_channel,
-                preprocess=self.SETTINGS.preprocess,
-                low_cutoff_hz=self.SETTINGS.low_cutoff_hz,
-                high_cutoff_hz=self.SETTINGS.high_cutoff_hz,
-                min_peak_amplitude_uv=self.SETTINGS.min_peak_amplitude_uv,
-                max_peak_amplitude_uv=self.SETTINGS.max_peak_amplitude_uv,
-                min_peak_gap_s=self.SETTINGS.min_peak_gap_s,
-                relative_peak_prominence=self.SETTINGS.relative_peak_prominence,
-                min_event_duration_s=self.SETTINGS.min_event_duration_s,
-                max_event_duration_s=self.SETTINGS.max_event_duration_s,
-                min_event_skewness=self.SETTINGS.min_event_skewness,
-                max_event_skewness=self.SETTINGS.max_event_skewness,
-                relative_baseline=self.SETTINGS.relative_baseline,
-                merge=self.SETTINGS.merge,
-                max_event_gap_s=self.SETTINGS.max_event_gap_s,
-                accepted_pattern=self.SETTINGS.accepted_pattern,
-                min_correlation=self.SETTINGS.min_correlation,
-                min_amplitude_ratio=self.SETTINGS.min_amplitude_ratio,
-                max_amplitude_ratio=self.SETTINGS.max_amplitude_ratio,
-            )
-        except Exception as exc:
-            logger.error("Eye-movement detection failed: {}", exc)
-            return
+        sequences, primitives = detect_lr_eye_movements(
+            ts,
+            self.SETTINGS.left_channel,
+            self.SETTINGS.right_channel,
+            preprocess=self.SETTINGS.preprocess,
+            low_cutoff_hz=self.SETTINGS.low_cutoff_hz,
+            high_cutoff_hz=self.SETTINGS.high_cutoff_hz,
+            min_peak_amplitude_uv=self.SETTINGS.min_peak_amplitude_uv,
+            max_peak_amplitude_uv=self.SETTINGS.max_peak_amplitude_uv,
+            min_peak_gap_s=self.SETTINGS.min_peak_gap_s,
+            relative_peak_prominence=self.SETTINGS.relative_peak_prominence,
+            min_event_duration_s=self.SETTINGS.min_event_duration_s,
+            max_event_duration_s=self.SETTINGS.max_event_duration_s,
+            min_event_skewness=self.SETTINGS.min_event_skewness,
+            max_event_skewness=self.SETTINGS.max_event_skewness,
+            relative_baseline=self.SETTINGS.relative_baseline,
+            merge=self.SETTINGS.merge,
+            max_event_gap_s=self.SETTINGS.max_event_gap_s,
+            accepted_pattern=self.SETTINGS.accepted_pattern,
+            min_correlation=self.SETTINGS.min_correlation,
+            min_amplitude_ratio=self.SETTINGS.min_amplitude_ratio,
+            max_amplitude_ratio=self.SETTINGS.max_amplitude_ratio,
+        )
 
         if sequences:
             logger.debug("Emitting {} eye-movement sequence(s).", len(sequences))

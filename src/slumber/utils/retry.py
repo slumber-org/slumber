@@ -33,7 +33,7 @@ def retry_sync(
                 if remaining < 0:
                     if on_attempts_exhausted is not None:
                         on_attempts_exhausted(exc)
-                    raise exc
+                    raise
             time.sleep(retry_delay_s)
 
 
@@ -60,5 +60,5 @@ async def retry_async(
                 if remaining < 0:
                     if on_attempts_exhausted is not None:
                         on_attempts_exhausted(exc)
-                    raise exc
+                    raise
             await asyncio.sleep(retry_delay_s)

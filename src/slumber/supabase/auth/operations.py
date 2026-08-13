@@ -7,12 +7,14 @@ the authenticated user.
 
 from __future__ import annotations
 
+from loguru import logger
+
 from slumber.supabase.auth.client import (
+    clear_saved_session,
     get_authenticated_client,
     get_client,
     load_session,
     save_session_from_response,
-    clear_saved_session,
 )
 
 
@@ -66,8 +68,9 @@ def sign_out() -> None:
             client = get_client()
             client.auth.set_session(tokens[0], tokens[1])
             client.auth.sign_out()
-    except (ValueError, Exception):
-        pass
+    # TODO: [refactor] catch typed auth/SDK errors instead of Exception
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Remote sign-out skipped: {}", exc)
     clear_saved_session()
 
 

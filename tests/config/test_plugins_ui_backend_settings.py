@@ -13,7 +13,7 @@ from slumber.plugins.ui.headless import HeadlessUIBackend
 from slumber.plugins.ui.nicegui.config import NiceGUISettings
 from slumber.runtime.run import RunContext
 from slumber.schemas.condition import Condition
-from slumber.schemas.study import Study, UI
+from slumber.schemas.study import UI, Study
 
 
 class DummyNiceGUIBackend(UIBackend):

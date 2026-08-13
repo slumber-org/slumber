@@ -9,8 +9,8 @@ from typer.testing import CliRunner
 
 from slumber.cli.doctor import (
     CheckStatus,
-    check_environment,
     check_dependencies,
+    check_environment,
     check_supabase_connectivity,
     run_doctor,
 )

@@ -11,8 +11,8 @@ from pathlib import Path
 import ezmsg.core as ez
 from loguru import logger
 from pydantic import BaseModel, Field
-
 from slumber.plugins.units import Settings
+
 from slumber_audio.player import AudioPlayer
 
 

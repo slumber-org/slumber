@@ -8,7 +8,8 @@ use the placeholder renderer. Stage 3 registers concrete renderers
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from nicegui import ui
 
@@ -45,7 +46,7 @@ def get_renderer(task_type: str) -> RenderFunc:
     return _RENDERERS.get(task_type, render_placeholder)
 
 
-def render_placeholder(step: "Step", container: Any) -> None:
+def render_placeholder(step: Step, container: Any) -> None:
     """Default placeholder renderer: show task type and settings.
 
     Args:

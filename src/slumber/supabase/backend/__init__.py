@@ -18,9 +18,9 @@ from slumber.supabase.backend.session import (
 from slumber.supabase.backend.study import create_study
 
 __all__ = [
+    "RunStatus",
     "create_participant",
     "create_participant_for_user",
-    "RunStatus",
     "create_run",
     "create_session",
     "create_study",

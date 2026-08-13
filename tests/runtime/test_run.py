@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 from slumber.runtime import RunContext, create_run_dir, resolve_run_dir
 from slumber.schemas.study import RunLayout, Study
 
@@ -19,13 +18,13 @@ def _study(
 
 
 def _ctx(**overrides: str) -> RunContext:
-    defaults = dict(
-        study_id="s1",
-        run_id="r001",
-        condition_id="ctrl",
-        participant_id="001",
-        session_id="ses01",
-    )
+    defaults = {
+        "study_id": "s1",
+        "run_id": "r001",
+        "condition_id": "ctrl",
+        "participant_id": "001",
+        "session_id": "ses01",
+    }
     return RunContext(**{**defaults, **overrides})  # type: ignore[arg-type]
 
 

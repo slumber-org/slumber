@@ -63,9 +63,11 @@ from pydantic import Field
 
 from slumber.plugins.units import Settings
 
+
 class MyUnitSettings(Settings):
     enabled: bool = True
     count: int = Field(ge=0, le=100)
+
 
 class MyUnit(ez.Unit):
     SETTINGS = MyUnitSettings

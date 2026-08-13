@@ -10,14 +10,14 @@ from pathlib import Path
 import pytest
 
 from slumber.supabase.auth.client import (
+    _PACKAGE_NAME,
     SESSION_FILENAME,
-    get_session_path,
-    get_client,
-    clear_saved_session,
-    load_session,
     _save_session,
+    clear_saved_session,
+    get_client,
+    get_session_path,
+    load_session,
 )
-from slumber.supabase.auth.client import _PACKAGE_NAME
 
 
 def test_get_session_path_default(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from slumber.schemas import Condition, DAG, Procedure, load_conditions_from_dir
+from slumber.schemas import DAG, Condition, Procedure, load_conditions_from_dir
 
 
 def _minimal_dag() -> dict:

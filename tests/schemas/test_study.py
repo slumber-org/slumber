@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from slumber.schemas import RunLayout, LoggingConfig, Study, UI
+from slumber.schemas import UI, LoggingConfig, RunLayout, Study
 
 
 class TestUI:

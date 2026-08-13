@@ -56,9 +56,7 @@ def record_event(
     )
 
 
-def resolve_audit_path(
-    config: "AuditConfig", context: "RunContext", run_dir: Path
-) -> Path:
+def resolve_audit_path(config: AuditConfig, context: RunContext, run_dir: Path) -> Path:
     """Expand placeholders in ``config.path`` and resolve relative to *run_dir*.
 
     Mirrors the placeholder/relative-path handling in
@@ -76,8 +74,8 @@ def resolve_audit_path(
 
 
 def configure_audit_logging(
-    study: "Study",
-    context: "RunContext",
+    study: Study,
+    context: RunContext,
     run_dir: Path,
 ) -> list[int]:
     """Add a loguru handler that writes audit records as JSONL.
@@ -118,7 +116,7 @@ def configure_audit_logging(
     return [handler_id]
 
 
-def _enabled_categories(cfg: "AuditConfig") -> set[str]:
+def _enabled_categories(cfg: AuditConfig) -> set[str]:
     cats = cfg.categories
     enabled: set[str] = set()
     if cats.ui:

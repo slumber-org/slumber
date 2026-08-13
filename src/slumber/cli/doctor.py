@@ -23,7 +23,6 @@ from slumber.constants import (
 )
 from slumber.supabase import is_supabase_extra_installed
 
-
 _ENV_CHECKS: list[tuple[str, str, bool]] = [
     # --- Optional: Supabase ---
     (SUPABASE_URL_ENV, "optional; required for all Supabase operations", False),
@@ -205,7 +204,8 @@ def check_supabase_connectivity() -> CheckResult:
         client = create_client(url, key)
         client.auth.get_user()
         return CheckResult(name="connectivity", status=CheckStatus.OK, message="ok")
-    except Exception as exc:
+    # TODO: [refactor] catch typed client/network errors instead of Exception
+    except Exception as exc:  # noqa: BLE001
         return CheckResult(
             name="connectivity",
             status=CheckStatus.FAIL,

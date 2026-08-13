@@ -1,6 +1,6 @@
 """SLUMBER audio playback extension."""
 
 from slumber_audio.player import AudioPlayer
-from slumber_audio.units import AudioPlayRequest, AudioPlayerUnit
+from slumber_audio.units import AudioPlayerUnit, AudioPlayRequest
 
-__all__ = ["AudioPlayer", "AudioPlayRequest", "AudioPlayerUnit"]
+__all__ = ["AudioPlayRequest", "AudioPlayer", "AudioPlayerUnit"]

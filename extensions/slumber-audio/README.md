@@ -26,9 +26,9 @@ uv add --editable ./extensions/slumber-audio
 from pathlib import Path
 from slumber_audio import AudioPlayer
 
-player = AudioPlayer()          # optional: device=0 to select output device
-player.play(Path("tone.wav"))   # blocks until done
-player.stop()                   # cancel from another thread
+player = AudioPlayer()  # optional: device=0 to select output device
+player.play(Path("tone.wav"))  # blocks until done
+player.stop()  # cancel from another thread
 ```
 
 ### ezmsg unit
