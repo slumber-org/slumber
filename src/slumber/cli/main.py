@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib import metadata
 from pathlib import Path
 
 import typer
@@ -21,6 +22,13 @@ app.command("doctor")(doctor_command)
 load_cli_extensions(app)
 
 
+def _version_callback(value: bool) -> None:
+    """Print the installed slumber version and exit when ``--version`` is passed."""
+    if value:
+        typer.echo(f"slumber {metadata.version('slumber')}")
+        raise typer.Exit()
+
+
 @app.callback()
 def _callback(
     env: Path | None = typer.Option(
@@ -37,6 +45,13 @@ def _callback(
         "--verbose",
         "-v",
         help="Enable verbose logging (DEBUG level).",
+    ),
+    show_version: bool = typer.Option(
+        False,
+        "--version",
+        callback=_version_callback,
+        is_eager=True,
+        help="Show the slumber version and exit.",
     ),
 ) -> None:
     """SLUMBER — Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings."""

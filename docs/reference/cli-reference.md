@@ -10,6 +10,7 @@ Core 0.1 ships `study` and `doctor`. Optional packages may attach more groups vi
 |--------|-------------|
 | `--env`, `-e` PATH | Load a specific environment file (overrides auto-discovered `.env`). |
 | `--verbose`, `-v` | Enable verbose (DEBUG) logging. |
+| `--version` | Show the installed slumber version and exit. |
 | `--help` | Show help and exit. |
 
 ```bash
