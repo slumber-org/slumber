@@ -4,7 +4,7 @@ This guide walks you through installing SLUMBER so you can author a study packag
 
 ## System requirements
 
-- **Python 3.10+** (3.12+ recommended for development)
+- **Python 3.10–3.13** (3.12+ recommended for development)
 - **[uv](https://docs.astral.sh/uv/)** — recommended package manager; used in all examples below
 
 ## Installing SLUMBER

@@ -7,7 +7,7 @@ authors = [
     { name = "Ali Saberi", email = "ali.saberi96@gmail.com" },
     { name = "Tinke van Buijtene", email = "tinke@kpnmail.nl"}
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.14"
 dependencies = [
     "python-dotenv>=1.0.0",
     "ezmsg>=3.7.3",

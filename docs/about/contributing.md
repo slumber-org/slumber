@@ -10,7 +10,7 @@ Thanks for helping improve SLUMBER. Contributions are welcome, including:
 
 ### Prerequisites
 
-- **Python**: SLUMBER supports Python **3.10+**; for local development we recommend **Python 3.12+**.
+- **Python**: SLUMBER supports Python **3.10–3.13**; for local development we recommend **Python 3.12+** (see `.python-version`).
 - **uv**: Install the [uv](https://docs.astral.sh/uv/) package manager.
 
 ### Installation
