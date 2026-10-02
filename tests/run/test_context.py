@@ -1,19 +1,19 @@
-"""Tests for run directory layout (resolve_run_dir, create_run_dir)."""
+"""Tests for RunContext and run directory helpers."""
 
 from pathlib import Path
 
-from slumber.runtime import RunContext, create_run_dir, resolve_run_dir
-from slumber.schemas.study import RunLayout, Study
+from slumber.run import RunContext, create_run_dir, resolve_run_dir
+from slumber.schemas.study import VALID_RUN_LAYOUT_KEYS, RunLayout, Study
 
 
 def _study(
     layout: str = "sub-{participant_id}/ses-{session_id}/run-{run_id}",
-    base: str = "runs",
+    directory: str = "runs",
 ) -> Study:
     return Study(
         study_id="s1",
-        name="S1",
-        runs=RunLayout(base_directory=base, layout=layout),
+        study_name="S1",
+        runs=RunLayout(directory=directory, layout=layout),
     )
 
 
@@ -26,6 +26,14 @@ def _ctx(**overrides: str) -> RunContext:
         "session_id": "ses01",
     }
     return RunContext(**{**defaults, **overrides})  # type: ignore[arg-type]
+
+
+class TestRunContextKeys:
+    def test_layout_keys_match_context_fields(self) -> None:
+        import dataclasses
+
+        field_names = {f.name for f in dataclasses.fields(RunContext)}
+        assert set(VALID_RUN_LAYOUT_KEYS) == field_names
 
 
 class TestResolveRunDir:
@@ -41,8 +49,8 @@ class TestResolveRunDir:
         result = resolve_run_dir(study, _ctx(), tmp_path)
         assert result == (tmp_path / "runs" / "s1" / "ctrl" / "r001").resolve()
 
-    def test_custom_base_directory(self, tmp_path: Path) -> None:
-        study = _study(base="output", layout="{participant_id}")
+    def test_custom_directory(self, tmp_path: Path) -> None:
+        study = _study(directory="output", layout="{participant_id}")
         result = resolve_run_dir(study, _ctx(participant_id="P42"), tmp_path)
         assert result == (tmp_path / "output" / "P42").resolve()
 
@@ -54,7 +62,7 @@ class TestResolveRunDir:
         result = resolve_run_dir(_study(), _ctx(), tmp_path)
         assert result.is_absolute()
 
-    def test_optional_participant_session_format_as_empty(self, tmp_path: Path) -> None:
+    def test_optional_ids_omitted_from_layout(self, tmp_path: Path) -> None:
         study = _study(layout="{study_id}/{run_id}")
         ctx = RunContext(
             study_id="s1",

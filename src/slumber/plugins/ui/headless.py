@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from slumber.plugins.ui.base import UIBackend
 
 if TYPE_CHECKING:
-    from slumber.runtime.run import RunContext
+    from slumber.run import RunContext
     from slumber.schemas.condition import Condition
     from slumber.schemas.study import Study
 

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from pydantic import BaseModel
 
 if TYPE_CHECKING:
-    from slumber.runtime.run import RunContext
+    from slumber.run import RunContext
     from slumber.schemas.condition import Condition
     from slumber.schemas.study import Study
 

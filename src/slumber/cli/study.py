@@ -16,7 +16,7 @@ from slumber.config import (
     validate_study_plugins,
 )
 from slumber.constants import PARTICIPANT_ID_ENV, STUDY_DIR_ENV
-from slumber.runtime import RunContext, init_sentry, run_study
+from slumber.run import RunContext, run_study
 from slumber.schemas.study import Study
 from slumber.supabase.utils import exit_unless_supabase_extra_installed
 from slumber.utils.errors import format_validation_error
@@ -35,8 +35,7 @@ def _execute_study_run(
     context: RunContext,
     resolved_dir: Path,
 ) -> Path:
-    """Initialize Sentry and execute the study run; returns the run directory."""
-    init_sentry(study.study_id)
+    """Execute the study run via RunEngine; returns the run directory."""
     return run_study(study, condition_name, context, resolved_dir)
 
 
@@ -306,7 +305,6 @@ def run_study_command(
     row, the active session window, and Run create/update (requires
     ``slumber[supabase]`` and ``slumber auth login``). Do not pass ``--condition``.
 
-    Set ``SENTRY_DSN`` to enable Sentry error monitoring.
     """
     if scheduled and condition_name is not None:
         typer.echo(

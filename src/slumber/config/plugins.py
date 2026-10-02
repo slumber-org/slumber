@@ -397,22 +397,6 @@ def _validate_ui(study: Study, registry: PluginRegistry) -> list[str]:
     return errors
 
 
-def resolve_ui_backend_from_ui(ui: PluginSpec, registry: PluginRegistry) -> Any:
-    """Legacy orchestrator hook (pre-0.1 UIBackend entry points).
-
-    Kept so ``slumber.runtime`` can still import while RunEngine lands. New
-    code should use :func:`resolve_plugin_spec` with :attr:`PluginGroup.UI`.
-
-    Raises:
-        NotImplementedError: Always; legacy backends are no longer registered.
-    """
-    del registry  # unused; signature preserved for callers
-    raise NotImplementedError(
-        f"Legacy UI backend resolution for type {ui.type!r} was removed. "
-        "Use resolve_plugin_spec(..., PluginGroup.UI) and the 0.1 RunEngine."
-    )
-
-
 def validate_study_plugins(
     study: Study,
     registry: PluginRegistry | None = None,

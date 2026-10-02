@@ -25,7 +25,7 @@ from slumber.supabase.utils import SUPABASE_INSTALL_HINT, is_supabase_extra_inst
 if TYPE_CHECKING:
     from pydantic import BaseModel
 
-    from slumber.runtime.run import RunContext
+    from slumber.run import RunContext
     from slumber.schemas.condition import Condition
     from slumber.schemas.study import Study
 

@@ -2,6 +2,9 @@
 
 All pages read/write :class:`AppState`. Page navigation is driven by
 setting :attr:`AppState.current_page`.
+
+Procedure trigger / guard dispatch was removed with the 0.1 RunEngine cutover.
+This module remains only until the NiceGUI stack is rewritten for phases.
 """
 
 from __future__ import annotations
@@ -12,12 +15,10 @@ from typing import TYPE_CHECKING, Any
 from loguru import logger
 
 from slumber.plugins.ui.nicegui.config import NiceGUISettings
-from slumber.runtime.events import SessionState, get_triggered_procedures
 
 if TYPE_CHECKING:
-    from slumber.runtime.run import RunContext
+    from slumber.run import RunContext
     from slumber.schemas.condition import Condition
-    from slumber.schemas.procedure import Procedure
     from slumber.schemas.study import Study
 
 
@@ -33,9 +34,7 @@ class AppState:
     authenticated: bool = False
     current_page: str = "welcome"
 
-    session_state: SessionState = field(default_factory=SessionState)
-
-    active_procedures: list[tuple[str, Procedure]] = field(default_factory=list)
+    active_procedures: list[tuple[str, Any]] = field(default_factory=list)
     active_procedure_index: int = 0
     current_step_index: int = 0
     completed_steps: set[int] = field(default_factory=set)
@@ -50,7 +49,7 @@ class AppState:
         return self.active_procedures[self.active_procedure_index][0]
 
     @property
-    def current_procedure(self) -> Procedure:
+    def current_procedure(self) -> Any:
         """Currently active procedure."""
         return self.active_procedures[self.active_procedure_index][1]
 
@@ -78,29 +77,20 @@ class AppState:
         return len(self.completed_steps) >= self.current_procedure.n_steps
 
     def fire_event(self, event: str) -> None:
-        """Fire a session event.
+        """Handle a legacy page event without procedure trigger matching.
 
-        Updates session state counters, finds matching procedures, and
-        navigates to the procedure page if any match. If no procedures
-        match and the event is ``session_end``, navigates to completion.
+        Procedure ``when`` / trigger dispatch is gone. ``session_end`` still
+        navigates to the complete page; other events only record ``_last_event``.
 
         Args:
             event: Session event name (e.g. ``"session_start"``).
         """
         self._last_event = event
-        self.session_state.handle_event(event)
-
-        triggered = get_triggered_procedures(
-            event, self.condition.procedures, self.session_state
+        logger.info(
+            "Event {!r}: procedure dispatch removed; no procedures triggered",
+            event,
         )
-        logger.info("Event {!r}: {} procedure(s) triggered", event, len(triggered))
-
-        if triggered:
-            self.active_procedures = triggered
-            self.active_procedure_index = 0
-            self._reset_step_state()
-            self.current_page = "procedure"
-        elif event == "session_end":
+        if event == "session_end":
             self.current_page = "complete"
 
     def advance_to_next_procedure(self) -> None:

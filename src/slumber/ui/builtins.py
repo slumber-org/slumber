@@ -5,16 +5,25 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 from slumber.plugins.base import ConfiguredPlugin
 from slumber.schemas.study import GuiSettings, StepperLayoutDefaults
+from slumber.ui.backend import MountedActivity, UIBackend
+from slumber.ui.headless import HeadlessBackend, HeadlessSettings
 
-
-class HeadlessSettings(BaseModel):
-    """Headless UI accepts no settings (empty model, extra forbidden)."""
-
-    model_config = ConfigDict(extra="forbid")
+__all__ = [
+    "BUILT_IN_LAYOUTS",
+    "BUILT_IN_UI",
+    "GuiBackend",
+    "HeadlessBackend",
+    "HeadlessSettings",
+    "HubLayout",
+    "HubLayoutSettings",
+    "StepperLayout",
+]
 
 
 class HubLayoutSettings(BaseModel):
@@ -23,16 +32,33 @@ class HubLayoutSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class GuiBackend(ConfiguredPlugin):
+class GuiBackend(UIBackend):
     """Participant GUI (NiceGUI). Full mount lives in the UI run stack."""
 
     settings_model = GuiSettings
 
+    def start(self, engine: Any) -> None:
+        """GUI event loop is not implemented in this package slice yet."""
+        raise NotImplementedError(
+            "ui.type 'gui' is not implemented yet; use headless or wait for the UI stack."
+        )
 
-class HeadlessBackend(ConfiguredPlugin):
-    """No window; activities that finish on mount auto-complete."""
+    def apply_frame(self, frame: dict[str, Any]) -> None:
+        """Apply AppFrame overrides (implemented with the GUI stack)."""
+        raise NotImplementedError("gui apply_frame is not implemented yet.")
 
-    settings_model = HeadlessSettings
+    def mount_phase(
+        self,
+        phase: Any,
+        layout: ConfiguredPlugin,
+        activities: list[MountedActivity],
+    ) -> None:
+        """Mount phase body (implemented with the GUI stack)."""
+        raise NotImplementedError("gui mount_phase is not implemented yet.")
+
+    def unmount_phase(self) -> None:
+        """Unmount phase body (implemented with the GUI stack)."""
+        raise NotImplementedError("gui unmount_phase is not implemented yet.")
 
 
 class StepperLayout(ConfiguredPlugin):

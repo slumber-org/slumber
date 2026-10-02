@@ -6,8 +6,19 @@ import dataclasses
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from slumber.schemas.study import VALID_RUN_LAYOUT_KEYS
+
 if TYPE_CHECKING:
     from slumber.schemas.study import Study
+
+__all__ = [
+    "VALID_RUN_LAYOUT_KEYS",
+    "RunContext",
+    "create_run_dir",
+    "format_with_run_context",
+    "resolve_run_dir",
+    "run_context_as_dict",
+]
 
 
 @dataclasses.dataclass
@@ -24,16 +35,12 @@ class RunContext:
     session_id: str | None = None
 
 
-VALID_RUN_LAYOUT_KEYS: frozenset[str] = frozenset(
-    f.name for f in dataclasses.fields(RunContext)
-)
-
-
-def run_context_as_dict(context: RunContext) -> dict[str, str]:
+def run_context_as_dict(context: RunContext) -> dict[str, str | None]:
+    """Return run context fields as a plain dict."""
     return dataclasses.asdict(context)
 
 
-def format_with_run_context(template: str, context: RunContext, **extra) -> str:
+def format_with_run_context(template: str, context: RunContext, **extra: object) -> str:
     """Format a string template using run context placeholders.
 
     Args:
@@ -47,42 +54,11 @@ def format_with_run_context(template: str, context: RunContext, **extra) -> str:
     return template.format(**run_context_as_dict(context), **extra)
 
 
-def resolve_path_template(
-    template: str,
-    context: RunContext,
-    *,
-    base_dir: Path | None = None,
-    **extra: str,
-) -> Path:
-    """Resolve a formatted path template relative to a base directory.
-
-    This expands placeholders in *template* using :class:`RunContext` (and any
-    *extra* placeholders), then resolves the resulting path relative to
-    *base_dir* when it is not already absolute.
-
-    Args:
-        template: Path template string (may be relative or absolute).
-        context: Run context values for placeholder expansion.
-        base_dir: Directory used to resolve relative paths. Optional if *template* is absolute.
-        **extra: Additional placeholders to inject for formatting.
-
-    Returns:
-        Resolved path (absolute if template is absolute, otherwise under base_dir).
-    """
-    expanded = format_with_run_context(template, context, **extra)
-    path = Path(expanded)
-    if not path.is_absolute():
-        if base_dir is None:
-            raise ValueError("base_dir is required when template is relative")
-        path = base_dir / path
-    return path.resolve()
-
-
 def resolve_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
     """Resolve the run directory path for a given run context.
 
-    Substitutes placeholders in study.runs.layout using the run context and
-    joins the result under study_dir / study.runs.base_directory. Does not
+    Substitutes placeholders in ``study.runs.layout`` using the run context and
+    joins the result under ``study_dir / study.runs.directory``. Does not
     create the directory.
 
     Args:
@@ -93,14 +69,17 @@ def resolve_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
     Returns:
         Resolved (absolute) path to the run directory.
     """
-    base_dir = study_dir / study.runs.base_directory
-    return resolve_path_template(study.runs.layout, context, base_dir=base_dir)
+    expanded = format_with_run_context(study.runs.layout, context)
+    path = Path(expanded)
+    if not path.is_absolute():
+        path = study_dir / study.runs.directory / path
+    return path.resolve()
 
 
 def create_run_dir(study: Study, context: RunContext, study_dir: Path) -> Path:
     """Create the run directory for a given run context.
 
-    Calls resolve_run_dir() and creates the directory (including any parents).
+    Calls :func:`resolve_run_dir` and creates the directory (including parents).
 
     Args:
         study: Loaded study manifest.
