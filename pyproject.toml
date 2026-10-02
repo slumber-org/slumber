@@ -28,6 +28,9 @@ sleep = "slumber.ui.activities.sleep:SleepActivity"
 clock = "slumber.pipeline.units.clock:ClockUnit"
 jsonl_writer = "slumber.pipeline.units.jsonl_writer:JsonlWriterUnit"
 
+# Extensions may register extra Typer apps under slumber.cli (e.g. auth, db).
+# Core discovers them at startup via slumber.cli.extensions.load_cli_extensions.
+
 [project.optional-dependencies]
 somnio = [
     "slumber-somnio",

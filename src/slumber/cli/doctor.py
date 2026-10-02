@@ -1,4 +1,4 @@
-"""slumber doctor: environment, connectivity, and dependency checks."""
+"""slumber doctor: local environment and dependency checks."""
 
 from __future__ import annotations
 
@@ -9,76 +9,29 @@ from enum import Enum
 
 import typer
 
-from slumber.constants import (
-    DATABASE_URL_ENV,
-    PARTICIPANT_ID_ENV,
-    SENTRY_DSN_ENV,
-    SESSION_FILE_ENV,
-    STUDY_DIR_ENV,
-    STUDY_ID_ENV,
-    SUPABASE_ANON_KEY_ENV,
-    SUPABASE_SERVICE_ROLE_KEY_ENV,
-    SUPABASE_URL_ENV,
-    USER_ID_ENV,
-)
-from slumber.supabase import is_supabase_extra_installed
+from slumber.constants import PARTICIPANT_ID_ENV, STUDY_DIR_ENV
 
 _ENV_CHECKS: list[tuple[str, str, bool]] = [
-    # --- Optional: Supabase ---
-    (SUPABASE_URL_ENV, "optional; required for all Supabase operations", False),
-    (
-        SUPABASE_ANON_KEY_ENV,
-        "optional; required for Supabase auth and API access",
-        False,
-    ),
-    (DATABASE_URL_ENV, "optional; required for slumber db upgrade (migrations)", False),
-    (
-        SUPABASE_SERVICE_ROLE_KEY_ENV,
-        "optional; required for admin commands: participant, session, condition sync",
-        False,
-    ),
-    # --- Optional: CLI convenience defaults ---
     (
         STUDY_DIR_ENV,
-        "optional; default study folder path for study/condition commands",
+        "optional; default study folder path for study commands",
         False,
     ),
-    (
-        STUDY_ID_ENV,
-        "optional; default study ID for participant and session commands",
-        False,
-    ),
-    (USER_ID_ENV, "optional; default auth user UUID for participant commands", False),
     (
         PARTICIPANT_ID_ENV,
-        "optional; default participant ID for session commands",
-        False,
-    ),
-    (
-        SESSION_FILE_ENV,
-        "optional; override default session file path (~/.config/slumber/session.json)",
-        False,
-    ),
-    # --- Optional: monitoring ---
-    (
-        SENTRY_DSN_ENV,
-        "optional; enables Sentry error monitoring during study runs",
+        "optional; used when run layout includes {participant_id}",
         False,
     ),
 ]
 
 _DEPS: list[tuple[str, bool]] = [
     ("ezmsg", True),
-    ("supabase", False),
     ("nicegui", False),
-    ("sentry_sdk", False),
 ]
 
 _DEP_DESCRIPTIONS: dict[str, str] = {
     "ezmsg": "data acquisition backbone",
-    "supabase": "optional; cloud backend (pip install slumber[supabase] or uv sync --extra supabase)",
     "nicegui": "optional; participant UI (pip install slumber[nicegui] or uv sync --extra nicegui)",
-    "sentry_sdk": "optional; enables Sentry run monitoring (pip install slumber[sentry] or uv sync --extra sentry)",
 }
 
 
@@ -119,29 +72,23 @@ class DoctorReport:
     """Aggregated results from all doctor checks."""
 
     env: list[CheckResult] = field(default_factory=list)
-    connectivity: list[CheckResult] = field(default_factory=list)
     dependencies: list[CheckResult] = field(default_factory=list)
 
     @property
     def failures(self) -> list[CheckResult]:
         """All required checks that failed."""
-        all_checks = self.env + self.connectivity + self.dependencies
+        all_checks = self.env + self.dependencies
         return [c for c in all_checks if c.required and c.status == CheckStatus.FAIL]
 
 
 def check_environment() -> list[CheckResult]:
-    """Check that expected environment variables are present.
+    """Check that expected local environment variables are present.
 
     Returns:
         List of CheckResult, one per env var.
     """
     results = []
     for var, description, required in _ENV_CHECKS:
-        if (
-            var in (SUPABASE_URL_ENV, SUPABASE_ANON_KEY_ENV)
-            and not is_supabase_extra_installed()
-        ):
-            required = False
         value = os.getenv(var, "").strip()
         if value:
             results.append(
@@ -170,50 +117,6 @@ def check_environment() -> list[CheckResult]:
     return results
 
 
-def check_supabase_connectivity() -> CheckResult:
-    """Try to reach the Supabase project and execute a lightweight query.
-
-    Skipped when the ``supabase`` extra is not installed or when
-    SUPABASE_URL / SUPABASE_ANON_KEY are not set.
-
-    Returns:
-        CheckResult for the connectivity check.
-    """
-    if not is_supabase_extra_installed():
-        return CheckResult(
-            name="connectivity",
-            status=CheckStatus.SKIP,
-            message="skipped (install slumber[supabase] for Supabase client)",
-            required=False,
-        )
-
-    url = os.getenv(SUPABASE_URL_ENV, "").strip()
-    key = os.getenv(SUPABASE_ANON_KEY_ENV, "").strip()
-
-    if not url or not key:
-        return CheckResult(
-            name="connectivity",
-            status=CheckStatus.SKIP,
-            message="skipped (SUPABASE_URL or SUPABASE_ANON_KEY not set)",
-            required=False,
-        )
-
-    try:
-        from supabase import create_client
-
-        client = create_client(url, key)
-        client.auth.get_user()
-        return CheckResult(name="connectivity", status=CheckStatus.OK, message="ok")
-    # TODO: [refactor] catch typed client/network errors instead of Exception
-    except Exception as exc:  # noqa: BLE001
-        return CheckResult(
-            name="connectivity",
-            status=CheckStatus.FAIL,
-            message=f"connection error: {exc}",
-            required=True,
-        )
-
-
 def check_dependencies() -> list[CheckResult]:
     """Check whether declared packages are importable.
 
@@ -223,14 +126,11 @@ def check_dependencies() -> list[CheckResult]:
     results = []
     for package, required in _DEPS:
         description = _DEP_DESCRIPTIONS[package]
-        if package == "supabase":
-            installed = is_supabase_extra_installed()
-        else:
-            try:
-                importlib.import_module(package)
-                installed = True
-            except ImportError:
-                installed = False
+        try:
+            importlib.import_module(package)
+            installed = True
+        except ImportError:
+            installed = False
         if installed:
             results.append(
                 CheckResult(
@@ -271,22 +171,19 @@ def run_doctor() -> DoctorReport:
     """Run all doctor checks and return the report.
 
     Returns:
-        DoctorReport with results for env, connectivity, and dependencies.
+        DoctorReport with results for env and dependencies.
     """
-    report = DoctorReport(
+    return DoctorReport(
         env=check_environment(),
-        connectivity=[check_supabase_connectivity()],
         dependencies=check_dependencies(),
     )
-    return report
 
 
 def doctor_command() -> None:
-    """Check environment variables, Supabase connectivity, and optional dependencies."""
+    """Check local environment variables and optional dependencies."""
     report = run_doctor()
 
     _print_section("Environment", report.env, name_width=28)
-    _print_section("Supabase", report.connectivity, name_width=28)
     _print_section("Dependencies", report.dependencies, name_width=28)
 
     typer.echo("")

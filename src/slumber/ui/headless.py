@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
@@ -9,6 +10,10 @@ from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
 from slumber.ui.backend import MountedActivity, UIBackend
+
+# Brief pause before auto ``end_sleep`` so a just-started pipeline subprocess can
+# reach unit ``initialize`` (e.g. create ``clock.jsonl``) before ``stop_pipeline``.
+_SLEEP_END_SETTLE_S = 0.5
 
 if TYPE_CHECKING:
     from slumber.plugins.base import ConfiguredPlugin
@@ -124,6 +129,7 @@ class HeadlessBackend(UIBackend):
                     "headless: emitting end_sleep for activity {!r}",
                     mounted.config.id,
                 )
+                time.sleep(_SLEEP_END_SETTLE_S)
                 engine.emit("end_sleep", source_activity_id=mounted.config.id)
 
     def unmount_phase(self) -> None:

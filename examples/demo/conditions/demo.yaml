@@ -1,0 +1,79 @@
+name: demo
+entry: setup
+
+phases:
+  - id: setup
+    title: Setup
+    layout:
+      type: stepper
+      settings:
+        allow_skip: true
+    activities:
+      - id: welcome
+        title: Welcome
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/intro.md" }
+    on:
+      - event: phase_completed
+        do:
+          - start_pipeline: main
+          - start_phase: sleep
+
+  - id: sleep
+    title: Sleep
+    frame:
+      header: false
+      footer: false
+    layout:
+      type: hub
+    activities:
+      - id: sleep
+        type: sleep
+        settings:
+          wake_button: "I'm Awake"
+          end_button: "End Session"
+        on:
+          - event: marked_awake
+            do: [{ start_phase: awakening }]
+          - event: end_sleep
+            do:
+              - stop_pipeline: main
+              - start_phase: morning
+
+  - id: awakening
+    title: Awakening
+    layout:
+      type: stepper
+    activities:
+      - id: awake
+        title: You're awake
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/awakening.md" }
+    on:
+      - event: phase_completed
+        do: [{ start_phase: sleep }]
+
+  - id: morning
+    title: Morning
+    layout:
+      type: stepper
+    activities:
+      - id: complete
+        title: Session complete
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/morning.md" }
+    on:
+      - event: phase_completed
+        do: [{ end_run }]
+
+pipelines:
+  - id: main
+    units:
+      - id: clock
+        type: clock
+        settings: { rate: 1.0 }
+      - id: store
+        type: jsonl_writer
+        settings: { path: "{run_dir}/clock.jsonl" }
+    connections:
+      - [clock/OUTPUT, store/INPUT]

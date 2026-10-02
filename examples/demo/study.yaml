@@ -1,0 +1,15 @@
+study_id: demo
+study_name: Demo Study
+ui:
+  type: gui
+  settings:
+    frame:
+      header:
+        title: "{study_name}"
+    layouts:
+      stepper:
+        previous_button: Previous
+        next_button: Next
+        complete_button: Complete
+        show_activity_list: true
+        allow_skip: false

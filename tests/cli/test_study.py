@@ -2,7 +2,6 @@
 
 from importlib.resources import as_file, files
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -65,17 +64,13 @@ class TestInitStudy:
     def test_creates_env_inside_study_folder_when_requested(
         self, tmp_path: Path
     ) -> None:
-        """With create_env_example=True, .env is created from study template in config (no DATABASE_URL/service role)."""
+        """With create_env_example=True, .env is created from the study template."""
         study_path = init_study(
             tmp_path, "s1", create_env_example=True, create_gitignore=False
         )
         env_file = study_path / ".env"
         assert env_file.is_file()
         content = env_file.read_text(encoding="utf-8")
-        assert "SUPABASE_URL" in content
-        # Study template does not set DATABASE_URL or service role (researcher .env has those).
-        assert "DATABASE_URL=" not in content
-        assert "SUPABASE_SERVICE_ROLE_KEY=" not in content
         ref = files("slumber.config.templates") / "env"
         with as_file(ref) as path:
             expected = path.read_text(encoding="utf-8")
@@ -163,7 +158,6 @@ class TestStudyInitCLI:
         study_path = tmp_path / "proj-study"
         assert (study_path / ".env").is_file()
         assert (study_path / ".gitignore").is_file()
-        assert "SUPABASE_URL" in (study_path / ".env").read_text(encoding="utf-8")
         content = (study_path / ".gitignore").read_text(encoding="utf-8")
         assert ".env" in content
         assert ".env.*" in content
@@ -185,7 +179,7 @@ class TestStudyInitCLI:
         )
         assert result.exit_code == 0
         content = (tmp_path / "x" / "study.yaml").read_text(encoding="utf-8")
-        assert "name: My Study Name" in content
+        assert "study_name: My Study Name" in content
 
     def test_exits_when_dir_exists(self, runner: CliRunner, tmp_path: Path) -> None:
         """CLI exits with code 1 when study directory already exists."""
@@ -248,35 +242,23 @@ class TestStudyInitCLI:
         assert result.exit_code == 0
         assert not (tmp_path / "z" / ".gitignore").exists()
 
-    @pytest.mark.supabase
-    def test_register_calls_supabase_create_study(
+    def test_register_flag_is_not_accepted(
         self, runner: CliRunner, tmp_path: Path
     ) -> None:
-        """With --register, CLI calls Supabase create_study after filesystem init."""
-        with (
-            patch("slumber.supabase.auth.get_client") as mock_get_client,
-            patch("slumber.supabase.backend.study.create_study") as mock_create,
-        ):
-            mock_get_client.return_value = object()
-            result = runner.invoke(
-                app,
-                [
-                    "study",
-                    "init",
-                    "--base-dir",
-                    str(tmp_path),
-                    "--study-id",
-                    "reg-study",
-                    "--name",
-                    "Reg Study",
-                    "--register",
-                ],
-            )
-        assert result.exit_code == 0
-        mock_get_client.assert_called_once_with(use_service_role=True)
-        mock_create.assert_called_once()
-        call_args = mock_create.call_args[0]
-        assert call_args[1] == "reg-study"
-        assert call_args[2] == "Reg Study"
-        assert "Created study at" in result.output
-        assert "Registered study 'reg-study'" in result.output
+        """Core study init no longer accepts --register (extension concern)."""
+        result = runner.invoke(
+            app,
+            [
+                "study",
+                "init",
+                "--base-dir",
+                str(tmp_path),
+                "--study-id",
+                "reg-study",
+                "--name",
+                "Reg Study",
+                "--register",
+            ],
+        )
+        assert result.exit_code != 0
+        assert "No such option" in result.output or "register" in result.output.lower()
