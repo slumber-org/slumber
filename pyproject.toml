@@ -20,12 +20,13 @@ dependencies = [
 [project.scripts]
 slumber = "slumber:main"
 
-[project.entry-points."slumber.tasks"]
-instruction = "slumber.plugins.tasks.instruction:InstructionTask"
+[project.entry-points."slumber.activities"]
+instruction = "slumber.ui.activities.instruction:InstructionActivity"
+sleep = "slumber.ui.activities.sleep:SleepActivity"
 
-[project.entry-points."slumber.ui_backends"]
-headless = "slumber.plugins.ui.headless:HeadlessUIBackend"
-nicegui = "slumber.plugins.ui.nicegui:NiceGUIBackend"
+[project.entry-points."slumber.units"]
+clock = "slumber.pipeline.units.clock:ClockUnit"
+jsonl_writer = "slumber.pipeline.units.jsonl_writer:JsonlWriterUnit"
 
 [project.optional-dependencies]
 somnio = [

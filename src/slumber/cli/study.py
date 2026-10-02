@@ -261,7 +261,7 @@ def validate_study(
         typer.echo(str(e), err=True)
         raise typer.Exit(1) from e
 
-    typer.echo(f"Study: {study.name} ({study.study_id})")
+    typer.echo(f"Study: {study.study_name} ({study.study_id})")
     typer.echo(f"Conditions: {len(study.conditions)}")
     for c in study.conditions:
         typer.echo(f"  - {c.name}")

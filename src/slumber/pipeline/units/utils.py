@@ -17,7 +17,7 @@ class Settings(ez.Settings):
 
     Example:
 
-        from slumber.plugins.units import Settings
+        from slumber.pipeline.units import Settings
         from pydantic import Field
 
         class MyUnitSettings(Settings):
@@ -38,12 +38,13 @@ class Settings(ez.Settings):
 def build_unit_from_settings(
     unit_cls: type[ez.Unit], settings: dict[str, Any] | None
 ) -> ez.Unit:
-    """Instantiate a unit class using its `SETTINGS` attribute.
+    """Instantiate a unit class using its ``SETTINGS`` attribute.
 
-    This mirrors the legacy behavior:
-    - If `unit_cls.SETTINGS` has `model_validate`, use it (Settings subclass).
-    - Otherwise, assume `SETTINGS` is a dataclass/constructor and call `SETTINGS(**settings)`.
-    - Instantiate the unit with the resulting settings object: `unit_cls(settings_obj)`.
+    - If ``unit_cls.SETTINGS`` has ``model_validate``, use it (Settings subclass).
+    - Otherwise, assume ``SETTINGS`` is a dataclass/constructor and call
+      ``SETTINGS(**settings)``.
+    - Instantiate the unit with the resulting settings object:
+      ``unit_cls(settings_obj)``.
 
     Args:
         unit_cls: The unit class to instantiate (ez.Unit subclass; defines SETTINGS).
@@ -53,7 +54,8 @@ def build_unit_from_settings(
         The instantiated ez.Unit.
 
     Raises:
-        ValueError: If settings is not a dict or None, or if the unit has SETTINGS = None but settings were provided.
+        ValueError: If settings is not a dict or None, or if the unit has
+            SETTINGS = None but settings were provided.
     """
     if settings is not None and not isinstance(settings, dict):
         raise ValueError(f"settings must be a dict or None, got {type(settings)}.")
@@ -63,7 +65,8 @@ def build_unit_from_settings(
     if settings_type is None:
         if settings is not None:
             raise ValueError(
-                f"Unit {unit_cls.__name__} has no SETTINGS (SETTINGS is None) but settings were provided."
+                f"Unit {unit_cls.__name__} has no SETTINGS (SETTINGS is None) "
+                "but settings were provided."
             )
         return unit_cls()
 

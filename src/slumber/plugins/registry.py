@@ -1,12 +1,10 @@
-"""Plugin registry: discover and resolve units, tasks, and UI backends via entry points."""
+"""Plugin registry: discover activities and units via entry points."""
 
 from __future__ import annotations
 
 from collections import defaultdict
 from enum import Enum
 from typing import Any
-
-from slumber.plugins.tasks.base import Task
 
 try:
     from importlib.metadata import entry_points
@@ -16,22 +14,20 @@ except ImportError:
 import ezmsg.core as ez
 from loguru import logger
 
+from slumber.plugins.base import ConfiguredPlugin
 from slumber.plugins.errors import PluginNotFoundError
-from slumber.plugins.ui.base import UIBackend
 
 
 class EntryPointGroup(str, Enum):
     """Entry-point group names (public API for extensions)."""
 
+    ACTIVITIES = "slumber.activities"
     UNITS = "slumber.units"
-    TASKS = "slumber.tasks"
-    UI_BACKENDS = "slumber.ui_backends"
 
 
 _ENTRY_POINT_GROUP_TO_CLASS = {
+    EntryPointGroup.ACTIVITIES: ConfiguredPlugin,
     EntryPointGroup.UNITS: ez.Unit,
-    EntryPointGroup.TASKS: Task,
-    EntryPointGroup.UI_BACKENDS: UIBackend,
 }
 
 
@@ -40,7 +36,8 @@ def _resolve_plugin_for_group(
 ) -> Any | None:
     """Return the object to store for this plugin, or None to skip (with a warning).
 
-    Units and tasks must be the expected class type; otherwise we warn and skip.
+    Activities must be ConfiguredPlugin subclasses; units must be ez.Unit
+    subclasses. Otherwise we warn and skip.
     """
     if isinstance(loaded_object, type) and issubclass(
         loaded_object, _ENTRY_POINT_GROUP_TO_CLASS[group]
@@ -60,10 +57,7 @@ def _resolve_plugin_for_group(
 def _load_entry_points(group: EntryPointGroup) -> dict[str, Any]:
     """Load entry points for a group; return mapping name -> loaded object.
 
-    For slumber.units: only ez.Unit subclasses are stored (the class).
-    For slumber.tasks: only Task subclasses are stored (the class).
-    For slumber.ui_backends: only UIBackend subclasses are stored (the class).
-    Invalid units/tasks are skipped with a warning.
+    Invalid plugins are skipped with a warning.
     """
     result: dict[str, Any] = {}
 
@@ -91,31 +85,26 @@ def _load_entry_points(group: EntryPointGroup) -> dict[str, Any]:
 
 
 class PluginRegistry:
-    """Single registry for units, tasks, and UI backends loaded from entry points."""
+    """Registry for activity and unit plugins loaded from entry points."""
 
     def __init__(self) -> None:
-        self._plugins: dict[
-            EntryPointGroup,
-            dict[str, type[Task | ez.Unit | UIBackend]],
-        ] = defaultdict(dict)
+        self._plugins: dict[EntryPointGroup, dict[str, type]] = defaultdict(dict)
         self._load_all()
 
     def _load_all(self) -> None:
-        """Load all three groups and coerce to expected types."""
+        """Load all entry-point groups."""
         for group in EntryPointGroup:
             self._plugins[group] = _load_entry_points(group)
 
-    def get_plugin(
-        self, group: EntryPointGroup, key: str
-    ) -> type[Task | ez.Unit | UIBackend]:
-        """Return the plugin for the given group and key.
+    def get_plugin(self, group: EntryPointGroup, key: str) -> type:
+        """Return the plugin class for the given group and key.
 
         Args:
             group: Entry-point group.
             key: Entry-point name.
 
         Returns:
-            The plugin for the given group and key.
+            The plugin class for the given group and key.
 
         Raises:
             PluginNotFoundError: If no plugin is registered for the given group and key.
@@ -133,7 +122,6 @@ class PluginRegistry:
         return sorted(self._plugins[group].keys())
 
 
-# Module-level default registry (lazy or at import).
 _default_registry: PluginRegistry | None = None
 
 
@@ -143,3 +131,9 @@ def get_registry() -> PluginRegistry:
     if _default_registry is None:
         _default_registry = PluginRegistry()
     return _default_registry
+
+
+def reset_registry() -> None:
+    """Clear the default registry singleton (for tests)."""
+    global _default_registry
+    _default_registry = None

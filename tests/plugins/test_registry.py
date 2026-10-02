@@ -5,26 +5,34 @@ from __future__ import annotations
 import pytest
 
 from slumber.plugins import (
+    ConfiguredPlugin,
     EntryPointGroup,
     PluginNotFoundError,
     get_registry,
+    reset_registry,
 )
+
+
+@pytest.fixture(autouse=True)
+def _fresh_registry() -> None:
+    """Reload entry points after pyproject changes within a session."""
+    reset_registry()
+    yield
+    reset_registry()
 
 
 class TestEntryPointGroup:
     """Entry-point group enum and string values."""
 
     def test_groups_defined(self) -> None:
+        assert EntryPointGroup.ACTIVITIES.value == "slumber.activities"
         assert EntryPointGroup.UNITS.value == "slumber.units"
-        assert EntryPointGroup.TASKS.value == "slumber.tasks"
-        assert EntryPointGroup.UI_BACKENDS.value == "slumber.ui_backends"
 
     def test_iteration(self) -> None:
         groups = list(EntryPointGroup)
-        assert len(groups) == 3
+        assert len(groups) == 2
+        assert EntryPointGroup.ACTIVITIES in groups
         assert EntryPointGroup.UNITS in groups
-        assert EntryPointGroup.TASKS in groups
-        assert EntryPointGroup.UI_BACKENDS in groups
 
 
 class TestPluginRegistry:
@@ -51,46 +59,37 @@ class TestPluginRegistry:
         assert err.key == "NonexistentUnitType"
         assert err.available is not None
 
-    def test_get_plugin_tasks_unknown_raises(self) -> None:
+    def test_get_plugin_activities_unknown_raises(self) -> None:
         registry = get_registry()
         with pytest.raises(PluginNotFoundError) as exc_info:
-            registry.get_plugin(EntryPointGroup.TASKS, "nonexistent_task")
+            registry.get_plugin(EntryPointGroup.ACTIVITIES, "nonexistent_activity")
         err = exc_info.value
-        assert err.group == "slumber.tasks"
-        assert err.key == "nonexistent_task"
+        assert err.group == "slumber.activities"
+        assert err.key == "nonexistent_activity"
 
-    def test_get_plugin_ui_backends_unknown_raises(self) -> None:
+    def test_get_plugin_instruction_activity_resolved(self) -> None:
         registry = get_registry()
-        with pytest.raises(PluginNotFoundError) as exc_info:
-            registry.get_plugin(EntryPointGroup.UI_BACKENDS, "nonexistent_ui")
-        err = exc_info.value
-        assert err.group == "slumber.ui_backends"
-        assert err.key == "nonexistent_ui"
-
-    def test_get_plugin_instruction_task_resolved(self) -> None:
-        registry = get_registry()
-        if "instruction" not in registry.list_plugins(EntryPointGroup.TASKS):
+        if "instruction" not in registry.list_plugins(EntryPointGroup.ACTIVITIES):
             pytest.skip(
-                "instruction task not loaded (entry-point load may have been skipped)"
+                "instruction activity not loaded "
+                "(entry-point load may have been skipped)"
             )
-        task_class = registry.get_plugin(EntryPointGroup.TASKS, "instruction")
-        assert task_class is not None
-        from slumber.plugins.tasks.instruction import InstructionTask
+        activity_class = registry.get_plugin(EntryPointGroup.ACTIVITIES, "instruction")
+        from slumber.ui.activities.instruction import InstructionActivity
 
-        assert task_class is InstructionTask
+        assert activity_class is InstructionActivity
+        assert issubclass(activity_class, ConfiguredPlugin)
 
-    def test_get_plugin_headless_ui_resolved(self) -> None:
+    def test_get_plugin_clock_unit_resolved(self) -> None:
         registry = get_registry()
-        backend_class_or_obj = registry.get_plugin(
-            EntryPointGroup.UI_BACKENDS, "headless"
-        )
-        backend = (
-            backend_class_or_obj()
-            if isinstance(backend_class_or_obj, type)
-            else backend_class_or_obj
-        )
-        assert backend is not None
-        assert hasattr(backend, "run")
+        if "clock" not in registry.list_plugins(EntryPointGroup.UNITS):
+            pytest.skip(
+                "clock unit not loaded (entry-point load may have been skipped)"
+            )
+        unit_class = registry.get_plugin(EntryPointGroup.UNITS, "clock")
+        from slumber.pipeline.units.clock import ClockUnit
+
+        assert unit_class is ClockUnit
 
 
 class TestPluginNotFoundError:
@@ -100,10 +99,10 @@ class TestPluginNotFoundError:
         assert issubclass(PluginNotFoundError, LookupError)
 
     def test_message_includes_group_key_available(self) -> None:
-        err = PluginNotFoundError("slumber.tasks", "foo", ["instruction", "survey"])
-        assert "slumber.tasks" in str(err)
+        err = PluginNotFoundError("slumber.activities", "foo", ["instruction", "sleep"])
+        assert "slumber.activities" in str(err)
         assert "foo" in str(err)
-        assert "instruction" in str(err) or "survey" in str(err)
+        assert "instruction" in str(err) or "sleep" in str(err)
 
     def test_attributes(self) -> None:
         err = PluginNotFoundError("slumber.units", "Bar", [])

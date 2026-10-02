@@ -47,10 +47,10 @@ registry.list_plugins(EntryPointGroup.UI_BACKENDS)
 
 ### Unit (`slumber.units`)
 
-- **Resolved as:** A **Unit class** (subclass of `ez.Unit`). The registry stores the class; use `build_unit_from_settings(unit_class, settings)` from `slumber.plugins.units` to build instances.
+- **Resolved as:** A **Unit class** (subclass of `ez.Unit`). The registry stores the class; use `build_unit_from_settings(unit_class, settings)` from `slumber.pipeline.units` to build instances.
 - **Usage:** The runtime resolves the unit class and calls `build_unit_from_settings` with the component’s `settings` to build the unit instance for the DAG.
 
-**Register the class:** Register your ez.Unit subclass; the registry stores it. Use the framework’s `Settings` (subclass of `ez.Settings`) from `slumber.plugins.units` for the unit’s `SETTINGS` so config dicts are validated and coerced.
+**Register the class:** Register your ez.Unit subclass; the registry stores it. Use the framework’s `Settings` (subclass of `ez.Settings`) from `slumber.pipeline.units` for the unit’s `SETTINGS` so config dicts are validated and coerced.
 
 ```toml
 [project.entry-points."slumber.units"]
@@ -61,7 +61,7 @@ my_unit = "mypackage.units:MyUnit"
 import ezmsg.core as ez
 from pydantic import Field
 
-from slumber.plugins.units import Settings
+from slumber.pipeline.units import Settings
 
 
 class MyUnitSettings(Settings):

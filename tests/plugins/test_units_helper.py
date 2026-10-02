@@ -9,7 +9,7 @@ import ezmsg.core as ez
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
-from slumber.plugins.units import Settings, build_unit_from_settings
+from slumber.pipeline.units import Settings, build_unit_from_settings
 
 
 class _PydanticSettings(BaseModel):

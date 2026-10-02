@@ -47,10 +47,11 @@ def init_study(
     create_env_example: bool = True,
     create_gitignore: bool = True,
 ) -> Path:
-    """Create a study folder with manifest, conditions/, and assets/.
+    """Create a study folder with manifest, conditions/, assets/, and runs/.
 
-    Creates <base_dir>/<study_id>/ with study.yaml, empty conditions/,
-    assets/, and optionally .env and .gitignore.
+    Creates ``<base_dir>/<study_id>/`` with ``study.yaml``, empty
+    ``conditions/``, ``assets/``, ``runs/``, and optionally ``.env`` and
+    ``.gitignore``. Default UI is ``headless``.
 
     Args:
         base_dir: Project root; study folder will be base_dir / study_id.
@@ -70,14 +71,15 @@ def init_study(
     if study_path.exists():
         raise FileExistsError(f"Study directory already exists: {study_path}")
 
-    name = name if name is not None else study_id
+    study_name = name if name is not None else study_id
     study = Study(
         study_id=study_id,
-        name=name,
+        study_name=study_name,
     )
     study_path.mkdir(parents=True)
     (study_path / study.conditions_dir).mkdir()
     (study_path / study.assets_dir).mkdir()
+    (study_path / study.runs.directory).mkdir()
 
     with open(study_path / _STUDY_MANIFEST_FILE, "w", encoding="utf-8") as f:
         yaml.dump(

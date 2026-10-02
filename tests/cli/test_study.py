@@ -27,7 +27,7 @@ class TestInitStudy:
         assert (study_path / DEFAULT_ASSETS_DIR_NAME).is_dir()
 
     def test_study_yaml_content(self, tmp_path: Path) -> None:
-        """Generated study.yaml contains study_id and name."""
+        """Generated study.yaml contains study_id and study_name."""
         study_path = init_study(
             tmp_path,
             "ld-2025",
@@ -37,17 +37,18 @@ class TestInitStudy:
         )
         content = (study_path / "study.yaml").read_text(encoding="utf-8")
         assert "study_id: ld-2025" in content
-        assert "name: Lucid Dreaming Pilot" in content
+        assert "study_name: Lucid Dreaming Pilot" in content
         assert "conditions_dir: conditions" in content
-        assert "backend: headless" in content
+        assert "type: headless" in content
+        assert (study_path / "runs").is_dir()
 
     def test_name_defaults_to_study_id(self, tmp_path: Path) -> None:
-        """When name is omitted, study name equals study_id."""
+        """When name is omitted, study_name equals study_id."""
         study_path = init_study(
             tmp_path, "foo-study", create_env_example=False, create_gitignore=False
         )
         content = (study_path / "study.yaml").read_text(encoding="utf-8")
-        assert "name: foo-study" in content
+        assert "study_name: foo-study" in content
 
     def test_raises_when_dir_exists(self, tmp_path: Path) -> None:
         """FileExistsError when study directory already exists."""

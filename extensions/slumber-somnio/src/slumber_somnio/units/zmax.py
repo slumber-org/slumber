@@ -8,7 +8,7 @@ from typing import Annotated
 import ezmsg.core as ez
 from loguru import logger
 from pydantic import BeforeValidator, ConfigDict, Field, IPvAnyAddress
-from slumber.plugins.units import Settings
+from slumber.pipeline.units import Settings
 from slumber.utils.pydantic import coerce_enum_by_name
 from slumber.utils.retry import retry_async
 from somnio.data.timeseries import Sample

@@ -7,7 +7,7 @@ from collections.abc import AsyncGenerator
 import ezmsg.core as ez
 from loguru import logger
 from pydantic import Field
-from slumber.plugins.units import Settings
+from slumber.pipeline.units import Settings
 from somnio.data.annotations import Event
 from somnio.data.timeseries import TimeSeries
 from somnio.tasks.eye_movement import detect_lr_eye_movements

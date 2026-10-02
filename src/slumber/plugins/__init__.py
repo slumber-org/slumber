@@ -1,19 +1,19 @@
-"""Plugin system: registry and built-in units/tasks/UI backends."""
+"""Plugin discovery: registry and ConfiguredPlugin contract."""
 
+from slumber.plugins.base import ConfiguredPlugin
 from slumber.plugins.errors import PluginNotFoundError
 from slumber.plugins.registry import (
     EntryPointGroup,
     PluginRegistry,
     get_registry,
+    reset_registry,
 )
-from slumber.plugins.ui.base import UIBackend
-from slumber.plugins.units import build_unit_from_settings
 
 __all__ = [
+    "ConfiguredPlugin",
     "EntryPointGroup",
     "PluginNotFoundError",
     "PluginRegistry",
-    "UIBackend",
-    "build_unit_from_settings",
     "get_registry",
+    "reset_registry",
 ]

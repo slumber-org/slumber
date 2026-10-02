@@ -15,7 +15,9 @@ class TestDiscoverStudyDir:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         monkeypatch.delenv("STUDY_DIR", raising=False)
-        (tmp_path / "study.yaml").write_text("study_id: s\nname: S\n", encoding="utf-8")
+        (tmp_path / "study.yaml").write_text(
+            "study_id: s\nstudy_name: S\n", encoding="utf-8"
+        )
         with patch.object(Path, "cwd", return_value=tmp_path):
             found = resolve_study_dir()
         assert found == tmp_path
@@ -36,7 +38,7 @@ class TestDiscoverStudyDir:
         study_dir = tmp_path / "my-study"
         study_dir.mkdir()
         (study_dir / "study.yaml").write_text(
-            "study_id: my-study\nname: My Study\n", encoding="utf-8"
+            "study_id: my-study\nstudy_name: My Study\n", encoding="utf-8"
         )
         found = resolve_study_dir(study_dir=study_dir)
         assert found == study_dir.resolve()
@@ -62,9 +64,11 @@ class TestLoadStudy:
 
         study = load_study(study_path)
         assert study.study_id == "s1"
+        assert study.study_name == "s1"
         conditions = study.conditions
         assert len(conditions) == 1
         assert conditions[0].name == "condition_1"
+        assert conditions[0].entry == "setup"
 
     def test_loads_multiple_conditions_sorted_by_filename(self, tmp_path: Path) -> None:
         study_path = init_study(
@@ -74,16 +78,15 @@ class TestLoadStudy:
             (study_path / "conditions" / name).write_text(
                 f"""
 name: {cond_name}
-procedures:
-  pre_sleep:
-    steps:
-      - task: instruction
-dag:
-  components:
-    - name: MASTER
-      unit_type: M
-  connections: []
-  process_components: []
+entry: setup
+phases:
+  - id: setup
+    layout: {{type: stepper}}
+    activities:
+      - id: welcome
+        type: instruction
+        settings: {{content: Hi}}
+pipelines: []
 """,
                 encoding="utf-8",
             )
@@ -99,7 +102,7 @@ dag:
         study_path = tmp_path / "orphan"
         study_path.mkdir()
         (study_path / "study.yaml").write_text(
-            "study_id: x\nname: X\nconditions_dir: no_such_dir\n",
+            "study_id: x\nstudy_name: X\nconditions_dir: no_such_dir\n",
             encoding="utf-8",
         )
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -113,9 +116,20 @@ dag:
             tmp_path, "s1", create_env_example=False, create_gitignore=False
         )
         (study_path / "conditions" / "bad.yaml").write_text(
-            "name: x\n# procedures missing\n", encoding="utf-8"
+            "name: x\n# phases missing\n", encoding="utf-8"
         )
         with pytest.raises(ValueError) as exc_info:
             load_study(study_path)
         assert "Condition file error" in str(exc_info.value)
         assert "bad.yaml" in str(exc_info.value)
+
+
+class TestInitStudy:
+    def test_creates_runs_dir_and_headless_ui(self, tmp_path: Path) -> None:
+        study_path = init_study(
+            tmp_path, "s1", create_env_example=False, create_gitignore=False
+        )
+        assert (study_path / "runs").is_dir()
+        content = (study_path / "study.yaml").read_text(encoding="utf-8")
+        assert "study_name: s1" in content
+        assert "type: headless" in content

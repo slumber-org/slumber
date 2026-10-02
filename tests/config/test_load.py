@@ -1,4 +1,4 @@
-"""Tests for load_and_validate (slumber.utils.yaml) with Study and Condition (slumber.schemas)."""
+"""Tests for load_and_validate (slumber.utils.yaml) with Study and Condition."""
 
 from pathlib import Path
 
@@ -16,13 +16,14 @@ class TestLoadAndValidateStudy:
     def test_loads_valid_manifest(self, tmp_path: Path) -> None:
         manifest = tmp_path / "study.yaml"
         manifest.write_text(
-            "study_id: my-study\nname: My Study\nconditions_dir: conditions\n",
+            "study_id: my-study\nstudy_name: My Study\nconditions_dir: conditions\n",
             encoding="utf-8",
         )
         study = load_and_validate(manifest, Study)
         assert study.study_id == "my-study"
-        assert study.name == "My Study"
+        assert study.study_name == "My Study"
         assert study.conditions_dir == "conditions"
+        assert study.ui.type == "headless"
 
     def test_raises_when_file_missing(self, tmp_path: Path) -> None:
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -31,7 +32,9 @@ class TestLoadAndValidateStudy:
 
     def test_raises_validation_error_on_invalid_content(self, tmp_path: Path) -> None:
         manifest = tmp_path / "study.yaml"
-        manifest.write_text("study_id: my-study\n# name missing\n", encoding="utf-8")
+        manifest.write_text(
+            "study_id: my-study\n# study_name missing\n", encoding="utf-8"
+        )
         with pytest.raises(ValidationError):
             load_and_validate(manifest, Study)
 
@@ -47,8 +50,8 @@ class TestLoadAndValidateCondition:
         cond = load_and_validate(cond_path, Condition)
         assert isinstance(cond, Condition)
         assert cond.name == "condition_1"
-        assert "pre_sleep" in cond.procedures
-        assert cond.dag.has_component("MASTER")
+        assert cond.entry == "setup"
+        assert "setup" in cond.phase_ids
 
     def test_raises_when_file_missing(self, tmp_path: Path) -> None:
         with pytest.raises(FileNotFoundError) as exc_info:
@@ -57,8 +60,6 @@ class TestLoadAndValidateCondition:
 
     def test_raises_validation_error_on_invalid_content(self, tmp_path: Path) -> None:
         cond_path = tmp_path / "bad.yaml"
-        cond_path.write_text(
-            "name: c1\n# procedures and dag missing\n", encoding="utf-8"
-        )
+        cond_path.write_text("name: c1\n# phases missing\n", encoding="utf-8")
         with pytest.raises(ValidationError):
             load_and_validate(cond_path, Condition)
