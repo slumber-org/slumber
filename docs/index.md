@@ -39,4 +39,4 @@ New to SLUMBER? Start here:
 | [Reference — Schemas](reference/schemas.md) | `study.yaml`, condition, procedure, DAG field reference |
 | [Reference — Plugins](reference/plugins.md) | Entry-point groups, plugin contracts, built-in plugins |
 | [Reference — Backend](reference/backend.md) | Supabase/Postgres, migrations, auth, participant/session management |
-| [Contributing](about/contributing.md) | Development setup, git flow, testing and documentation conventions |
+| [Contributing](about/contributing.md) | Development setup, GitHub Flow, testing and documentation conventions |
