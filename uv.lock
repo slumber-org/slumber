@@ -12,6 +12,7 @@ members = [
     "slumber",
     "slumber-audio",
     "slumber-somnio",
+    "slumber-supabase",
 ]
 
 [[package]]
@@ -2782,10 +2783,7 @@ somnio = [
     { name = "slumber-somnio" },
 ]
 supabase = [
-    { name = "alembic" },
-    { name = "psycopg2-binary" },
-    { name = "sqlmodel" },
-    { name = "supabase" },
+    { name = "slumber-supabase" },
 ]
 
 [package.dev-dependencies]
@@ -2811,18 +2809,15 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", marker = "extra == 'supabase'", specifier = ">=1.18.4" },
     { name = "ezmsg", specifier = ">=3.7.3" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "nicegui", marker = "extra == 'nicegui'", specifier = ">=2.0.0" },
-    { name = "psycopg2-binary", marker = "extra == 'supabase'", specifier = ">=2.9.11" },
     { name = "pydantic", specifier = ">=2.12.5" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "sentry-sdk", marker = "extra == 'sentry'", specifier = ">=2.0.0" },
     { name = "slumber-somnio", marker = "extra == 'somnio'", editable = "extensions/slumber-somnio" },
-    { name = "sqlmodel", marker = "extra == 'supabase'", specifier = ">=0.0.37" },
-    { name = "supabase", marker = "extra == 'supabase'", specifier = ">=2.10.0" },
+    { name = "slumber-supabase", marker = "extra == 'supabase'", editable = "extensions/slumber-supabase" },
     { name = "typer", specifier = ">=0.24.1" },
 ]
 provides-extras = ["somnio", "supabase", "sentry", "nicegui"]
@@ -2909,6 +2904,49 @@ test = [
 requires-dist = [
     { name = "slumber", editable = "." },
     { name = "somnio", git = "https://github.com/alitsaberi/somnio.git" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=4.5.0" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "ruff", specifier = ">=0.14.6" },
+]
+lint = [{ name = "ruff", specifier = ">=0.14.6" }]
+test = [{ name = "pytest", specifier = ">=9.0.2" }]
+
+[[package]]
+name = "slumber-supabase"
+version = "0.1.0"
+source = { editable = "extensions/slumber-supabase" }
+dependencies = [
+    { name = "alembic" },
+    { name = "psycopg2-binary" },
+    { name = "slumber" },
+    { name = "sqlmodel" },
+    { name = "supabase" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+lint = [
+    { name = "ruff" },
+]
+test = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alembic", specifier = ">=1.18.4" },
+    { name = "psycopg2-binary", specifier = ">=2.9.11" },
+    { name = "slumber", editable = "." },
+    { name = "sqlmodel", specifier = ">=0.0.37" },
+    { name = "supabase", specifier = ">=2.10.0" },
 ]
 
 [package.metadata.requires-dev]

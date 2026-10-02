@@ -36,10 +36,7 @@ somnio = [
     "slumber-somnio",
 ]
 supabase = [
-    "alembic>=1.18.4",
-    "psycopg2-binary>=2.9.11",
-    "sqlmodel>=0.0.37",
-    "supabase>=2.10.0",
+    "slumber-supabase",
 ]
 sentry = [
     "sentry-sdk>=2.0.0",
@@ -81,10 +78,12 @@ dev = {requires-python = ">=3.12"}
 slumber = { workspace = true }
 slumber-somnio = { workspace = true }
 slumber-audio = { workspace = true }
+slumber-supabase = { workspace = true }
 # TODO: Switch somnio back to PyPI (remove git source override).
 somnio = { git = "https://github.com/alitsaberi/somnio.git" }
 
 [tool.pytest.ini_options]
+testpaths = ["tests", "extensions/slumber-supabase/tests"]
 markers = [
     "supabase: tests requiring slumber[supabase] (client, SQLModel, Alembic stack)",
     "nicegui: tests requiring slumber[nicegui]",

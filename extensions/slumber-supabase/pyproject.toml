@@ -1,0 +1,58 @@
+[project]
+name = "slumber-supabase"
+version = "0.1.0"
+description = "SLUMBER extension for Supabase auth, backend, and migrations"
+readme = "README.md"
+authors = [
+  { name = "Ali Saberi", email = "ali.saberi96@gmail.com" },
+]
+requires-python = ">=3.10"
+dependencies = [
+  "slumber",
+  "alembic>=1.18.4",
+  "psycopg2-binary>=2.9.11",
+  "sqlmodel>=0.0.37",
+  "supabase>=2.10.0",
+]
+
+[project.entry-points."slumber.cli"]
+auth = "slumber_supabase.cli.auth:auth_app"
+db = "slumber_supabase.cli.db:db_app"
+participant = "slumber_supabase.cli.participant:participant_app"
+session = "slumber_supabase.cli.session:session_app"
+condition = "slumber_supabase.cli.condition:condition_app"
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    {include-group = "lint"},
+    {include-group = "test"},
+    "pre-commit>=4.5.0",
+]
+lint = [
+    "ruff>=0.14.6",
+]
+test = [
+    "pytest>=9.0.2",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint]
+extend-select = ["TD001", "TD007", "UP031", "UP032"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.pytest.ini_options]
+markers = [
+    "supabase: tests requiring the supabase client / SQLModel / Alembic stack",
+]
