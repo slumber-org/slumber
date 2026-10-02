@@ -1,165 +1,86 @@
-# NiceGUI Participant UI
+# Participant UI (GUI)
 
-The NiceGUI UI backend provides a web-based participant application with login, procedure execution, sleep monitoring, and session completion.
+The GUI backend presents a run in a browser window via [NiceGUI](https://nicegui.io/). It uses the same RunEngine as headless: phases, layouts, activities, and event → action handlers.
 
 ## Setup
-
-Install the NiceGUI optional dependency:
 
 ```bash
 uv sync --extra nicegui
 ```
 
-Set the UI backend in your `study.yaml`:
-
 ```yaml
 ui:
-  backend: nicegui
-  config:
-    port: 8080      # web server port (default: 8080)
-    dark: true       # dark mode (optional)
-    show: true       # auto-open browser (default: true)
+  type: gui
+  settings:
+    port: 8080
+    frame:
+      header:
+        title: "{study_name}"
+    layouts:
+      stepper:
+        show_activity_list: true
+        allow_skip: false
 ```
 
-## App Flow
-
-The participant app follows an event-driven flow:
+## App flow
 
 ```
-Login → Welcome → [Sleep Page ↔ Procedures] → Completion
+AppFrame
+  ├── header / footer   ← study frame; phase may hide them
+  └── body
+        └── layout (stepper | hub)
+              └── activity slot
 ```
 
-1. **Login** — Shown if no valid Supabase session exists. Email/password authentication.
-2. **Welcome** — Study name, participant info, and "Start Session" button.
-3. **Sleep Page** — The idle hub. Fires events that trigger procedures.
-4. **Procedure Runner** — Executes triggered procedures with step sidebar and navigation.
-5. **Completion** — Session finished. Shuts down the app.
+1. Run starts → theme + AppFrame mount once.
+2. Engine `start_phase(entry)` → apply phase frame override → mount layout + activities.
+3. Activities call `complete()` or `emit(...)`; handlers run `do` actions.
+4. `end_run` unmounts and finishes.
 
-## Event-Driven Procedures
+Phases are started by actions (`start_phase`), not sequenced as a flat procedure list.
 
-Procedures are triggered by **session events**, not run sequentially. Each procedure declares a `trigger` event and an optional `when` guard.
+## Layouts
 
-### Session Events
+| Layout | Use |
+|--------|-----|
+| `stepper` | Ordered steps with optional activity list and navigation. |
+| `hub` | Single full-bleed activity (e.g. sleep). |
 
-| Event | Fired by |
-|-------|----------|
-| `session_start` | Welcome page "Start Session" button |
-| `sleep_start` | Sleep page "Going to Sleep" button |
-| `wake_up` | Sleep page "I'm Awake" button |
-| `session_end` | Sleep page "End Session" button |
+Phase `layout.settings` merges over study `ui.settings.layouts.<type>`.
 
-### Example Condition
+## Activities
+
+| Activity | Behaviour |
+|----------|-----------|
+| `instruction` | Markdown/text from `settings.content` (path or string). Completes on mount. |
+| `sleep` | "I'm Awake" / "End Session" (labels configurable). Emits `marked_awake` / `end_sleep` only. |
+
+Example sleep phase (hidden chrome):
 
 ```yaml
-name: lucid_dreaming
-procedures:
-  pre_sleep:
-    trigger: session_start
-    steps:
-      - task: instruction
-        settings: {text: "Welcome to the study. Prepare for sleep."}
-
-  first_awakening:
-    trigger: wake_up
-    when:
-      awakening_count: 1
-    steps:
-      - task: instruction
-        settings: {text: "First awakening. Please answer some questions."}
-
-  later_awakening:
-    trigger: wake_up
-    when:
-      awakening_count: {gt: 1}
-    steps:
-      - task: instruction
-        settings: {text: "You woke up again. Quick check-in."}
-
-  post_sleep:
-    trigger: session_end
-    steps:
-      - task: instruction
-        settings: {text: "Good morning! Session complete."}
-
-dag:
-  components:
-    - name: MASTER
-      unit_type: Master
-  connections: []
-  process_components: []
+- id: sleep
+  frame:
+    header: false
+    footer: false
+  layout:
+    type: hub
+  activities:
+    - id: sleep
+      type: sleep
+      settings:
+        wake_button: "I'm Awake"
+        end_button: "End Session"
+      on:
+        - event: marked_awake
+          do: [{ start_phase: awakening }]
+        - event: end_sleep
+          do:
+            - stop_pipeline: main
+            - start_phase: morning
 ```
 
-### Guards (`when` conditions)
+## Branding
 
-Guards determine whether a procedure runs when its trigger fires. Two forms:
+Fixed dark theme tokens load once at GUI start. Package defaults supply logo and favicon; override with `ui.settings.favicon` and `frame.header.logo` (paths relative to the study root, typically `{assets_dir}/…`).
 
-**Declarative (YAML dict)** — simple state checks:
-
-```yaml
-# exact match
-when:
-  awakening_count: 1
-
-# comparison operators: gt, gte, lt, lte
-when:
-  awakening_count: {gt: 1}
-
-# multiple keys use AND logic — all must match
-when:
-  awakening_count: {gte: 2}
-  sleep_count: 1
-```
-
-**Code-driven (Python callable)** — for complex or data-driven logic:
-
-```yaml
-when: "my_study.guards:is_rem_awakening"
-```
-
-The callable receives a `SessionState` object and returns `bool`:
-
-```python
-from slumber.runtime.events import SessionState
-
-
-def is_rem_awakening(state: SessionState) -> bool:
-    return state.get("last_arousal_type") == "rem"
-```
-
-### Conflict Resolution
-
-When multiple procedures share the same trigger, **all matching** procedures run in the order they appear in the YAML. Make guards mutually exclusive if only one should run.
-
-### Post-Procedure Flow
-
-After triggered procedures complete:
-
-- **`session_end`** → Completion page
-- **All other events** → Back to Sleep page
-
-## Procedure Runner
-
-The procedure runner displays:
-
-- **Content area**: renders the current step (placeholder in Stage 2)
-- **Task sidebar**: step list with completion status (controlled by `show_task_list`)
-- **Navigation**: Previous / Next / Complete buttons
-
-### Procedure Options
-
-```yaml
-procedures:
-  my_procedure:
-    trigger: session_start
-    show_task_list: true   # show step sidebar (default: true)
-    allow_skip: false      # allow skipping steps (default: false)
-    steps: [...]
-```
-
-## Sleep Page
-
-The sleep page is the app's idle state between procedures. It provides:
-
-- **"Going to Sleep"** button (with confirmation) → fires `sleep_start`
-- **"I'm Awake"** button (with confirmation) → fires `wake_up`
-- **"End Session"** button (disabled while asleep, with confirmation) → fires `session_end`
+See [UI reference](../reference/ui-backends.md) and [Schema reference](../reference/schemas.md).

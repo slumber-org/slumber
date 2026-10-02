@@ -133,10 +133,10 @@ The documentation is organized into the following high-level sections:
   Minimal steps required to install dependencies and run the project for the first time.
 
 - **User Guide**  
-  Usage-focused documentation describing how to work with SLUMBER from a user perspective (e.g., running sessions, configuration, common workflows).
+  Study packages, validation, local run, and participant UI.
 
-- **Developer Guide**  
-  Information for contributors and developers, including documentation conventions, development setup, testing, and internal design notes.
+- **Reference**  
+  Schemas, plugins, UI, and CLI for the 0.1 surface.
 
 - **About**  
   Project background, contributing guidelines, release notes, citation information, and references.

@@ -1,105 +1,88 @@
-# UI Backends
+# UI
 
-UI backends subclass **`UIBackend`** (`slumber.plugins.ui.base`) and control the full participant experience for a study condition.
+`study.ui` selects how a run is presented. 0.1 backends are a **built-in map** (`gui` | `headless`), not an entry-point group. Both drive the same RunEngine; they differ only in presentation.
 
-## `UIBackend`
+```yaml
+ui:
+  type: gui   # or headless
+```
 
-- **`ui_settings_model`**: `ClassVar[type[BaseModel] | None]` — Pydantic model for `study.ui.settings`, or `None` if the backend accepts no settings.
-- **`configure(settings: dict) -> None`**: Validates and stores settings (implemented on the base class).
-- **`run(study, condition, context) -> None`**: Run the full UI lifecycle (implemented by each backend).
+| `type` | Role |
+|--------|------|
+| `gui` | Participant window (NiceGUI): AppFrame + layout + activities. |
+| `headless` | No window. Sequential activities auto-`complete()`. Sleep emits `end_sleep` on mount so the demo finishes without a browser. |
 
-The orchestrator calls `configure()` once per run with `study.ui.settings`, then `run()`.
+Override for one run: `slumber study run --ui headless` (or `gui`). Switching to headless clears GUI-only settings.
 
-### Arguments to `run`
+## GUI settings
 
-- **`study`**: The loaded `Study` manifest.
-- **`condition`**: The `Condition` to run (procedures dict + DAG).
-- **`context`**: `RunContext` with IDs (study, participant, session, run, condition).
+Optional under `ui.settings` when `type` is `gui`:
 
-Participant-facing settings live under **`study.ui.settings`** in `study.yaml` (see study schema).
+```yaml
+ui:
+  type: gui
+  settings:
+    port: 8080
+    favicon: "{assets_dir}/favicon.png"
+    frame:
+      header:
+        logo: "{assets_dir}/logo.png"
+        title: "{study_name}"
+    layouts:
+      stepper:
+        previous_button: Previous
+        next_button: Next
+        complete_button: Complete
+        show_activity_list: true
+        allow_skip: false
+```
 
-## Built-in Backends
+Phase `layout.settings` deep-merges over study `ui.settings.layouts.<type>`. Phase `frame` deep-merges over study `ui.settings.frame` (e.g. hide header/footer during sleep).
 
-### `headless`
-
-Logs all procedures and steps without displaying a UI. Ignores triggers and guards — runs all procedures sequentially. Used for testing and CI. Does not accept `ui.settings`.
-
-### `nicegui`
-
-Web-based participant app using [NiceGUI](https://nicegui.io/). Provides login, welcome, procedure execution, sleep monitoring, and completion pages. See [NiceGUI UI guide](../user-guide/nicegui-ui.md).
-
-Requires the `nicegui` optional dependency:
+Requires the NiceGUI optional dependency:
 
 ```bash
 uv sync --extra nicegui
 ```
 
-## Event System
+## AppFrame
 
-The event dispatch engine (`slumber.runtime.events`) is UI-agnostic and available to all backends.
+One chrome shell per run: header (logo, title), body, footer. Study frame is the default; `start_phase` applies that phase's optional frame override.
 
-### SessionState
+## Layouts
 
-Mutable key-value store tracking runtime state during a session:
+Each phase selects a layout. Layouts fill the AppFrame body and host that phase's activities.
 
-```python
-from slumber.runtime.events import SessionState
+| `type` | Role |
+|--------|------|
+| `stepper` | Ordered activities: optional list + activity slot; prev/next/complete. |
+| `hub` | One activity, full bleed. |
 
-state = SessionState()
-state.handle_event("wake_up")  # auto-increments awakening_count
-state.set("custom_key", "value")  # arbitrary keys
-state.get("custom_key")  # → "value"
-state.awakening_count  # → 1
-```
+Within a layout, only the activity slot remounts. A layout swap remounts the body. After every sequential activity has `complete()`d, the layout emits `phase_completed`.
 
-### Guard Evaluation
+## Activities
 
-```python
-from slumber.runtime.events import evaluate_guard
+Activities are layout-agnostic. They call host methods; they do not define what completion means for the study.
 
-evaluate_guard(None, state)  # always True
-evaluate_guard({"awakening_count": 1}, state)  # exact match
-evaluate_guard({"awakening_count": {"gt": 1}}, state)  # comparison
-evaluate_guard("my_module:my_func", state)  # Python callable
-```
+| Call | Audience | Meaning |
+|------|----------|---------|
+| `complete()` | Layout | This mounted instance finished as a step |
+| `emit(name)` | RunEngine | A named study event happened |
+| `phase_completed` | RunEngine (from layout) | Layout decided the phase is done |
 
-### Procedure Matching
+| Key | Behaviour |
+|-----|-----------|
+| `instruction` | Renders markdown or text; calls `complete()` on mount. |
+| `sleep` | Wake / end buttons → `emit("marked_awake")` / `emit("end_sleep")`. Does not complete. |
 
-```python
-from slumber.runtime.events import get_triggered_procedures
+Open-ended activities (`sleep`) leave via `start_phase` / `end_run` actions, which unmount them.
 
-triggered = get_triggered_procedures("wake_up", condition.procedures, state)
-# Returns list of (name, procedure) tuples in YAML order
-```
+## Headless behaviour
 
-## Task Renderer Dispatch
+Headless uses the same event → action path:
 
-The NiceGUI backend uses a renderer dispatch to map `task_type` to render functions:
+- Activities that finish on mount auto-`complete()` (e.g. `instruction`).
+- `sleep` emits `end_sleep` as soon as it mounts so setup → pipeline → morning → `end_run` can finish in CI without a browser.
+- GUI waits on the wake and end buttons.
 
-```python
-from slumber.plugins.ui.nicegui.renderers import register_renderer, get_renderer
-
-
-def render_my_task(step, container):
-    from nicegui import ui
-
-    with container:
-        ui.label(f"Custom: {step.settings}")
-
-
-register_renderer("my_task", render_my_task)
-```
-
-Unregistered task types fall back to a placeholder renderer.
-
-## Implementing a Custom Backend
-
-1. Subclass **`UIBackend`** (`slumber.plugins.ui.base`), set `ui_settings_model` (or `None`), and implement `run()`.
-2. Register the **class** as an entry point in `pyproject.toml`:
-
-```toml
-[project.entry-points."slumber.ui_backends"]
-my_backend = "my_package.backend:MyBackend"
-```
-
-3. Set `ui.backend: my_backend` in `study.yaml` (and optional `ui.settings` if your model defines fields).
+See [Running a study](../user-guide/study-run.md) and the `examples/demo/` package in the repository.

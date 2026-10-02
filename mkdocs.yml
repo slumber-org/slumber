@@ -66,17 +66,17 @@ nav:
       - Overview: user-guide/index.md
       - Study Setup: user-guide/study-setup.md
       - Config Validation: user-guide/config-validation.md
-      - Condition Sync: user-guide/condition-sync.md
       - Run Layout and Logging: user-guide/run-layout-logging.md
       - Running a Study: user-guide/study-run.md
-      - NiceGUI Participant UI: user-guide/nicegui-ui.md
+      - Participant UI: user-guide/nicegui-ui.md
+      - Backend features (extension): user-guide/condition-sync.md
 
   - Reference:
       - CLI: reference/cli-reference.md
       - Schemas: reference/schemas.md
       - Plugins: reference/plugins.md
-      - UI Backends: reference/ui-backends.md
-      - Backend (Supabase / Postgres): reference/backend.md
+      - UI: reference/ui-backends.md
+      - Backend: reference/backend.md
 
   - About:
       - Contributing: about/contributing.md

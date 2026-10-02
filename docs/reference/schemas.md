@@ -1,75 +1,120 @@
 # Schema reference
 
-Core Pydantic schemas for study manifest, conditions, procedures, and DAG. All live under `slumber.schemas` and are used for config loading and validation.
+Core Pydantic schemas for study manifests and conditions. All live under `slumber.schemas` and validate **shape only** — they do not import the plugin registry or resolve implementations.
+
+## PluginSpec
+
+Shared reference used by UI, layouts, activities, and units:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Entry-point name or built-in key (required). |
+| `settings` | dict | Optional settings validated later by the implementation. |
 
 ## Study manifest (`study.yaml`)
-
-The study manifest describes a single study: identity, where conditions live, run layout, run-time logging, and UI selection.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `study_id` | string | Unique study identifier (required). |
-| `name` | string | Human-readable study name (required). |
-| `conditions_dir` | string | Directory name, relative to study folder, containing condition YAML files. Default: `conditions`. |
-| `runs` | RunLayout | Run output directory layout (base_directory + layout with placeholders). |
-| `logging` | RunLoggingConfig | Logging config for runs: `level` and `handlers` (list of dicts passed to loguru `logger.add()`). |
-| `ui` | UI | Selected UI backend key and optional config. |
+| `study_name` | string | Human-readable study name (required). |
+| `conditions_dir` | string | Directory of condition YAML files, relative to the study folder. Default: `conditions`. |
+| `assets_dir` | string | Directory of assets, relative to the study folder. Default: `assets`. |
+| `runs` | RunLayout | Run output directory and path template. |
+| `ui` | PluginSpec | UI selection (`gui` or `headless`) and optional settings. Default type: `headless`. |
+| `logging` | LoggingConfig | Run logging: `level` and `handlers` (list of dicts passed to loguru `logger.add()`). |
 
-**RunLayout**: `base_directory` (default `runs`) and `layout` (path template). Allowed placeholders in `layout`: `study_id`, `participant_id`, `session_id`, `run_id`, `condition_id`.
+**RunLayout**: `directory` (default `runs`) and `layout` (path template, default `run-{run_id}`). Allowed placeholders in `layout`: `study_id`, `run_id`, `condition_id`, `participant_id`, `session_id`.
 
-**RunLoggingConfig**: `level` (default `INFO`), `handlers` (list of handler configs; each is kwargs for `logger.add()`). Sink paths may use placeholders (e.g. `run_id`) substituted at run start.
+**LoggingConfig**: `level` (default `INFO`), `handlers` (list of handler configs). Sink paths may use placeholders (e.g. `run_id`, `run_dir`) substituted at run start.
 
-**UI**: `backend` (plugin key; currently only `headless`), `config` (optional dict for the backend).
+**UI (`PluginSpec`)**: `type` is `gui` or `headless`. For `gui`, optional `settings` may include `port`, `favicon`, `frame`, and `layouts` (stepper defaults). See [UI](ui-backends.md).
 
 Extra keys in the manifest are forbidden.
 
+Minimal example:
+
+```yaml
+study_id: demo
+study_name: Demo Study
+ui:
+  type: headless
+```
+
 ## Condition file (per-condition YAML)
 
-One condition = named procedures + one DAG. Typically stored in `<study_dir>/<conditions_dir>/<condition_name>.yaml`.
+One condition = entry phase + phases + optional pipelines. Stored as `<study_dir>/<conditions_dir>/<name>.yaml`.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `name` | string | Condition name (required). |
-| `procedures` | dict[str, Procedure] | Mapping from procedure name to Procedure (e.g. `pre_sleep`, `awakening`, `post_sleep`, `wbtb`). At least one required. |
-| `dag` | DAG | Processing DAG for this condition (required). |
+| `entry` | string | Id of the phase to start (required). |
+| `phases` | list[Phase] | Named stages (at least one). |
+| `pipelines` | list[Pipeline] | Named processing graphs (optional). |
 
-## Procedure and Step
-
-Procedures are UI-agnostic: each step is keyed by a **type** string (resolved via the `slumber.tasks` entry point to a Task plugin), like DAG Component → Unit. Step → Task.
-
-**Step**:
+## Phase
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `task` | string | Task plugin key (e.g. `instruction`, `survey`). Alias for `task_type`. |
-| `settings` | dict | Plugin-specific settings (optional). |
+| `id` | string | Unique phase id (required). |
+| `title` | string | Display title. Defaults to `id` when omitted. |
+| `layout` | PluginSpec | Layout (`stepper` or `hub`) and settings. |
+| `activities` | list[Activity] | Ordered activities (at least one). |
+| `frame` | FrameSettings | Optional AppFrame override merged over study `ui.settings.frame`. |
+| `on` | list[EventHandler] | Phase-scoped event handlers. |
 
-**Procedure**:
+`frame.header` / `frame.footer` may be `false` to hide chrome (typical during sleep).
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `steps` | list[Step] | Ordered list of steps (at least one). |
+## Activity
 
-## DAG
-
-Processing DAG: components (plugin-keyed by `unit_type`), stream connections, and process component names. Units are resolved via the `slumber.units` entry point at runtime; the schema does not resolve to classes.
-
-**Component**:
+Extends PluginSpec with instance fields:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Unique component name: uppercase with underscores (e.g. `MASTER`, `ZMAX_STORAGE`). |
-| `unit_type` | string | Unit plugin key (YAML may use `unit` as alias). |
-| `settings` | dict \| null | Plugin-specific unit settings (optional). |
+| `id` | string | Unique activity id within the phase. |
+| `title` | string | Display title. Defaults to `id`. |
+| `type` | string | Activity plugin key (e.g. `instruction`, `sleep`). |
+| `settings` | dict | Plugin-specific settings. |
+| `on` | list[EventHandler] | Activity-scoped event handlers. |
 
-**Connection**: `output_stream` and `input_stream`, each in the form `<component_name>/<stream_name>` (e.g. `ZMAX/OUTPUT_SAMPLE`).
+Built-in activities: `instruction` (markdown/text; calls `complete()` on mount), `sleep` (wake/end buttons; emits study events, never completes).
 
-**DAG**:
+## Pipeline
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `components` | list[Component] | At least one component; names must be unique. |
-| `connections` | list[Connection] | Stream connections (output → input). May be given as `[output_stream, input_stream]` tuples. |
-| `process_components` | list[str] | Component names that run as separate processes. Each must exist in `components`. |
+| `id` | string | Unique pipeline id. |
+| `units` | list[Unit] | Units (`id` + PluginSpec). At least one. |
+| `connections` | list[Connection] | Stream links. Shorthand `[output, input]` or `{output, input}`. |
 
-Validation: connection stream names must reference existing component names (first segment before `/`). Stream existence on the actual unit is checked at runtime via the plugin registry.
+**Unit**: `id` plus `type` / `settings` (PluginSpec). Stream endpoints use `<unit_id>/<stream_name>` (e.g. `clock/OUTPUT`).
+
+Built-in units: `clock` (periodic samples at `settings.rate`), `jsonl_writer` (append to `settings.path`).
+
+## Actions and events
+
+**Action** — exactly one of:
+
+| Field | Meaning |
+|-------|---------|
+| `start_phase` | Phase id to start |
+| `start_pipeline` | Pipeline id to start |
+| `stop_pipeline` | Pipeline id to stop |
+| `end_run` | End the run (`true` / bare `end_run`) |
+
+**EventHandler**: `event` (string) + `do` (ordered list of actions).
+
+Handlers on the emitting activity are matched first, then handlers on the active phase. Layouts emit `phase_completed` when every sequential activity has `complete()`d. Activities may `emit` named study events (e.g. `marked_awake`, `end_sleep`).
+
+## Path placeholders
+
+Placeholders expand first; then relative results resolve against the **study root**. Absolute paths stay absolute.
+
+| Placeholder | Expands to |
+|-------------|------------|
+| `{assets_dir}` | Study assets directory |
+| `{run_dir}` | This run's directory |
+| `{run_id}` | Run id |
+| `{study_name}` | Study display name |
+| `{study_id}` | Study id |
+
+Plus run-layout keys (`condition_id`, `participant_id`, `session_id`) where applicable.

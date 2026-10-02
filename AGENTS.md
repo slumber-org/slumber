@@ -26,21 +26,17 @@ uv run pytest -v
 uv run pytest tests/test_smoke.py          # specific file
 uv run pytest -k test_name                  # filter by name
 
-# Database migrations (Supabase extension; not required for local study run)
-uv run slumber db upgrade            # apply migrations
-uv run slumber db revision -m "description"  # create migration
-
 # Docs
 uv run mkdocs serve
 ```
 
-Update this section when the CLI surface changes (0.1 core: `study` / `doctor`; extensions attach via `slumber.cli`).
+Core CLI: `study` (`init` / `validate` / `run`) and `doctor`. Extra Typer apps attach via the `slumber.cli` entry-point group (e.g. a Supabase extension for `db` / auth).
 
 ## Architecture
 
-**Target architecture and terms** live in [`docs/design/0.1-base.md`](docs/design/0.1-base.md). Prefer that document when implementing or refactoring. The current tree may lag; names like tasks, procedures, and DAG are migration leftovers.
+Architecture and terms live in [`docs/design/0.1-base.md`](docs/design/0.1-base.md). Prefer that document when implementing or refactoring.
 
-### Target (0.1) module map
+### Module map (0.1)
 
 ```
 slumber/
@@ -59,17 +55,15 @@ tests/         # mirrors src/slumber/
 
 Study package on disk: `study.yaml`, `conditions/`, `assets/`, `runs/`.
 
-Key 0.1 terms: Study, Condition, Phase, Activity, Layout, UI (`gui` / `headless`), Pipeline, Unit, RunEngine, Plugin (`type` + `settings`). Details, YAML shapes, and contracts are in the design doc — do not duplicate them here.
+Key terms: Study, Condition, Phase, Activity, Layout, UI (`gui` / `headless`), Pipeline, Unit, RunEngine, Plugin (`type` + `settings`). Details, YAML shapes, and contracts are in the design doc — do not duplicate them here.
 
-### Current tree (until reorg)
-
-The installed package still has as-built layout and CLI (including in-tree Supabase helpers and older entry-point names such as `slumber.tasks`). Treat that as transitional; do not extend it contrary to `0.1-base.md`.
+Core CLI: `study` (`init` / `validate` / `run --condition`) and `doctor`. Do not reintroduce procedures, DAG, `slumber.tasks`, or `ui.backend` into core.
 
 ## Key Conventions
 
-- Prefer the 0.1 design when adding or reshaping APIs: schemas validate shape only; plugins are discovery-only; `PluginSpec` is `type` + `settings`.
+- Schemas validate shape only; plugins are discovery-only; `PluginSpec` is `type` + `settings`.
 - Local study run must work without Supabase. Backend/auth/session features belong in an extension (`extensions/slumber-supabase`), not core.
-- When touching existing Supabase code: authenticated session for backend CLI; RLS on tables; service role for admin; session windows must not overlap (exclusion constraint).
+- When touching existing Supabase code (until fully extracted): authenticated session for backend CLI; RLS on tables; service role for admin; session windows must not overlap (exclusion constraint).
 - `ezmsg` remains the processing backbone; pipeline units are ezmsg `Unit` subclasses registered under `slumber.units`.
 - Path placeholders (`{assets_dir}`, `{run_dir}`, `{run_id}`, …) and relative→study-root resolution follow the design doc.
 

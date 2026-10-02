@@ -4,29 +4,26 @@
 
 # Welcome to SLUMBER
 
-SLUMBER (**S**leep **L**ogging and **U**nsupervised **M**onitoring through **B**io**E**lectrical **R**ecordings) is an open-source, Python-based framework designed for conducting sleep studies outside of the laboratory environment.
+SLUMBER (**S**leep **L**ogging and **U**nsupervised **M**onitoring through **B**io**E**lectrical **R**ecordings) is an open-source Python framework for conducting sleep studies outside the laboratory.
 
 ## Why use SLUMBER?
 
-Traditional sleep studies often rely on in-lab supervision and fixed-infrastructure hardware. SLUMBER provides a flexible alternative by offering:
+Traditional sleep studies often rely on in-lab supervision and fixed infrastructure. SLUMBER provides a flexible alternative:
 
-- Real-time acquisition of physiological signals through wearable devices
-- Automated guidance for study participants through calibration, instructions, and nightly procedures
-- Configurable experimental protocols, including multi-night scheduling and condition assignment
-- Support for stimulus delivery (e.g., sound) during sleep based on incoming physiological data
-- Integrated logging for reproducibility, data auditing, and study validation
+- YAML-driven study packages (conditions, phases, activities, pipelines)
+- Participant UI (`gui`) or browserless runs (`headless`) driven by one RunEngine
+- Plugin architecture for activities and processing units
+- Optional extensions (devices, audio, multi-participant backend) via entry points
 
-SLUMBER is intended for researchers who want to run controlled studies in naturalistic (home-based) environments, without direct supervision.
+SLUMBER is intended for researchers who want to run controlled studies in naturalistic (home-based) environments.
 
 ---
 
 ## Getting started
 
-New to SLUMBER? Start here:
-
-1. [Installation and Setup](getting-started/installation-setup.md) — install, configure Supabase, verify
-2. [Study Setup](user-guide/study-setup.md) — create your first study folder
-3. [Running a Study](user-guide/study-run.md) — full researcher workflow with walkthrough
+1. [Installation and Setup](getting-started/installation-setup.md) — install and verify
+2. [Study Setup](user-guide/study-setup.md) — create a study folder
+3. [Running a Study](user-guide/study-run.md) — run a condition locally (try `examples/demo/`)
 
 ---
 
@@ -34,9 +31,10 @@ New to SLUMBER? Start here:
 
 | Section | Contents |
 |---------|----------|
-| [Getting Started](getting-started/installation-setup.md) | Install, Supabase setup, environment config, first commands |
-| [User Guide](user-guide/index.md) | Study setup, condition sync, run layout, CLI reference |
-| [Reference — Schemas](reference/schemas.md) | `study.yaml`, condition, procedure, DAG field reference |
-| [Reference — Plugins](reference/plugins.md) | Entry-point groups, plugin contracts, built-in plugins |
-| [Reference — Backend](reference/backend.md) | Supabase/Postgres, migrations, auth, participant/session management |
-| [Contributing](about/contributing.md) | Development setup, GitHub Flow, testing and documentation conventions |
+| [Getting Started](getting-started/installation-setup.md) | Install, doctor, first commands |
+| [User Guide](user-guide/index.md) | Study setup, validation, run layout, GUI |
+| [Reference — Schemas](reference/schemas.md) | `study.yaml`, condition, phase, pipeline |
+| [Reference — Plugins](reference/plugins.md) | Entry points, contracts, built-ins |
+| [Reference — UI](reference/ui-backends.md) | `gui` / `headless`, layouts, activities |
+| [Reference — CLI](reference/cli-reference.md) | `study` and `doctor` |
+| [Contributing](about/contributing.md) | Development setup and conventions |
