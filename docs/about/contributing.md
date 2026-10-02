@@ -34,31 +34,29 @@ uv sync
 uv run pre-commit install
 ```
 
-## Git Flow
+## GitHub Flow
 
-This project follows [Git Flow](https://davidregalado255.medium.com/what-is-gitflow-b3396770cd42) for branching and releases.
+This project follows [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow) for branching and releases.
 
 ### Branches
 
-- **`main`**: production-ready, stable code (release and hotfix merges only).
-- **`develop`**: integration branch for ongoing work; base for feature and release branches.
-- **`feature/<name>`**: new features branched from `develop`.
-- **`bugfix/<name>`**: non-urgent bug fixes branched from `develop`.
-- **`docs/<name>`**: documentation-only changes branched from `develop`.
-- **`release/<version>`**: stabilization branches cut from `develop` to prepare a release.
-- **`hotfix/<name>`**: urgent production fixes branched from `main` and merged back to both `main` and `develop`.
+- **`main`**: the only long-lived branch; always the integration target. Releases are tags on `main` (e.g. `v0.1.0`).
+- **`feature/<name>`**: new features branched from `main`.
+- **`fix/<name>`**: bug fixes branched from `main`.
+- **`docs/<name>`**: documentation-only changes branched from `main`.
+- **`chore/<name>`**: maintenance and tooling changes branched from `main`.
 
 ### Development workflow
 
-1. Update your local `develop` from the remote `develop`.
-2. Create a `feature/`, `bugfix/`, or `docs/` branch from `develop`.
+1. Update your local `main` from the remote `main`.
+2. Create a `feature/`, `fix/`, `docs/`, or `chore/` branch from `main`.
 3. Make your changes and commit them on your branch.
-4. Squash (or fix up) commits as needed, then open a PR from your branch into `develop`.
+4. Open a PR from your branch into `main`.
 
 #### Tips and Conventions
 
 - Commit messages should start with a **capitalized action verb** (imperative) and be descriptive, e.g. `Add logging for debug output`, `Fix crash on empty config`, `Update contributing guide`.
-- Rebase your branch on the latest `develop` to minimize merge conflicts.
+- Rebase your branch on the latest `main` to minimize merge conflicts.
 - Make PR titles/descriptions clear and request review from the appropriate reviewer(s).
 - Address review feedback with follow-up commits (e.g. `Address review feedback (round 2)`) and push updates to the same branch.
 - Keep PRs focused; avoid bundling unrelated changes.
