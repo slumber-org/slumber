@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Protocol
+from typing import Any, Protocol
 
 from slumber.plugins.base import ConfiguredPlugin
 
 
 class ActivityHost(Protocol):
-    """API injected at mount: container, complete/emit, and path helpers."""
+    """API injected at mount: container, complete/emit, and path helpers.
+
+    ``container`` is a NiceGUI element under the GUI backend, or ``None`` when
+    running headless.
+    """
+
+    container: Any | None
 
     def complete(self) -> None:
         """Mark this mounted activity finished as a layout step."""

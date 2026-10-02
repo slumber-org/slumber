@@ -23,7 +23,9 @@ class HeadlessSettings(BaseModel):
 
 
 class _HeadlessActivityHost:
-    """ActivityHost for headless mounts."""
+    """ActivityHost for headless mounts (no GUI container)."""
+
+    container = None
 
     def __init__(
         self,

@@ -1,11 +1,12 @@
 /* SLUMBER color palette — sleep/night theme
-   Matches src/slumber/plugins/ui/nicegui/theme.py
+   Matches src/slumber/ui/theme.py role tokens
+   (PAGE_BG / SURFACE / BRAND / CTA / SECONDARY / ATTENTION / TEXT).
 
-   INDIGO_LIGHT  #7b7fc4   AMBER         #e8a45a
-   INDIGO        #3d4a8a   SURFACE_DARK  #121528
-   INDIGO_DARK   #2a2f52   SURFACE       #151833
-   TEXT_PRIMARY   #fffffe   SURFACE_MID   #1a1f3c
-   TEXT_SECONDARY #94a1b2   SURFACE_LIGHT #2a2f52 */
+   BRAND_LIGHT   #7b7fc4   CTA / ATTENTION #e8a45a
+   BRAND         #3d4a8a   PAGE_BG_DEEP    #121528
+   BRAND_DARK    #2a2f52   PAGE_BG         #151833
+   TEXT          #fffffe   SURFACE         #1a1f3c
+   SECONDARY     #94a1b2   SURFACE_BORDER  #2a2f52 */
 
 /* Light mode */
 [data-md-color-scheme="default"] {
