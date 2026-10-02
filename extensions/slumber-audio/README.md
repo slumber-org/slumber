@@ -31,22 +31,23 @@ player.play(Path("tone.wav"))  # blocks until done
 player.stop()  # cancel from another thread
 ```
 
-### ezmsg unit
+### Pipeline unit
 
-Register `AudioPlayerUnit` in a DAG and wire it to a trigger source:
+Register `AudioPlayerUnit` in a condition pipeline and wire it to a trigger source:
 
 ```yaml
-# condition.yaml
-dag:
-  units:
-    audio:
-      type: audio_player
-      settings:
-        file_path: assets/cue.wav
-        volume: 0.8
-  connections:
-    - [trigger.OUTPUT_CUE, audio.INPUT_PLAY]
-    - [audio.OUTPUT_DONE, logger.INPUT_EVENT]
+# conditions/demo.yaml (excerpt)
+pipelines:
+  - id: cueing
+    units:
+      - id: audio
+        type: audio_player
+        settings:
+          file_path: "{assets_dir}/cue.wav"
+          volume: 0.8
+    connections:
+      - [trigger.OUTPUT_CUE, audio.INPUT_PLAY]
+      - [audio.OUTPUT_DONE, logger.INPUT_EVENT]
 ```
 
 #### Streams
@@ -60,8 +61,9 @@ dag:
 #### `AudioPlayRequest`
 
 ```python
-from slumber_audio import AudioPlayRequest
 from pathlib import Path
+
+from slumber_audio import AudioPlayRequest
 
 # Use unit defaults
 request = AudioPlayRequest()

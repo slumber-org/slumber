@@ -1,9 +1,7 @@
 # Slumber study folder — fill in values. Do not commit .env.
-# (Researcher uses project .env with DATABASE_URL and SUPABASE_SERVICE_ROLE_KEY.)
-
-# Supabase API (participant app / condition sync).
+#
+# Optional: slumber-supabase extension (auth / condition sync / migrations).
 # SUPABASE_URL=https://[project-ref].supabase.co
 # SUPABASE_ANON_KEY=
-
-# Optional: error/performance monitoring when running a study
-# SENTRY_DSN=
+# DATABASE_URL=postgresql://...
+# SUPABASE_SERVICE_ROLE_KEY=

@@ -1,4 +1,4 @@
-"""Eye-movement detection DAG unit."""
+"""Eye-movement detection pipeline unit."""
 
 from __future__ import annotations
 

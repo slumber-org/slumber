@@ -4,12 +4,12 @@ SLUMBER is an open-source, Python-based framework for conducting **home-based sl
 
 - **Researcher-friendly configuration** (YAML/JSON-first)
 - **Extensibility** via a small stable core + optional extensions (devices, processing, UI)
-- **Reproducibility** through structured logging/audit trails and well-defined study artifacts
+- **Reproducibility** through run logging and well-defined study artifacts
 
 ## Documentation
 
 - **Docs site**: see `docs/` (served via MkDocs)
-- **Framework refactor plan**: `docs/roadmap/framework-refactor-plan.md`
+- **Design (0.1)**: `docs/design/0.1-base.md`
 - **Legacy reference**: `docs/about/legacy-reference.md`
 
 Serve docs locally:
