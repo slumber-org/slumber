@@ -349,10 +349,10 @@ class TestLoadConditionsFromDir:
     """Tests for load_conditions_from_dir."""
 
     def test_loads_conditions_from_directory(self, tmp_path: Path) -> None:
-        (tmp_path / "control.yaml").write_text(
+        (tmp_path / "condition_1.yaml").write_text(
             _minimal_condition_yaml("condition_1"), encoding="utf-8"
         )
-        (tmp_path / "other.yaml").write_text(
+        (tmp_path / "condition_2.yaml").write_text(
             _minimal_condition_yaml("condition_2"), encoding="utf-8"
         )
         conditions = load_conditions_from_dir(tmp_path)
@@ -413,6 +413,18 @@ phases:
         )
         conditions = load_conditions_from_dir(tmp_path)
         assert conditions[0].phases[0].activities[0].on[0].event == "end_sleep"
+
+    def test_raises_when_name_does_not_match_file_stem(self, tmp_path: Path) -> None:
+        file_path = tmp_path / "control.yaml"
+        file_path.write_text(_minimal_condition_yaml("condition_1"), encoding="utf-8")
+
+        with pytest.raises(ValueError) as exc_info:
+            load_conditions_from_dir(tmp_path)
+
+        message = str(exc_info.value)
+        assert str(file_path) in message
+        assert "'condition_1'" in message
+        assert "'control'" in message
 
 
 class TestUnit:

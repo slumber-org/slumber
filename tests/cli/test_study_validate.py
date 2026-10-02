@@ -61,7 +61,7 @@ class TestStudyValidateCLI:
         study_path = init_study(
             tmp_path, "v-study", create_env_example=False, create_gitignore=False
         )
-        (study_path / "conditions" / "control.yaml").write_text(
+        (study_path / "conditions" / "condition_1.yaml").write_text(
             minimal_condition_yaml, encoding="utf-8"
         )
         with patch(
@@ -82,7 +82,7 @@ class TestStudyValidateCLI:
         study_path = init_study(
             tmp_path, "v-study", create_env_example=False, create_gitignore=False
         )
-        (study_path / "conditions" / "c.yaml").write_text(
+        (study_path / "conditions" / "condition_1.yaml").write_text(
             minimal_condition_yaml, encoding="utf-8"
         )
         with patch(
@@ -102,7 +102,7 @@ class TestStudyValidateCLI:
         study_path = init_study(
             tmp_path, "v-study", create_env_example=False, create_gitignore=False
         )
-        (study_path / "conditions" / "control.yaml").write_text(
+        (study_path / "conditions" / "condition_1.yaml").write_text(
             """
 name: condition_1
 entry: setup
