@@ -1,4 +1,4 @@
-"""Study manifest schema: metadata, conditions dir, runs, logging, UI."""
+"""Study manifest schema: metadata, runs, logging, and UI."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from pydantic import (
     model_validator,
 )
 
-from slumber.schemas.audit import AuditConfig
+from slumber.schemas.plugin import PluginSpec
 
 if TYPE_CHECKING:
     from slumber.schemas.condition import Condition
@@ -25,51 +25,125 @@ DEFAULT_RUNS_DIR_NAME = "runs"
 DEFAULT_ASSETS_DIR_NAME = "assets"
 DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_RUN_LAYOUT = "run-{run_id}"
+DEFAULT_UI_TYPE = "headless"
+
+# Placeholders allowed in ``runs.layout`` (and related run path templates).
+# Kept in schemas so Study validation does not import the run package.
+VALID_RUN_LAYOUT_KEYS: frozenset[str] = frozenset(
+    {
+        "study_id",
+        "run_id",
+        "condition_id",
+        "participant_id",
+        "session_id",
+    }
+)
 
 # study_id must not contain path components so base_dir / study_id cannot escape base_dir
 INVALID_STUDY_ID_SUBSTRINGS: ClassVar[tuple[str, ...]] = ("/", "\\", "..")
 
-DEFAULT_UI_BACKEND = "headless"
 
+class FrameHeaderSettings(BaseModel):
+    """Optional header branding inside the AppFrame."""
 
-class UI(BaseModel):
-    """Selected UI backend and its configuration."""
+    model_config = ConfigDict(extra="forbid")
 
-    model_config = ConfigDict(populate_by_name=True)
-
-    backend: str = Field(
-        default=DEFAULT_UI_BACKEND,
-        min_length=1,
-        description="UI backend plugin key (e.g. 'headless').",
+    logo: str | None = Field(
+        default=None,
+        description="Logo path (placeholders expanded at resolve time).",
     )
-    settings: dict[str, Any] = Field(
-        default_factory=dict,
-        description="UI backend-specific settings.",
+    title: str | None = Field(
+        default=None,
+        description="Header title (e.g. '{study_name}').",
+    )
+
+
+class FrameSettings(BaseModel):
+    """AppFrame chrome defaults or per-phase overrides.
+
+    A region set to ``False`` hides it (typical phase override during sleep).
+    A dict configures content; omitted fields keep the study default after merge.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    header: FrameHeaderSettings | bool | None = Field(
+        default=None,
+        description="Header config, or False to hide.",
+    )
+    footer: bool | None = Field(
+        default=None,
+        description="Footer visibility (False hides).",
+    )
+
+
+class StepperLayoutDefaults(BaseModel):
+    """Default labels and behaviour for the stepper layout."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    previous_button: str = Field(default="Previous")
+    next_button: str = Field(default="Next")
+    complete_button: str = Field(default="Complete")
+    show_activity_list: bool = Field(default=True)
+    allow_skip: bool = Field(default=False)
+
+
+class LayoutDefaults(BaseModel):
+    """Per-layout-type defaults under ``ui.settings.layouts``."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    stepper: StepperLayoutDefaults | None = Field(
+        default=None,
+        description="Defaults merged under phase layout.settings for type stepper.",
+    )
+
+
+class GuiSettings(BaseModel):
+    """Optional settings when ``study.ui.type`` is ``gui``.
+
+    Stored as ``PluginSpec.settings``; config validates with this model when
+    resolving the GUI backend. Phase ``layout.settings`` / ``frame`` merge in
+    config, not here.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    port: int | None = Field(default=None, description="NiceGUI listen port.")
+    favicon: str | None = Field(
+        default=None,
+        description="Favicon path (placeholders expanded at resolve time).",
+    )
+    frame: FrameSettings | None = Field(
+        default=None,
+        description="Default AppFrame chrome for the run.",
+    )
+    layouts: LayoutDefaults | None = Field(
+        default=None,
+        description="Per-layout-type defaults (e.g. stepper button labels).",
     )
 
 
 class RunLayout(BaseModel):
     """Run output directory and path structure.
 
-    Run directory is base_directory joined with layout formatted with run-context
-    values. Use placeholders like {participant_id}, {run_id} (and any others
-    the schema supports).
+    Run directory is ``directory`` joined with ``layout`` formatted with
+    run-context values (see :data:`VALID_RUN_LAYOUT_KEYS`).
     """
 
-    base_directory: str = Field(
+    directory: str = Field(
         default=DEFAULT_RUNS_DIR_NAME,
         description="Base directory for run outputs.",
     )
     layout: str = Field(
         default=DEFAULT_RUN_LAYOUT,
         min_length=1,
-        description="Path relative to base_directory with placeholders.",
+        description="Path relative to directory with placeholders.",
     )
 
     @model_validator(mode="after")
     def validate_layout(self) -> RunLayout:
-        from slumber.runtime.run import VALID_RUN_LAYOUT_KEYS
-
         placeholders = re.findall(r"\{(\w+)\}", self.layout)
         unknown = set(placeholders) - VALID_RUN_LAYOUT_KEYS
         if unknown:
@@ -83,8 +157,8 @@ class RunLayout(BaseModel):
 class LoggingConfig(BaseModel):
     """Logging configuration.
 
-    Handlers are passed as kwargs to loguru logger.add(). Sink paths may
-    contain placeholders (e.g. run_id) substituted at run start.
+    Handlers are passed as kwargs to loguru ``logger.add()``. Sink paths may
+    contain placeholders (e.g. ``run_id``) substituted at run start.
     """
 
     level: str = Field(
@@ -110,7 +184,7 @@ class Study(BaseModel):
     _conditions: list[Condition] = PrivateAttr(default_factory=list)
 
     study_id: str = Field(..., min_length=1, description="Unique study identifier.")
-    name: str = Field(..., min_length=1, description="Human-readable study name.")
+    study_name: str = Field(..., min_length=1, description="Human-readable study name.")
     conditions_dir: str = Field(
         default=DEFAULT_CONDITIONS_DIR_NAME,
         description="Directory name (relative to study folder) containing condition YAML files.",
@@ -123,13 +197,9 @@ class Study(BaseModel):
         default_factory=RunLayout,
         description="Run output directory layout.",
     )
-    ui: UI = Field(
-        default_factory=UI,
-        description="Selected UI backend and configuration.",
-    )
-    audit: AuditConfig = Field(
-        default_factory=AuditConfig,
-        description="Audit log configuration.",
+    ui: PluginSpec = Field(
+        default_factory=lambda: PluginSpec(type=DEFAULT_UI_TYPE),
+        description="UI backend plugin spec (gui or headless).",
     )
     logging: LoggingConfig = Field(
         default_factory=LoggingConfig,
@@ -162,5 +232,3 @@ class Study(BaseModel):
     def conditions(self) -> list[Condition]:
         """Conditions loaded from the study directory (set by load_study())."""
         return self._conditions
-
-    # TODO: [feature] add logo and favicon fields to the study manifest\

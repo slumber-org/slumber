@@ -1,30 +1,71 @@
-"""Tests for Study, RunLayout, UI, and LoggingConfig schemas."""
+"""Tests for Study, RunLayout, PluginSpec UI, GuiSettings, and LoggingConfig."""
 
 import pytest
 from pydantic import ValidationError
 
-from slumber.schemas import UI, LoggingConfig, RunLayout, Study
+from slumber.schemas import (
+    GuiSettings,
+    LoggingConfig,
+    PluginSpec,
+    RunLayout,
+    Study,
+)
 
 
-class TestUI:
-    """Tests for UI schema."""
+class TestPluginSpec:
+    """Tests for PluginSpec schema."""
 
     def test_valid_minimal(self) -> None:
-        ui = UI(backend="headless")
-        assert ui.backend == "headless"
-        assert ui.settings == {}
+        spec = PluginSpec(type="headless")
+        assert spec.type == "headless"
+        assert spec.settings == {}
 
-    def test_valid_with_config(self) -> None:
-        ui = UI(backend="headless", settings={"theme": "dark"})
-        assert ui.backend == "headless"
-        assert ui.settings["theme"] == "dark"
+    def test_valid_with_settings(self) -> None:
+        spec = PluginSpec(type="gui", settings={"port": 8080})
+        assert spec.type == "gui"
+        assert spec.settings["port"] == 8080
 
-    def test_backend_required(self) -> None:
-        with pytest.raises(ValidationError) as exc_info:
-            UI(backend="")
-        assert "backend" in str(exc_info.value).lower() or "min_length" in str(
-            exc_info.value
+    def test_type_required(self) -> None:
+        with pytest.raises(ValidationError):
+            PluginSpec(type="")
+
+
+class TestGuiSettings:
+    """Tests for GuiSettings schema."""
+
+    def test_valid_defaults(self) -> None:
+        settings = GuiSettings()
+        assert settings.port is None
+        assert settings.favicon is None
+        assert settings.frame is None
+        assert settings.layouts is None
+
+    def test_valid_full(self) -> None:
+        settings = GuiSettings(
+            port=8080,
+            favicon="{assets_dir}/favicon.png",
+            frame={
+                "header": {"logo": "{assets_dir}/logo.png", "title": "{study_name}"},
+            },
+            layouts={
+                "stepper": {
+                    "previous_button": "Back",
+                    "allow_skip": True,
+                }
+            },
         )
+        assert settings.port == 8080
+        assert settings.frame is not None
+        assert settings.frame.header is not None
+        assert settings.layouts is not None
+        assert settings.layouts.stepper is not None
+        assert settings.layouts.stepper.allow_skip is True
+
+    def test_frame_header_false(self) -> None:
+        settings = GuiSettings(frame={"header": False, "footer": False})
+        assert settings.frame is not None
+        assert settings.frame.header is False
+        assert settings.frame.footer is False
 
 
 class TestRunLayout:
@@ -32,15 +73,15 @@ class TestRunLayout:
 
     def test_valid_defaults(self) -> None:
         layout = RunLayout()
-        assert layout.base_directory == "runs"
+        assert layout.directory == "runs"
         assert layout.layout == "run-{run_id}"
 
     def test_valid_custom(self) -> None:
         layout = RunLayout(
-            base_directory="output",
+            directory="output",
             layout="sub-{participant_id}/run-{run_id}",
         )
-        assert layout.base_directory == "output"
+        assert layout.directory == "output"
         assert layout.layout == "sub-{participant_id}/run-{run_id}"
 
     def test_invalid_placeholder_rejected(self) -> None:
@@ -52,7 +93,10 @@ class TestRunLayout:
 
     def test_allowed_placeholders_accepted(self) -> None:
         layout = RunLayout(
-            layout="s-{study_id}/p-{participant_id}/c-{condition_id}/ses-{session_id}/r-{run_id}"
+            layout=(
+                "s-{study_id}/p-{participant_id}/c-{condition_id}/"
+                "ses-{session_id}/r-{run_id}"
+            )
         )
         assert "study_id" in layout.layout
 
@@ -83,39 +127,40 @@ class TestStudy:
     def test_valid_minimal(self) -> None:
         study = Study(
             study_id="test-study",
-            name="Test Study",
-            ui=UI(backend="headless"),
+            study_name="Test Study",
+            ui=PluginSpec(type="headless"),
         )
         assert study.study_id == "test-study"
-        assert study.name == "Test Study"
+        assert study.study_name == "Test Study"
         assert study.conditions_dir == "conditions"
-        assert study.ui.backend == "headless"
-        assert study.runs.base_directory == "runs"
+        assert study.ui.type == "headless"
+        assert study.runs.directory == "runs"
         assert study.logging.level == "INFO"
+        assert not hasattr(study, "audit") or "audit" not in study.model_fields
 
     def test_valid_full(self) -> None:
         study = Study(
             study_id="ld-2025",
-            name="Lucid Dreaming Pilot",
+            study_name="Lucid Dreaming Pilot",
             conditions_dir="conditions",
-            ui=UI(backend="headless", settings={"theme": "dark"}),
+            ui=PluginSpec(type="gui", settings={"port": 8080}),
         )
         assert study.conditions_dir == "conditions"
-        assert study.ui.settings["theme"] == "dark"
+        assert study.ui.settings["port"] == 8080
 
     def test_study_id_required(self) -> None:
         with pytest.raises(ValidationError):
             Study(
                 study_id="",
-                name="A Study",
-                ui=UI(backend="headless"),
+                study_name="A Study",
+                ui=PluginSpec(type="headless"),
             )
 
     def test_study_id_rejects_path_components(self) -> None:
         """study_id must not contain '/', '\\', or '..' so it cannot escape base_dir."""
         for invalid_id in ("a/b", "..", "a/../b", "a\\b", "study..id"):
             with pytest.raises(ValidationError) as exc_info:
-                Study(study_id=invalid_id, name="Study")
+                Study(study_id=invalid_id, study_name="Study")
             assert (
                 "path" in str(exc_info.value).lower()
                 or "forbidden" in str(exc_info.value).lower()
@@ -123,18 +168,30 @@ class TestStudy:
 
     def test_study_id_accepts_safe_values(self) -> None:
         """study_id accepts alphanumeric, hyphen, underscore (no path components)."""
-        study = Study(study_id="my-study_2025", name="Study")
+        study = Study(study_id="my-study_2025", study_name="Study")
         assert study.study_id == "my-study_2025"
 
-    def test_name_required(self) -> None:
+    def test_study_name_required(self) -> None:
         with pytest.raises(ValidationError):
             Study(
                 study_id="x",
-                name="",
-                ui=UI(backend="headless"),
+                study_name="",
+                ui=PluginSpec(type="headless"),
             )
 
     def test_ui_has_default(self) -> None:
         """Study accepts minimal args; ui defaults to headless."""
-        study = Study(study_id="x", name="Y")
-        assert study.ui.backend == "headless"
+        study = Study(study_id="x", study_name="Y")
+        assert study.ui.type == "headless"
+
+    def test_rejects_legacy_name_field(self) -> None:
+        with pytest.raises(ValidationError):
+            Study(study_id="x", name="Legacy Name")  # type: ignore[call-arg]
+
+    def test_rejects_audit_field(self) -> None:
+        with pytest.raises(ValidationError):
+            Study(
+                study_id="x",
+                study_name="Y",
+                audit={"enabled": False},  # type: ignore[call-arg]
+            )
