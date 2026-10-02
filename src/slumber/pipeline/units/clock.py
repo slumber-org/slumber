@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
+from collections.abc import AsyncGenerator
+from typing import Any
+
 import ezmsg.core as ez
 from pydantic import Field
 
@@ -15,6 +20,20 @@ class ClockSettings(Settings):
 
 
 class ClockUnit(ez.Unit):
-    """Emit periodic dummy samples at ``settings.rate`` (implementation in run stack)."""
+    """Emit periodic dummy samples at ``settings.rate`` on ``OUTPUT``."""
 
     SETTINGS = ClockSettings
+
+    OUTPUT = ez.OutputStream(dict[str, Any])
+
+    @ez.publisher(OUTPUT)
+    async def tick(
+        self,
+    ) -> AsyncGenerator[tuple[ez.OutputStream, dict[str, Any]], None]:
+        """Publish ``{"n", "t"}`` samples forever at the configured rate."""
+        period = 1.0 / self.SETTINGS.rate
+        n = 0
+        while True:
+            yield self.OUTPUT, {"n": n, "t": time.time()}
+            n += 1
+            await asyncio.sleep(period)

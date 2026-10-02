@@ -151,6 +151,11 @@ class RunEngine:
 
         if self._pipelines is None:
             self._pipelines = PipelineManager(self._condition)
+        self._pipelines.configure(
+            study_root=self._study_dir,
+            placeholders=self._placeholders,
+            registry=self._registry,
+        )
 
         self._handler_ids = configure_run_logging(
             self._study,
