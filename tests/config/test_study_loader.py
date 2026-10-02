@@ -59,7 +59,7 @@ class TestLoadStudy:
         study_path = init_study(
             tmp_path, "s1", create_env_example=False, create_gitignore=False
         )
-        cond_path = study_path / "conditions" / "control.yaml"
+        cond_path = study_path / "conditions" / "condition_1.yaml"
         cond_path.write_text(minimal_condition_yaml, encoding="utf-8")
 
         study = load_study(study_path)
@@ -74,7 +74,7 @@ class TestLoadStudy:
         study_path = init_study(
             tmp_path, "s1", create_env_example=False, create_gitignore=False
         )
-        for name, cond_name in [("a.yaml", "cond_a"), ("b.yaml", "cond_b")]:
+        for name, cond_name in [("cond_a.yaml", "cond_a"), ("cond_b.yaml", "cond_b")]:
             (study_path / "conditions" / name).write_text(
                 f"""
 name: {cond_name}

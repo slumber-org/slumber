@@ -346,7 +346,8 @@ def load_conditions_from_dir(conditions_dir: Path) -> list[Condition]:
 
     Raises:
         FileNotFoundError: If the conditions directory does not exist.
-        ValueError: If any condition file fails validation (message includes path).
+        ValueError: If any condition file fails validation, or its ``name`` does
+            not match the file stem (message includes path).
     """
     if not conditions_dir.is_dir():
         raise FileNotFoundError(f"Conditions directory not found: {conditions_dir}")
@@ -358,10 +359,17 @@ def load_conditions_from_dir(conditions_dir: Path) -> list[Condition]:
     conditions: list[Condition] = []
     for file_path in condition_files:
         try:
-            conditions.append(load_and_validate(file_path, Condition))
+            condition = load_and_validate(file_path, Condition)
         except ValidationError as e:
             msg = format_validation_error(
                 e, path=file_path, prefix="Condition file error"
             )
             raise ValueError(msg) from e
+        if condition.name != file_path.stem:
+            raise ValueError(
+                f"Condition file error: {file_path}\n"
+                f"  name: '{condition.name}' does not match the file name "
+                f"'{file_path.stem}'"
+            )
+        conditions.append(condition)
     return conditions
