@@ -49,4 +49,3 @@ def load_cli_extensions(app: typer.Typer) -> None:
             continue
 
         app.add_typer(loaded, name=entry_point.name)
-        logger.debug("Attached CLI extension {!r}", entry_point.name)

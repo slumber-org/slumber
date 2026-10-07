@@ -8,12 +8,12 @@ from loguru import logger
 def configure_cli_logging(*, verbose: bool = False) -> None:
     """Configure loguru for CLI use.
 
-    Replaces the default loguru handler with a stderr handler at WARNING
+    Replaces the default loguru handler with a stderr handler at INFO
     level (quiet by default). When ``verbose=True``, level is set to DEBUG
     so internal framework messages are visible.
 
     Args:
-        verbose: If True, log at DEBUG level; otherwise WARNING.
+        verbose: If True, log at DEBUG level; otherwise INFO.
     """
     logger.remove()
     level = "DEBUG" if verbose else "INFO"
