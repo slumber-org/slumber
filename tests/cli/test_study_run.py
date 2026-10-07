@@ -33,11 +33,6 @@ pipelines: []
 
 
 @pytest.fixture
-def runner() -> CliRunner:
-    return CliRunner()
-
-
-@pytest.fixture
 def study_dir(tmp_path: Path) -> Path:
     sd = init_study(tmp_path, "s1", create_env_example=False, create_gitignore=False)
     (sd / "conditions" / "ctrl.yaml").write_text(_MINIMAL_CONDITION, encoding="utf-8")

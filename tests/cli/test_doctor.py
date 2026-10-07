@@ -16,11 +16,6 @@ from slumber.cli.doctor import (
 from slumber.cli.main import app
 
 
-@pytest.fixture
-def runner() -> CliRunner:
-    return CliRunner()
-
-
 class TestCheckEnvironment:
     def test_optional_vars_skip_when_missing(
         self, monkeypatch: pytest.MonkeyPatch

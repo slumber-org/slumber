@@ -108,10 +108,6 @@ class TestInitStudy:
 class TestStudyInitCLI:
     """Tests for slumber study init command (non-interactive)."""
 
-    @pytest.fixture
-    def runner(self) -> CliRunner:
-        return CliRunner()
-
     def test_non_interactive_creates_layout(
         self, runner: CliRunner, tmp_path: Path
     ) -> None:

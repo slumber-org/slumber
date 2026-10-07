@@ -14,11 +14,6 @@ from slumber.plugins import EntryPointGroup, reset_registry
 from slumber.ui.activities.instruction import InstructionActivity
 
 
-@pytest.fixture
-def runner() -> CliRunner:
-    return CliRunner()
-
-
 @pytest.fixture(autouse=True)
 def _fresh_registry() -> None:
     reset_registry()

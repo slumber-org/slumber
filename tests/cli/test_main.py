@@ -4,15 +4,9 @@ from __future__ import annotations
 
 from importlib import metadata
 
-import pytest
 from typer.testing import CliRunner
 
 from slumber.cli.main import app
-
-
-@pytest.fixture
-def runner() -> CliRunner:
-    return CliRunner()
 
 
 class TestVersionOption:

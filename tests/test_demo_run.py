@@ -14,11 +14,6 @@ from slumber.constants import PACKAGE_ROOT
 _DEMO_DIR = PACKAGE_ROOT / "examples" / "demo"
 
 
-@pytest.fixture
-def runner() -> CliRunner:
-    return CliRunner()
-
-
 @pytest.mark.skipif(not _DEMO_DIR.is_dir(), reason="examples/demo not present")
 class TestHeadlessDemoRun:
     """Run examples/demo headless and assert run artifacts."""
