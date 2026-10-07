@@ -5,8 +5,10 @@
 (function () {
   const SIB_STYLE = "https://sibforms.com/forms/end-form/build/sib-styles.css";
   const SIB_SCRIPT = "https://sibforms.com/forms/end-form/build/main.js";
-  const RECAPTCHA_SCRIPT =
-    "https://www.google.com/recaptcha/api.js?hl=en&render=explicit";
+  // Brevo’s embed still uses g-recaptcha markup for Turnstile sitekeys (0x4AAAAA…).
+  // Load Turnstile in reCAPTCHA compatibility mode so grecaptcha.render works.
+  const TURNSTILE_SCRIPT =
+    "https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha&render=explicit";
 
   window.handleCaptchaResponse = function handleCaptchaResponse() {
     const captcha = document.getElementById("sib-captcha");
@@ -89,7 +91,8 @@
     if (!captcha || typeof window.grecaptcha === "undefined") {
       return;
     }
-    window.grecaptcha.ready(() => {
+    const ready = window.grecaptcha.ready || ((callback) => callback());
+    ready(() => {
       if (captcha.querySelector("iframe, textarea")) {
         return;
       }
@@ -112,7 +115,7 @@
     configureBrevo();
     ensureStylesheet();
     try {
-      await loadExternalScript(RECAPTCHA_SCRIPT, "data-brevo-recaptcha");
+      await loadExternalScript(TURNSTILE_SCRIPT, "data-brevo-turnstile");
       renderCaptcha();
       await loadBrevoMain();
     } catch (error) {
