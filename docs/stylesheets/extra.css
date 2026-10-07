@@ -58,3 +58,178 @@
 [data-md-color-scheme="slate"] .md-typeset details {
   background-color: #1a1f3c; /* SURFACE_MID */
 }
+
+/* Brevo “Sign up for updates” embed
+   Form supplies its own heading — keep nav/browser title, hide page H1.
+   Overrides are scoped to .sib-form and use Material theme variables. */
+.sib-form-page-title {
+  display: none;
+}
+
+.sib-form {
+  margin: 0.25rem auto 1.5rem;
+  max-width: 540px;
+  background-color: transparent !important;
+  font-family: var(--md-text-font-family, inherit);
+  color: var(--md-typeset-color, var(--md-default-fg-color));
+}
+
+.sib-form :where(.sib-form-message-panel) {
+  display: none;
+}
+
+.sib-form :where(.sib-form-message-panel .sib-notification__icon) {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.sib-form #sib-container,
+.sib-form #sib-form-container {
+  background-color: transparent !important;
+  color: inherit;
+}
+
+.sib-form #sib-container {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.sib-form .sib-form-block,
+.sib-form .sib-form-block p,
+.sib-form .sib-text-form-block p,
+.sib-form .entry__label,
+.sib-form .entry__choice,
+.sib-form .entry__choice > span,
+.sib-form .entry__choice label > span:not(.checkbox),
+.sib-form .entry__choice p {
+  color: var(--md-typeset-color, var(--md-default-fg-color)) !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+}
+
+.sib-form .sib-form-block p {
+  margin: 0;
+}
+
+/* Brevo paints .checkbox_tick_positive green + a white ::before tick even when
+   unchecked; keep an empty box until :checked, and theme both states. */
+.sib-form .checkbox {
+  background-color: var(--md-default-bg-color) !important;
+  border: 1px solid var(--md-default-fg-color--light) !important;
+  box-shadow: none !important;
+}
+
+.sib-form .input_replaced:not(:checked) + .checkbox_tick_positive::before,
+.sib-form .input_replaced:not(:checked) + .checkbox_tick_positive::after {
+  content: none !important;
+}
+
+.sib-form .input_replaced:checked + .checkbox_tick_positive {
+  background-color: var(--md-primary-fg-color) !important;
+  border-color: var(--md-primary-fg-color) !important;
+}
+
+.sib-form .input_replaced:checked + .checkbox_tick_positive::before {
+  border-color: var(--md-primary-bg-color, #ffffff) !important;
+}
+
+.sib-form .input_replaced:focus + .checkbox {
+  box-shadow: 0 0 0 0.1rem var(--md-primary-fg-color--light) !important;
+}
+
+.sib-form .sib-captcha {
+  text-align: left;
+}
+
+.sib-form .sib-captcha .g-recaptcha {
+  display: inline-block;
+}
+
+.sib-form .sib-form__declaration-text,
+.sib-form .sib-form__declaration-text p {
+  color: var(--md-default-fg-color--light) !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+}
+
+.sib-form a {
+  color: var(--md-typeset-a-color) !important;
+  text-decoration: underline;
+}
+
+.sib-form #sib-container input::placeholder,
+.sib-form #sib-container textarea::placeholder {
+  color: var(--md-default-fg-color--light) !important;
+  font-family: inherit !important;
+  text-align: left;
+}
+
+.sib-form #sib-container .entry__field,
+.sib-form #sib-container input.input {
+  background-color: var(--md-code-bg-color, var(--md-default-bg-color)) !important;
+  color: var(--md-typeset-color, var(--md-default-fg-color)) !important;
+  border: 0.1rem solid var(--md-default-fg-color--lightest) !important;
+  border-radius: 0.2rem !important;
+  font-family: inherit !important;
+}
+
+.sib-form #sib-container input.input:focus {
+  border-color: var(--md-primary-fg-color) !important;
+  outline: none;
+  box-shadow: 0 0 0 0.1rem var(--md-primary-fg-color--light);
+}
+
+.sib-form .sib-form-block__button {
+  background-color: var(--md-primary-fg-color) !important;
+  color: var(--md-primary-bg-color, #ffffff) !important;
+  font-family: inherit !important;
+  border-radius: 0.2rem !important;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.sib-form .sib-form-block__button:hover,
+.sib-form .sib-form-block__button:focus {
+  background-color: var(--md-accent-fg-color) !important;
+  color: var(--md-primary-bg-color, #ffffff) !important;
+}
+
+.sib-form .sib-form-block__button .progress-indicator__icon {
+  fill: currentColor;
+}
+
+.sib-form #error-message,
+.sib-form .entry__error--primary {
+  color: #661d1d !important;
+  background-color: #ffeded !important;
+  border-color: #ff4949 !important;
+}
+
+.sib-form #success-message {
+  color: #085229 !important;
+  background-color: #e7faf0 !important;
+  border-color: #13ce66 !important;
+}
+
+[data-md-color-scheme="slate"] .sib-form #error-message,
+[data-md-color-scheme="slate"] .sib-form .entry__error--primary {
+  color: #ffb4b4 !important;
+  background-color: rgba(255, 73, 73, 0.16) !important;
+  border-color: #ff4949 !important;
+}
+
+[data-md-color-scheme="slate"] .sib-form #success-message {
+  color: #b8f0d0 !important;
+  background-color: rgba(19, 206, 102, 0.16) !important;
+  border-color: #13ce66 !important;
+}
+
+.sib-form .input--hidden {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}

@@ -44,6 +44,9 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/brevo-form.js
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -80,3 +83,4 @@ nav:
 
   - About:
       - Contributing: about/contributing.md
+      - Sign up for updates: updates.md
