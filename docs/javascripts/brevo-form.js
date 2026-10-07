@@ -6,11 +6,32 @@
   const SIB_STYLE = "https://sibforms.com/forms/end-form/build/sib-styles.css";
   const SIB_SCRIPT = "https://sibforms.com/forms/end-form/build/main.js";
   // Brevo’s embed still uses g-recaptcha markup for Turnstile sitekeys (0x4AAAAA…).
-  // Load Turnstile in reCAPTCHA compatibility mode so grecaptcha.render works.
+  // Load Turnstile in reCAPTCHA compatibility mode; also copy the token into
+  // g-recaptcha-response so Brevo’s validator accepts the submission.
   const TURNSTILE_SCRIPT =
     "https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha&render=explicit";
 
-  window.handleCaptchaResponse = function handleCaptchaResponse() {
+  function setBrevoCaptchaToken(token) {
+    const form = document.getElementById("sib-form");
+    if (!form) {
+      return;
+    }
+    let input = form.querySelector(
+      'textarea[name="g-recaptcha-response"], input[name="g-recaptcha-response"]',
+    );
+    if (!input) {
+      input = document.createElement("textarea");
+      input.name = "g-recaptcha-response";
+      input.setAttribute("aria-hidden", "true");
+      input.tabIndex = -1;
+      input.style.display = "none";
+      form.appendChild(input);
+    }
+    input.value = token || "";
+  }
+
+  window.handleCaptchaResponse = function handleCaptchaResponse(token) {
+    setBrevoCaptchaToken(token);
     const captcha = document.getElementById("sib-captcha");
     if (captcha) {
       captcha.dispatchEvent(new Event("captchaChange"));
@@ -68,6 +89,8 @@
       }
       const script = document.createElement("script");
       script.src = src;
+      script.async = true;
+      script.defer = true;
       script.setAttribute(marker, "true");
       script.onload = () => {
         script.dataset.loaded = "true";
@@ -86,26 +109,68 @@
     return loadExternalScript(SIB_SCRIPT, "data-brevo-main");
   }
 
-  function renderCaptcha() {
+  function waitForTurnstile() {
+    return new Promise((resolve, reject) => {
+      const started = Date.now();
+      const poll = () => {
+        if (window.turnstile && typeof window.turnstile.render === "function") {
+          if (typeof window.turnstile.ready === "function") {
+            window.turnstile.ready(() => resolve(window.turnstile));
+          } else {
+            resolve(window.turnstile);
+          }
+          return;
+        }
+        if (Date.now() - started > 10000) {
+          reject(new Error("Timed out waiting for Turnstile"));
+          return;
+        }
+        window.setTimeout(poll, 50);
+      };
+      poll();
+    });
+  }
+
+  function captchaTheme() {
+    return document.body.getAttribute("data-md-color-scheme") === "slate"
+      ? "dark"
+      : "light";
+  }
+
+  async function renderCaptcha() {
     const captcha = document.getElementById("sib-captcha");
-    if (!captcha || typeof window.grecaptcha === "undefined") {
+    if (!captcha) {
       return;
     }
-    const ready = window.grecaptcha.ready || ((callback) => callback());
-    ready(() => {
-      if (captcha.querySelector("iframe, textarea")) {
-        return;
-      }
+
+    const turnstile = await waitForTurnstile();
+    const previousId = captcha.dataset.turnstileWidgetId;
+    if (previousId) {
       try {
-        window.grecaptcha.render(captcha, {
-          sitekey: captcha.dataset.sitekey,
-          callback: window.handleCaptchaResponse,
-        });
-      } catch (error) {
-        // Widget may already be bound after Instant Navigation reuse.
-        console.debug("Brevo captcha render skipped:", error);
+        turnstile.remove(previousId);
+      } catch {
+        // Widget may already be gone after Instant Navigation.
       }
+      delete captcha.dataset.turnstileWidgetId;
+    }
+    captcha.replaceChildren();
+    setBrevoCaptchaToken("");
+
+    const widgetId = turnstile.render(captcha, {
+      sitekey: captcha.getAttribute("data-sitekey"),
+      theme: captchaTheme(),
+      callback: window.handleCaptchaResponse,
+      "expired-callback": () => {
+        setBrevoCaptchaToken("");
+        captcha.dispatchEvent(new Event("captchaChange"));
+      },
+      "error-callback": () => {
+        setBrevoCaptchaToken("");
+      },
     });
+    if (widgetId != null) {
+      captcha.dataset.turnstileWidgetId = String(widgetId);
+    }
   }
 
   async function initBrevoForm() {
@@ -116,7 +181,7 @@
     ensureStylesheet();
     try {
       await loadExternalScript(TURNSTILE_SCRIPT, "data-brevo-turnstile");
-      renderCaptcha();
+      await renderCaptcha();
       await loadBrevoMain();
     } catch (error) {
       console.error(error);
