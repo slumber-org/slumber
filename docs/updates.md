@@ -109,7 +109,7 @@ hide:
           <div class="sib-captcha sib-form-block">
             <div class="form__entry entry_block">
               <div class="form__label-row ">
-                <div class="g-recaptcha sib-visible-recaptcha" id="sib-captcha" data-sitekey="0x4AAAAAAFQd9jEATymwRbmT" data-callback="handleCaptchaResponse" style="direction:ltr"></div>
+                <div class="cf-turnstile g-recaptcha" id="sib-captcha" data-sitekey="0x4AAAAAAFQd9jEATymwRbmT" data-callback="handleCaptchaResponse" data-language="en"></div>
               </div>
               <label class="entry__error entry__error--primary" style="font-size:16px; text-align:left; border-radius:3px;">
               </label>

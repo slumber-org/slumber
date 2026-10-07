@@ -1,15 +1,15 @@
 /**
  * Load Brevo form assets when #sib-form is present.
  * Re-runs on Material Instant Navigation via document$.
+ *
+ * Matches Brevo’s Cloudflare Turnstile embed: cf-turnstile markup, alias
+ * window.grecaptcha = window.turnstile, and captchaChange for validation.
  */
 (function () {
   const SIB_STYLE = "https://sibforms.com/forms/end-form/build/sib-styles.css";
   const SIB_SCRIPT = "https://sibforms.com/forms/end-form/build/main.js";
-  // Brevo’s embed still uses g-recaptcha markup for Turnstile sitekeys (0x4AAAAA…).
-  // Load Turnstile in reCAPTCHA compatibility mode; also copy the token into
-  // g-recaptcha-response so Brevo’s validator accepts the submission.
   const TURNSTILE_SCRIPT =
-    "https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha&render=explicit";
+    "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
   function setBrevoCaptchaToken(token) {
     const form = document.getElementById("sib-form");
@@ -30,7 +30,15 @@
     input.value = token || "";
   }
 
+  function aliasGreCaptcha() {
+    if (window.turnstile) {
+      window.grecaptcha = window.turnstile;
+    }
+  }
+
   window.handleCaptchaResponse = function handleCaptchaResponse(token) {
+    // Brevo’s embed aliases grecaptcha to turnstile after a successful challenge.
+    aliasGreCaptcha();
     setBrevoCaptchaToken(token);
     const captcha = document.getElementById("sib-captcha");
     if (captcha) {
@@ -114,6 +122,7 @@
       const started = Date.now();
       const poll = () => {
         if (window.turnstile && typeof window.turnstile.render === "function") {
+          aliasGreCaptcha();
           if (typeof window.turnstile.ready === "function") {
             window.turnstile.ready(() => resolve(window.turnstile));
           } else {
@@ -153,12 +162,17 @@
       }
       delete captcha.dataset.turnstileWidgetId;
     }
-    captcha.replaceChildren();
+
+    // Fresh container for Instant Navigation re-entry.
+    if (captcha.querySelector("iframe, textarea, input")) {
+      captcha.replaceChildren();
+    }
     setBrevoCaptchaToken("");
 
     const widgetId = turnstile.render(captcha, {
       sitekey: captcha.getAttribute("data-sitekey"),
       theme: captchaTheme(),
+      language: captcha.getAttribute("data-language") || "en",
       callback: window.handleCaptchaResponse,
       "expired-callback": () => {
         setBrevoCaptchaToken("");
@@ -180,9 +194,10 @@
     configureBrevo();
     ensureStylesheet();
     try {
+      // Match Brevo footer order: form runtime, then Turnstile.
+      await loadBrevoMain();
       await loadExternalScript(TURNSTILE_SCRIPT, "data-brevo-turnstile");
       await renderCaptcha();
-      await loadBrevoMain();
     } catch (error) {
       console.error(error);
     }
