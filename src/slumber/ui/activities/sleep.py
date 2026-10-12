@@ -5,7 +5,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 from slumber.ui.activities.base import Activity, ActivityHost
-from slumber.ui.theme import BRAND_LIGHT, SECONDARY, TYPE_SCALE
+from slumber.ui.theme import SECONDARY, TEXT, TYPE_SCALE
 from slumber.ui.widgets import confirm_dialog, logo_mark, outline_button, primary_button
 
 
@@ -39,7 +39,7 @@ class SleepActivity(Activity):
         with activity_host.container, ui.column().classes("items-center gap-4"):
             logo_mark(None, size="hub", fallback_icon="bedtime")
             ui.label("Sleep").classes(
-                f"{TYPE_SCALE['display']} font-bold text-[{BRAND_LIGHT}]"
+                f"{TYPE_SCALE['display']} font-bold text-[{TEXT}]"
             )
             ui.label("Rest until you wake or end the session.").classes(
                 f"{TYPE_SCALE['body']} text-[{SECONDARY}]"

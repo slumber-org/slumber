@@ -20,6 +20,14 @@ def test_apply_theme_sets_colors() -> None:
     assert COLORS["primary"]
 
 
+def test_theme_css_defines_button_variants() -> None:
+    from slumber.ui.theme import build_theme_css
+
+    css = build_theme_css()
+    for variant in ("primary", "secondary", "attention"):
+        assert f".slumber-btn-{variant}" in css
+
+
 def test_widgets_importable() -> None:
     from slumber.ui.widgets import (
         confirm_dialog,

@@ -1,93 +1,178 @@
 """Fixed dark brand tokens and Quasar colour map for the GUI.
 
-Hex values match ``docs/stylesheets/extra.css`` (indigo moon + amber EEG).
+Hex values match ``docs/stylesheets/extra.css``.
 Call sites should import role tokens and helpers, not raw Quasar names.
+Mulish is packaged under ``assets/fonts/`` (SIL OFL) for offline use.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
-# Role tokens (design 0.1)
-PAGE_BG = "#151833"  # page background
-SURFACE = "#1A1F3C"  # cards / panels
-BRAND = "#3D4A8A"  # logo / nav
-CTA = "#E8A45A"  # primary buttons / active
-SECONDARY = "#94A1B2"  # secondary text / hover
-ATTENTION = "#E8A45A"  # alerts / high-contrast highlight
-TEXT = "#FFFFFE"  # body text on dark
+# Palette, by role
+PAGE_BG = "#020617"  # Ink Black: page background, current-step row, upcoming progress segments
+SURFACE = "#1E293B"  # Deep Space Blue: header, cards, sidebar, nav bar, dialogs
+SURFACE_ALT = "#1E3672"  # callouts and inline code inside cards
+BRAND = "#1D4ED8"  # Royal Azure: logo and primary buttons (Next, Complete, Confirm)
+ACCENT = "#00B3FF"  # Fresh Sky: done and skipped steps (list and progress bar), Previous outline
+SECONDARY = "#94E2FF"  # Frosted Blue: current step, secondary text
+ATTENTION = "#FFD60A"  # Gold: attention actions such as End Session
+POSITIVE = "#34D399"  # successful actions only
+NEGATIVE = "#F87171"  # errors only
+TEXT = "#F8FAFC"  # Bright Snow: body text and button labels
 
-# Supporting palette (chrome accents, status)
-BRAND_LIGHT = "#7B7FC4"
-BRAND_DARK = "#2A2F52"
-PAGE_BG_DEEP = "#121528"
-SURFACE_BORDER = "#2A2F52"
-POSITIVE = "#34D399"
-NEGATIVE = "#F87171"
+# The design uses no borders. Kept only until the frame, stepper, card and dialog
+# drop their border classes; remove it together with ``--slumber-border`` then.
+SURFACE_BORDER = "#334155"
 
-# Quasar ``ui.colors`` — CTA is Quasar primary; brand is used explicitly in chrome.
+# Dialog backdrop: PAGE_BG at 72% (never pure black).
+SCRIM = "rgba(2, 6, 23, 0.72)"
+
+# Quasar ``ui.colors``: BRAND is Quasar primary (primary buttons). ACCENT, SECONDARY and
+# TEXT are applied explicitly through the CSS variables below.
 COLORS = {
-    "primary": CTA,
+    "primary": BRAND,
     "secondary": SURFACE,
-    "accent": ATTENTION,
-    "dark": PAGE_BG_DEEP,
+    "accent": ACCENT,
+    "dark": PAGE_BG,
     "dark-page": PAGE_BG,
     "positive": POSITIVE,
     "negative": NEGATIVE,
-    "info": BRAND_LIGHT,
+    "info": SECONDARY,
     "warning": ATTENTION,
 }
 
+# Logo heights; the width follows the image's own proportions.
 LOGO_SIZE = {
     "hero": "7rem",
-    "header": "2rem",
-    "hub": "5rem",
+    "header": "2.25rem",
+    "hub": "clamp(3.5rem, 11vh, 6rem)",
 }
 
+# Classes defined in ``_THEME_CSS``; sizes step down on smaller windows.
 TYPE_SCALE = {
-    "display": "text-h3",
-    "title": "text-h5",
-    "body": "text-body1",
-    "caption": "text-caption",
+    "display": "slumber-display",
+    "title": "slumber-title",
+    "body": "slumber-body",
+    "caption": "slumber-caption",
 }
 
-FONT_FAMILY = "Figtree"
-FONT_URL = (
-    "https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap"
-)
+FONT_FAMILY = "Mulish"
+FONTS_URL_PREFIX = "/slumber-fonts"
+FONT_FILES = {
+    400: "mulish-latin-400-normal.woff2",
+    600: "mulish-latin-600-normal.woff2",
+    700: "mulish-latin-700-normal.woff2",
+}
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
+FONTS_DIR = ASSETS_DIR / "fonts"
 DEFAULT_LOGO_PATH = ASSETS_DIR / "logo.png"
 DEFAULT_FAVICON_PATH = ASSETS_DIR / "favicon.png"
 
 POWERED_BY = "Powered by SLUMBER"
 
+_FONT_FACE_CSS = "\n".join(
+    f"""
+@font-face {{
+  font-family: '{FONT_FAMILY}';
+  font-style: normal;
+  font-weight: {weight};
+  font-display: swap;
+  src: url('{FONTS_URL_PREFIX}/{filename}') format('woff2');
+}}""".strip()
+    for weight, filename in FONT_FILES.items()
+)
+
 _THEME_CSS = f"""
+{_FONT_FACE_CSS}
 :root {{
   --slumber-page-bg: {PAGE_BG};
   --slumber-surface: {SURFACE};
+  --slumber-surface-alt: {SURFACE_ALT};
   --slumber-brand: {BRAND};
-  --slumber-cta: {CTA};
+  --slumber-accent: {ACCENT};
   --slumber-secondary: {SECONDARY};
   --slumber-attention: {ATTENTION};
   --slumber-text: {TEXT};
   --slumber-border: {SURFACE_BORDER};
   --slumber-font: '{FONT_FAMILY}', system-ui, sans-serif;
+  --slumber-fs: 17px;
+  --slumber-h1: 30px;
+  --slumber-h2: 22px;
+}}
+@media (max-width: 1199px) {{
+  :root {{ --slumber-fs: 16px; --slumber-h1: 28px; --slumber-h2: 20px; }}
+}}
+@media (max-width: 799px) {{
+  :root {{ --slumber-h1: 26px; }}
+}}
+@media (max-height: 760px) {{
+  :root {{ --slumber-h1: 26px; }}
 }}
 body, .q-page, .nicegui-content {{
   font-family: var(--slumber-font) !important;
   background-color: var(--slumber-page-bg) !important;
   color: var(--slumber-text);
 }}
+.slumber-display {{ font-size: clamp(28px, 5vh, 40px); line-height: 1.15; }}
+.slumber-title {{ font-size: var(--slumber-h1); line-height: 1.2; }}
+.slumber-body {{ font-size: var(--slumber-fs); line-height: 1.5; }}
+.slumber-caption {{ font-size: 12px; line-height: 1.4; }}
 """
+
+# Rules that must beat Quasar's own !important utilities (text colour, disabled opacity).
+# NiceGUI 3 puts those in a late cascade layer, so ours go in its ``overrides`` layer;
+# earlier NiceGUI versions have no layers and take the rules as they are.
+_OVERRIDE_CSS = f"""
+.q-dialog__backdrop {{ background: {SCRIM} !important; }}
+.q-btn.slumber-btn {{
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 8px;
+  font: 700 16px/1 var(--slumber-font);
+  letter-spacing: 0;
+  text-transform: none;
+}}
+.q-btn.slumber-btn .q-icon {{ font-size: 18px; }}
+.q-btn.slumber-btn .on-left {{ margin-right: 8px; }}
+.q-btn.slumber-btn .on-right {{ margin-left: 8px; }}
+.q-btn.slumber-btn-primary {{
+  background: var(--slumber-brand) !important;
+  color: var(--slumber-text) !important;
+}}
+.q-btn.slumber-btn-secondary {{ color: var(--slumber-text) !important; font-weight: 600; }}
+.q-btn.slumber-btn-secondary:before {{ border: 1.5px solid var(--slumber-accent); }}
+.q-btn.slumber-btn-attention {{ color: var(--slumber-attention) !important; font-weight: 600; }}
+.q-btn.slumber-btn-attention:before {{ border: 1.5px solid var(--slumber-attention); }}
+.q-btn.slumber-btn-lg {{ min-height: 56px; padding: 0 44px; border-radius: 10px; font-size: 18px; }}
+.q-btn.slumber-btn.disabled {{ opacity: 0.4 !important; }}
+.q-btn.slumber-btn:focus-visible {{ outline: 2px solid var(--slumber-text); outline-offset: 2px; }}
+"""
+
+
+def mount_fonts(app: Any) -> None:
+    """Serve packaged Mulish files under ``FONTS_URL_PREFIX``."""
+    if FONTS_DIR.is_dir():
+        app.add_static_files(FONTS_URL_PREFIX, str(FONTS_DIR))
+
+
+def build_theme_css() -> str:
+    """Return the theme CSS, layering the overrides when NiceGUI uses cascade layers."""
+    from nicegui import __version__
+
+    overrides = _OVERRIDE_CSS
+    if int(__version__.split(".")[0]) >= 3:
+        overrides = f"@layer overrides {{\n{_OVERRIDE_CSS}\n}}"
+    return _THEME_CSS + overrides
 
 
 def apply_theme() -> None:
     """Load typeface, CSS variables, and Quasar colours (call once at GUI start)."""
     from nicegui import ui
 
-    ui.add_head_html(f'<link rel="stylesheet" href="{FONT_URL}">')
-    ui.add_css(_THEME_CSS)
+    ui.add_css(build_theme_css())
     ui.colors(**COLORS)
 
 

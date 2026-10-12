@@ -17,6 +17,7 @@ from slumber.ui.theme import (
     apply_theme,
     default_favicon_path,
     default_logo_path,
+    mount_fonts,
 )
 
 if TYPE_CHECKING:
@@ -126,6 +127,7 @@ class GuiBackend(UIBackend):
         self._engine = engine
         self._entry_started = False
         self._resolve_branding()
+        mount_fonts(app)
 
         logo_path = self._logo_path
 
