@@ -1,60 +1,91 @@
-/* SLUMBER color palette — sleep/night theme
+/* SLUMBER color palette — design identity
    Matches src/slumber/ui/theme.py role tokens
-   (PAGE_BG / SURFACE / BRAND / CTA / SECONDARY / ATTENTION / TEXT).
+   (PAGE_BG / SURFACE / BRAND / ACCENT / SECONDARY / ATTENTION / TEXT).
 
-   BRAND_LIGHT   #7b7fc4   CTA / ATTENTION #e8a45a
-   BRAND         #3d4a8a   PAGE_BG_DEEP    #121528
-   BRAND_DARK    #2a2f52   PAGE_BG         #151833
-   TEXT          #fffffe   SURFACE         #1a1f3c
-   SECONDARY     #94a1b2   SURFACE_BORDER  #2a2f52 */
+   PAGE_BG       #020617   Ink Black       page background
+   SURFACE       #1E293B   Deep Space Blue  header, cards, nav bar, dividers
+   BRAND         #1D4ED8   Royal Azure      logo and primary buttons
+   ACCENT        #00B3FF   Fresh Sky        accents (done and skipped steps in the GUI)
+   SECONDARY     #94E2FF   Frosted Blue     links, secondary text, lighter primary
+   ATTENTION     #FFD60A   Gold             highlights
+   TEXT          #F8FAFC   Bright Snow      body text
 
-/* Light mode */
-[data-md-color-scheme="default"] {
-  --md-primary-fg-color:        #3d4a8a; /* INDIGO */
-  --md-primary-fg-color--light: #7b7fc4; /* INDIGO_LIGHT */
-  --md-primary-fg-color--dark:  #1a1f3c; /* SURFACE_MID */
-  --md-accent-fg-color:         #e8a45a; /* AMBER */
-  --md-typeset-a-color:         #3d4a8a; /* INDIGO */
+   Only these colours are used; there is no pure black. */
+
+/* Packaged Mulish (SIL OFL) — docs/assets/fonts/; mirrors GUI assets/fonts/ */
+@font-face {
+  font-family: Mulish;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Mulish;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: Mulish;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/mulish-latin-700-normal.woff2") format("woff2");
 }
 
-/* Dark mode */
+body {
+  font-family: Mulish, system-ui, sans-serif;
+}
+
+/* Light mode — Royal Azure primary, Fresh Sky accent */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color:        #1D4ED8; /* BRAND — Royal Azure */
+  --md-primary-fg-color--light: #94E2FF; /* SECONDARY — Frosted Blue */
+  --md-primary-fg-color--dark:  #1E293B; /* SURFACE — Deep Space Blue */
+  --md-accent-fg-color:         #00B3FF; /* ACCENT — Fresh Sky */
+  --md-typeset-a-color:         #1D4ED8; /* BRAND — Royal Azure */
+}
+
+/* Dark mode — Ink Black page, Deep Space Blue chrome */
 [data-md-color-scheme="slate"] {
-  --md-default-bg-color:         #151833; /* SURFACE */
-  --md-default-fg-color:         #fffffe; /* TEXT_PRIMARY */
-  --md-default-fg-color--light:  #94a1b2; /* TEXT_SECONDARY */
-  --md-default-fg-color--lightest: #2a2f52; /* SURFACE_LIGHT */
+  --md-default-bg-color:         #020617; /* PAGE_BG — Ink Black */
+  --md-default-fg-color:         #F8FAFC; /* TEXT — Bright Snow */
+  --md-default-fg-color--light:  #94E2FF; /* SECONDARY — Frosted Blue */
+  --md-default-fg-color--lightest: #1E293B; /* SURFACE — Deep Space Blue (dividers) */
 
-  --md-primary-fg-color:         #3d4a8a; /* INDIGO */
-  --md-primary-fg-color--light:  #7b7fc4; /* INDIGO_LIGHT */
-  --md-primary-fg-color--dark:   #1a1f3c; /* SURFACE_MID */
-  --md-primary-bg-color:         #fffffe; /* TEXT_PRIMARY */
+  --md-primary-fg-color:         #1D4ED8; /* BRAND — Royal Azure */
+  --md-primary-fg-color--light:  #94E2FF; /* SECONDARY — Frosted Blue */
+  --md-primary-fg-color--dark:   #1E293B; /* SURFACE — Deep Space Blue */
+  --md-primary-bg-color:         #F8FAFC; /* TEXT — Bright Snow */
 
-  --md-accent-fg-color:          #e8a45a; /* AMBER */
+  --md-accent-fg-color:          #00B3FF; /* ACCENT — Fresh Sky */
 
-  --md-typeset-a-color:          #7b7fc4; /* INDIGO_LIGHT */
-  --md-typeset-color:            #fffffe; /* TEXT_PRIMARY */
+  --md-typeset-a-color:          #94E2FF; /* SECONDARY — Frosted Blue */
+  --md-typeset-color:            #F8FAFC; /* TEXT — Bright Snow */
 
-  --md-code-bg-color:            #1a1f3c; /* SURFACE_MID */
-  --md-code-fg-color:            #fffffe; /* TEXT_PRIMARY */
-  --md-code-hl-color:            #e8a45a26; /* AMBER @ 15% */
+  --md-code-bg-color:            #1E293B; /* SURFACE — Deep Space Blue */
+  --md-code-fg-color:            #F8FAFC; /* TEXT — Bright Snow */
+  --md-code-hl-color:            #FFD60A26; /* ATTENTION — Gold @ 15% */
 
-  --md-footer-bg-color:          #1a1f3c; /* SURFACE_MID */
-  --md-footer-bg-color--dark:    #121528; /* SURFACE_DARK */
+  --md-footer-bg-color:          #1E293B; /* SURFACE — Deep Space Blue */
+  --md-footer-bg-color--dark:    #020617; /* PAGE_BG — Ink Black */
 }
 
 .md-header {
-  background-color: #1a1f3c; /* SURFACE_MID */
+  background-color: #1E293B; /* SURFACE — Deep Space Blue */
 }
 
 .md-tabs {
-  background-color: #1a1f3c; /* SURFACE_MID */
+  background-color: #1E293B; /* SURFACE — Deep Space Blue */
 }
 
 [data-md-color-scheme="slate"] .md-nav--primary .md-nav__title {
-  background-color: #1a1f3c; /* SURFACE_MID */
+  background-color: #020617; /* PAGE_BG — Ink Black (no bar vs page) */
 }
 
 [data-md-color-scheme="slate"] .md-typeset .admonition,
 [data-md-color-scheme="slate"] .md-typeset details {
-  background-color: #1a1f3c; /* SURFACE_MID */
+  background-color: #1E293B; /* SURFACE — Deep Space Blue */
 }

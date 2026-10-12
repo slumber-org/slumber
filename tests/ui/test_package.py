@@ -19,16 +19,21 @@ from slumber.ui.gui import GuiBackend
 from slumber.ui.headless import HeadlessBackend
 from slumber.ui.layouts import HubLayout, StepperLayout
 from slumber.ui.theme import (
+    ACCENT,
     ATTENTION,
     BRAND,
     COLORS,
-    CTA,
     DEFAULT_FAVICON_PATH,
     DEFAULT_LOGO_PATH,
+    FONT_FILES,
+    FONTS_DIR,
     LOGO_SIZE,
+    NEGATIVE,
     PAGE_BG,
+    POSITIVE,
     SECONDARY,
     SURFACE,
+    SURFACE_ALT,
     TEXT,
     TYPE_SCALE,
     default_favicon_path,
@@ -38,12 +43,38 @@ from slumber.ui.theme import (
 
 class TestTheme:
     def test_role_tokens_are_hex(self) -> None:
-        for value in (PAGE_BG, SURFACE, BRAND, CTA, SECONDARY, ATTENTION, TEXT):
+        for value in (
+            PAGE_BG,
+            SURFACE,
+            SURFACE_ALT,
+            BRAND,
+            ACCENT,
+            SECONDARY,
+            ATTENTION,
+            TEXT,
+        ):
             assert value.startswith("#")
             assert len(value) == 7
 
-    def test_quasar_primary_is_cta(self) -> None:
-        assert COLORS["primary"] == CTA
+    def test_surface_alt_differs_from_page_and_card(self) -> None:
+        assert SURFACE_ALT not in (PAGE_BG, SURFACE)
+
+    def test_quasar_primary_is_brand(self) -> None:
+        assert COLORS["primary"] == BRAND
+
+    def test_quasar_colours_come_from_the_palette(self) -> None:
+        palette = {
+            PAGE_BG,
+            SURFACE,
+            BRAND,
+            ACCENT,
+            SECONDARY,
+            ATTENTION,
+            TEXT,
+            POSITIVE,
+            NEGATIVE,
+        }
+        assert set(COLORS.values()) <= palette
 
     def test_logo_and_type_scale_keys(self) -> None:
         assert set(LOGO_SIZE) == {"hero", "header", "hub"}
@@ -54,6 +85,10 @@ class TestTheme:
         assert DEFAULT_FAVICON_PATH.is_file()
         assert default_logo_path() == DEFAULT_LOGO_PATH
         assert default_favicon_path() == DEFAULT_FAVICON_PATH
+        assert FONTS_DIR.is_dir()
+        for filename in FONT_FILES.values():
+            assert (FONTS_DIR / filename).is_file()
+        assert (FONTS_DIR / "OFL.txt").is_file()
 
 
 class TestInstructionActivity:

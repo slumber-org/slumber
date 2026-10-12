@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from slumber.ui.theme import BRAND_LIGHT, LOGO_SIZE
+from slumber.ui.theme import BRAND, LOGO_SIZE
 
 LogoSize = Literal["hero", "header", "hub"]
 
@@ -17,6 +17,9 @@ def logo_mark(
 ) -> None:
     """Render the brand logo image, or a fallback icon when no URL is set.
 
+    The size sets the image's height; its width follows the image's own
+    proportions, so any logo shape works.
+
     Args:
         logo_url: Served logo URL, or ``None`` for the icon fallback.
         size: One of ``hero``, ``header``, or ``hub`` (see :data:`LOGO_SIZE`).
@@ -24,10 +27,10 @@ def logo_mark(
     """
     from nicegui import ui
 
-    dimension = LOGO_SIZE[size]
+    height = LOGO_SIZE[size]
     if logo_url:
-        ui.image(logo_url).style(
-            f"width: {dimension}; height: {dimension}; object-fit: contain;"
-        ).classes("rounded-lg")
+        ui.element("img").props(f'src="{logo_url}" alt=""').style(
+            f"height: {height}; width: auto; display: block; flex-shrink: 0;"
+        )
     else:
-        ui.icon(fallback_icon, size=dimension).classes(f"text-[{BRAND_LIGHT}]")
+        ui.icon(fallback_icon, size=height).classes(f"text-[{BRAND}]")
