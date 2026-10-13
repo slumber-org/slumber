@@ -6,6 +6,7 @@ ui:
     frame:
       header:
         title: "{study_name}"
+        show_phase_title: true
     layouts:
       stepper:
         previous_button: Previous
