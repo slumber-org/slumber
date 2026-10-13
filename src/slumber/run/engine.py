@@ -209,9 +209,12 @@ class RunEngine:
             self._ui.unmount_phase()
             self._active_phase = None
 
-        study_frame = self._study.ui.settings.get("frame")
-        frame = merge_frame_settings(study_frame, phase.frame)
-        self._ui.apply_frame(frame)
+        frame = resolve_settings(
+            merge_frame_settings(self._study.ui.settings.get("frame"), phase.frame),
+            study_root=self._study_dir,
+            placeholders=self._placeholders,
+        )
+        self._ui.apply_frame(frame, phase)
 
         layout = self._resolve_layout(phase)
         activities = self._resolve_activities(phase)

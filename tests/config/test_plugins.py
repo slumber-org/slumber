@@ -149,6 +149,13 @@ class TestMerges:
         assert merged["header"] is False
         assert merged["footer"] is True
 
+    def test_phase_override_keeps_study_show_phase_title(self) -> None:
+        merged = merge_frame_settings(
+            {"header": {"show_phase_title": True}},
+            FrameSettings(header={"title": "Phase"}),
+        )
+        assert merged["header"] == {"show_phase_title": True, "title": "Phase"}
+
 
 class TestValidateStudyPlugins:
     def test_valid_study(self, tmp_path: Path) -> None:

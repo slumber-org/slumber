@@ -76,9 +76,9 @@ class HeadlessBackend(UIBackend):
         )
         engine.start_phase(engine.condition.entry)
 
-    def apply_frame(self, frame: dict[str, Any]) -> None:
+    def apply_frame(self, frame: dict[str, Any], phase: Phase) -> None:
         """Log frame overrides (no chrome in headless)."""
-        logger.debug("headless: apply_frame {}", frame)
+        logger.debug("headless: apply_frame {} phase={!r}", frame, phase.id)
 
     def mount_phase(
         self,

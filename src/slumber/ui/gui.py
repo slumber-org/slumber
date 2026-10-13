@@ -177,8 +177,9 @@ class GuiBackend(UIBackend):
             show=True,
         )
 
-    def apply_frame(self, frame: dict[str, Any]) -> None:
-        """Apply merged AppFrame settings for the active phase."""
+    def apply_frame(self, frame: dict[str, Any], phase: Phase) -> None:
+        """Apply merged AppFrame settings for the phase being started."""
+        del phase  # its title is shown once the AppFrame renders phase titles
         if self._frame is not None:
             self._frame.apply_frame(frame)
 

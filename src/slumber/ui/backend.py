@@ -36,8 +36,14 @@ class UIBackend(ConfiguredPlugin, ABC):
         """Prepare the UI and drive the run until ``end_run``."""
 
     @abstractmethod
-    def apply_frame(self, frame: dict[str, Any]) -> None:
-        """Apply merged AppFrame settings for the active phase."""
+    def apply_frame(self, frame: dict[str, Any], phase: Phase) -> None:
+        """Apply merged AppFrame settings for the phase being started.
+
+        Args:
+            frame: Study frame merged with the phase override, with the header
+                title and logo already resolved.
+            phase: The phase being started (the header can show its title).
+        """
 
     @abstractmethod
     def mount_phase(

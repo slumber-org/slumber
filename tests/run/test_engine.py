@@ -11,6 +11,8 @@ import pytest
 from slumber.config import init_study, load_study
 from slumber.pipeline.manager import PipelineManager
 from slumber.run import RunContext, RunEngine, run_study
+from slumber.schemas.condition import Phase
+from slumber.ui.headless import HeadlessBackend
 
 
 def _make_study(tmp_path: Path, condition_yaml: str) -> tuple[Path, object]:
@@ -245,6 +247,42 @@ class TestRunStudy:
         ):
             engine.run()
         assert removed == [99]
+
+
+class TestFramePerPhase:
+    def test_apply_frame_gets_resolved_frame_and_phase_title(
+        self, tmp_path: Path
+    ) -> None:
+        study_dir, _ = _make_study(tmp_path, _AWAKENING_CONDITION)
+        (study_dir / "study.yaml").write_text(
+            "study_id: s1\n"
+            'study_name: "Night Study"\n'
+            "ui:\n"
+            "  type: gui\n"
+            "  settings:\n"
+            "    frame:\n"
+            "      header:\n"
+            '        title: "{study_name}"\n'
+            "        show_phase_title: true\n",
+            encoding="utf-8",
+        )
+        study = load_study(study_dir)
+        calls: list[tuple[dict, str | None]] = []
+
+        class RecordingBackend(HeadlessBackend):
+            def apply_frame(self, frame: dict, phase: Phase) -> None:
+                calls.append((frame, phase.display_title))
+
+        RunEngine(
+            study, study.conditions[0], _ctx(), study_dir, ui=RecordingBackend()
+        ).run()
+
+        assert [title for _, title in calls] == ["setup", "sleep", "morning"]
+        assert calls[0][0]["header"] == {
+            "title": "Night Study",
+            "show_phase_title": True,
+        }
+        assert calls[1][0]["header"] is False
 
 
 class TestRunEngineFlow:
