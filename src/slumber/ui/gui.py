@@ -103,9 +103,11 @@ class GuiBackend(UIBackend):
         self._engine: RunEngine | None = None
         self._frame: AppFrame | None = None
         self._layout: Layout | None = None
-        self._logo_url: str | None = None
+        self._default_logo_url: str | None = None
         self._logo_path: Path | None = None
         self._favicon_path: Path | None = None
+        self._logo_urls: dict[Path, str] = {}
+        self._missing_logos: set[Path] = set()
         self._entry_started = False
 
     @property
@@ -120,7 +122,6 @@ class GuiBackend(UIBackend):
         """Apply theme, mount AppFrame, start the entry phase, and block in ui.run."""
         try:
             from nicegui import app, ui
-            from starlette.responses import FileResponse, Response
         except ImportError as e:
             raise RuntimeError(_NICEGUI_INSTALL_HINT) from e
 
@@ -128,22 +129,10 @@ class GuiBackend(UIBackend):
         self._entry_started = False
         self._resolve_branding()
         mount_fonts(app)
-
-        logo_path = self._logo_path
-
-        @app.get("/slumber-logo")
-        async def serve_logo() -> Response:
-            if logo_path is None or not logo_path.is_file():
-                return Response(status_code=404)
-            return FileResponse(logo_path)
-
-        self._logo_url = "/slumber-logo" if logo_path is not None else None
-
-        study_frame = _frame_dict_without_logo_path(self._gui_settings.frame)
+        self._default_logo_url = self._serve_logo(self._logo_path)
         self._frame = AppFrame(
             study_name=engine.study.study_name,
-            logo_url=self._logo_url,
-            frame=study_frame,
+            logo_url=self._default_logo_url,
         )
 
         @ui.page("/")
@@ -179,9 +168,12 @@ class GuiBackend(UIBackend):
 
     def apply_frame(self, frame: dict[str, Any], phase: Phase) -> None:
         """Apply merged AppFrame settings for the phase being started."""
-        del phase  # its title is shown once the AppFrame renders phase titles
         if self._frame is not None:
-            self._frame.apply_frame(frame)
+            self._frame.apply_frame(
+                frame,
+                phase_title=phase.display_title,
+                logo_url=self._header_logo_url(frame),
+            )
 
     def mount_phase(
         self,
@@ -252,6 +244,39 @@ class GuiBackend(UIBackend):
         else:
             self._logo_path = default_logo_path()
 
+    def _header_logo_url(self, frame: dict[str, Any]) -> str | None:
+        """Served URL for the frame's header logo.
+
+        A missing file falls back to the study logo, or to the packaged logo when
+        the study sets none or its file is missing too.
+        """
+        header = frame.get("header")
+        logo = header.get("logo") if isinstance(header, dict) else None
+        if not logo:
+            return self._default_logo_url
+        path = Path(logo)
+        if not path.is_file():
+            if path not in self._missing_logos:
+                self._missing_logos.add(path)
+                logger.warning(
+                    "gui: header logo {} not found; using the study or packaged logo",
+                    path,
+                )
+            return self._default_logo_url
+        return self._serve_logo(path)
+
+    def _serve_logo(self, path: Path | None) -> str | None:
+        """Serve *path* as a static file once and return its URL."""
+        if path is None:
+            return None
+        url = self._logo_urls.get(path)
+        if url is None:
+            from nicegui import app
+
+            url = app.add_static_file(local_file=path)
+            self._logo_urls[path] = url
+        return url
+
 
 def _header_logo_path(frame: FrameSettings | None) -> str | None:
     """Extract optional logo path from frame header settings."""
@@ -263,15 +288,3 @@ def _header_logo_path(frame: FrameSettings | None) -> str | None:
         raw = frame.header.get("logo")
         return str(raw) if raw else None
     return None
-
-
-def _frame_dict_without_logo_path(frame: FrameSettings | None) -> dict[str, Any]:
-    """Study frame as a dict for AppFrame, without the logo path key."""
-    if frame is None:
-        return {}
-    data = frame.model_dump(exclude_none=True)
-    header = data.get("header")
-    if isinstance(header, dict):
-        header = {k: v for k, v in header.items() if k != "logo"}
-        data["header"] = header or True
-    return data
