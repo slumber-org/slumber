@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
 from slumber.plugins.base import ConfiguredPlugin
 
@@ -36,7 +36,14 @@ class LayoutHost(Protocol):
 
 
 class Layout(ConfiguredPlugin, ABC):
-    """How a phase's body is arranged inside the AppFrame."""
+    """How a phase's body is arranged inside the AppFrame.
+
+    A layout keeps its own styles in :attr:`css`; the GUI backend adds them when it
+    mounts the layout, so ``mount`` only builds elements.
+    """
+
+    css: ClassVar[str] = ""
+    """Stylesheet for this layout, using the shared ``--slumber-*`` variables."""
 
     @abstractmethod
     def mount(self, host: LayoutHost, activities: list[MountedActivity]) -> None:

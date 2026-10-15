@@ -1,4 +1,4 @@
-"""Hub layout: single activity full bleed in the AppFrame body."""
+"""Hub layout: a single activity filling the AppFrame body."""
 
 from __future__ import annotations
 
@@ -13,6 +13,22 @@ if TYPE_CHECKING:
     from slumber.ui.backend import MountedActivity
 
 
+HUB_CSS = """
+.slumber-hub {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--slumber-pad);
+  scrollbar-width: thin;
+  scrollbar-color: var(--slumber-secondary) transparent;
+}
+"""
+
+
 class HubLayoutSettings(BaseModel):
     """Hub layout has no settings in 0.1."""
 
@@ -20,9 +36,10 @@ class HubLayoutSettings(BaseModel):
 
 
 class HubLayout(Layout):
-    """One activity, full bleed; does not emit ``phase_completed`` itself."""
+    """One activity filling the body; does not emit ``phase_completed`` itself."""
 
     settings_model = HubLayoutSettings
+    css = HUB_CSS
 
     def __init__(self, settings: HubLayoutSettings | None = None) -> None:
         super().__init__(settings or HubLayoutSettings())
@@ -43,9 +60,7 @@ class HubLayout(Layout):
 
         mounted = activities[0]
         with host.container:
-            slot = ui.column().classes(
-                "w-full h-full flex flex-col items-center justify-center p-6"
-            )
+            slot = ui.element("div").classes("slumber-hub")
 
         def on_complete(activity_id: str) -> None:
             del activity_id  # hub does not advance on complete
