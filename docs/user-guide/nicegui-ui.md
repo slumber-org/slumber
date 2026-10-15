@@ -55,10 +55,28 @@ A phase's `frame` merges over the study's, so a phase only lists what it changes
 
 | Layout | Use |
 |--------|-----|
-| `stepper` | Ordered steps with optional activity list and navigation. |
-| `hub` | Single full-bleed activity (e.g. sleep). |
+| `stepper` | Ordered steps with an optional activity list, a progress bar and navigation. |
+| `hub` | A single activity filling the body, centred (e.g. sleep). |
 
 Phase `layout.settings` merges over study `ui.settings.layouts.<type>`.
+
+### Stepper
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `previous_button`, `next_button`, `complete_button` | Previous, Next, Complete | Button labels. |
+| `show_activity_list` | `true` | List of the steps beside the activity. |
+| `show_progress_bar` | `true` | Progress bar between Previous and Next. |
+| `show_step_count` | `true` | "Step x of y" above the bar. Needs the bar. |
+| `show_step_name` | `false` | The current step's title above the bar. Needs the bar. |
+| `number_steps` | `false` | Number the steps in the list. |
+| `allow_skip` | `false` | Let the participant open any step and complete the phase without finishing every step. |
+
+Each step has a **state**: not started, current, or done (its activity called `complete()`). The list and the progress bar show the same states.
+
+A step is also **available** or not, worked out from the states. A step is available when every step before it is done. Unavailable steps are dimmed in the list and cannot be opened. Complete is enabled once every step is done. With `allow_skip` every step is available and Complete is always enabled.
+
+Long content scrolls inside the activity card; the header, buttons and footer stay in place. Below 800 px wide the list becomes a strip above the activity. Sizes follow the size of the app window.
 
 ## Activities
 
