@@ -23,10 +23,6 @@ POSITIVE = "#34D399"  # successful actions only
 NEGATIVE = "#F87171"  # errors only
 TEXT = "#F8FAFC"  # Bright Snow: body text and button labels
 
-# The design uses no borders. Kept only until the frame, stepper, card and dialog
-# drop their border classes; remove it together with ``--slumber-border`` then.
-SURFACE_BORDER = "#334155"
-
 # Dialog backdrop: PAGE_BG at 72% (never pure black).
 SCRIM = "rgba(2, 6, 23, 0.72)"
 
@@ -102,7 +98,6 @@ _THEME_CSS = f"""
   --slumber-secondary: {SECONDARY};
   --slumber-attention: {ATTENTION};
   --slumber-text: {TEXT};
-  --slumber-border: {SURFACE_BORDER};
   --slumber-font: '{FONT_FAMILY}', system-ui, sans-serif;
   --slumber-fs: 17px;
   --slumber-h1: 30px;
@@ -158,6 +153,7 @@ _OVERRIDE_CSS = f"""
 .q-btn.slumber-btn-attention {{ color: var(--slumber-attention) !important; font-weight: 600; }}
 .q-btn.slumber-btn-attention:before {{ border: 1.5px solid var(--slumber-attention); }}
 .q-btn.slumber-btn-lg {{ min-height: 56px; padding: 0 44px; border-radius: 10px; font-size: 18px; }}
+@media (max-height: 640px) {{ .q-btn.slumber-btn-lg {{ min-height: 48px; }} }}
 .q-btn.slumber-btn.disabled {{ opacity: 0.4 !important; }}
 .q-btn.slumber-btn:focus-visible {{ outline: 2px solid var(--slumber-text); outline-offset: 2px; }}
 """
