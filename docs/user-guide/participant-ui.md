@@ -107,6 +107,29 @@ To change a setting for one phase only, set it under that phase's `layout.settin
 
 With `allow_skip: true`, the participant can open any step from the list and complete the phase without finishing every step. Without it, a step only becomes available once the steps before it are finished.
 
+## Change the sleep buttons
+
+The `sleep` activity has a main button that toggles between **Going to Sleep** and **I'm Awake**, and an **End Session** button below it. Only **End Session** asks "Are you sure?" by default. Change the labels under the activity's `settings`, or change what a button asks:
+
+```yaml
+    activities:
+      - id: sleep
+        type: sleep
+        settings:
+          message: "Press a button when you go to bed, wake up or finish."
+          sleep_button: "Going to Bed"
+          wake_button: "I Woke Up"
+          end_button:
+            label: "Finish Night"
+            confirm:
+              title: "Finish the night?"
+              message: "This ends the sleep phase."
+              confirm_label: "Yes, finish"
+              cancel_label: "Not yet"
+```
+
+Quote labels such as `"Yes"` or `"No"`, because YAML reads them as true or false. Every setting, the button styles and the questions are listed in the [UI reference](../reference/ui.md#how-the-sleep-buttons-work).
+
 ## Change the port
 
 The GUI runs on port 8080. If that port is already in use, choose another one:

@@ -76,7 +76,7 @@ Activities report back with `complete()` and `emit(name)`; see [How activities s
 | Key | Behaviour |
 |-----|-----------|
 | `instruction` | Renders markdown or text; calls `complete()` on mount. |
-| `sleep` | Wake / end buttons → `emit("marked_awake")` / `emit("end_sleep")`. Does not complete. |
+| `sleep` | A sleep / wake toggle button → `emit("marked_asleep")` / `emit("marked_awake")` and an end button → `emit("end_sleep")`, each optionally after a confirm dialog. Does not complete. |
 
 ### Activity settings
 
@@ -85,10 +85,36 @@ Set under the activity's `settings:`. All are optional.
 | Activity | Setting | Default | Description |
 |----------|---------|---------|-------------|
 | `instruction` | `content` | `""` | Markdown text, or a path to a Markdown file (usually `{assets_dir}/…`). If the value is not an existing file, it is shown as text. Empty content shows "No instruction content." |
-| `sleep` | `wake_button` | `I'm Awake` | Label of the button that emits `marked_awake`. |
-| `sleep` | `end_button` | `End Session` | Label of the button that emits `end_sleep`. |
+| `sleep` | `title` | `Sleep well` | The heading. `false` or an empty text leaves it out. |
+| `sleep` | `message` | none | Text under the heading. Line breaks are kept. |
+| `sleep` | `sleep_button` | `Going to Sleep` | The main button at the start; emits `marked_asleep`. A label, or a mapping (see below). |
+| `sleep` | `wake_button` | `I'm Awake` | The main button once the participant has gone to sleep; emits `marked_awake`. A label, or a mapping. |
+| `sleep` | `end_button` | `End Session` | The button that emits `end_sleep`. A label, or a mapping. |
 
 For how to use them in a condition, see [Writing conditions](../user-guide/writing-conditions.md#add-activities).
+
+#### How the sleep buttons work
+
+The activity starts awake, with the sleep button as its main button. Pressing it emits `marked_asleep` and turns it into the wake button. Pressing that emits `marked_awake` and turns it back. The end button below it always emits `end_sleep`. The events are fixed, and the title and message stay the same in both states.
+
+A button is written as a label, or as a mapping with these settings:
+
+| Button setting | Default | Description |
+|----------------|---------|-------------|
+| `label` | `Going to Sleep` / `I'm Awake` / `End Session` | The text on the button. |
+| `style` | `primary` (sleep and wake), `attention` (end) | `primary` (large), `secondary` or `attention`. |
+| `confirm` | `false` (sleep and wake), `true` (end) | Whether to ask first. See below. |
+
+A setting you leave out keeps the default of that button, so `end_button: {confirm: false}` still shows "End Session" in the attention style, and `sleep_button: {confirm: true}` still says "Going to Sleep". Only the end button asks by default.
+
+| `confirm` | The participant sees |
+|-----------|----------------------|
+| `true` | A dialog titled "&lt;label&gt;?" asking "Are you sure?", with Confirm and Cancel. |
+| `false` | No dialog; the event is sent on a single press. |
+| A text | A dialog with that text as the question. |
+| A mapping | A dialog with the `title`, `message`, `confirm_label` and `cancel_label` you set; any you leave out keep their defaults. |
+
+Cancel has focus when the dialog opens, so a stray key press does not confirm.
 
 #### How instruction text is shown
 
@@ -124,6 +150,6 @@ Separate options with spaces or commas. An option that isn't recognised is ignor
 | Key | Headless |
 |-----|----------|
 | `instruction` | Completes on mount, as in the GUI. |
-| `sleep` | Emits `end_sleep` shortly after mounting. Never emits `marked_awake`. |
+| `sleep` | Emits `end_sleep` shortly after mounting. Never emits `marked_asleep` or `marked_awake`. |
 
 For how headless runs a condition overall, see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless).

@@ -110,18 +110,21 @@ An instruction counts as finished as soon as it is shown.
 
 ### `sleep`: the night screen
 
-Shows two buttons: one for when the participant wakes up during the night, and one to end the session in the morning. You can change their labels:
+Shows a main button that toggles between going to sleep (**Going to Sleep**) and waking up (**I'm Awake**), and a button to end the session in the morning. You can change their labels:
 
 ```yaml
     activities:
       - id: sleep
         type: sleep
         settings:
+          sleep_button: "Going to Sleep"
           wake_button: "I'm Awake"
           end_button: "End Session"
 ```
 
-A sleep activity never finishes by itself. Pressing a button sends an event (`marked_awake` or `end_sleep`), and you decide what happens next with handlers, as described below.
+A button can also set its style and the question it asks; see [Change the sleep buttons](participant-ui.md#change-the-sleep-buttons).
+
+A sleep activity never finishes by itself. Pressing a button sends an event (`marked_asleep`, `marked_awake` or `end_sleep`), and you decide what happens next with handlers, as described below.
 
 ## Decide what happens next: `on:` handlers
 
@@ -142,6 +145,7 @@ This reads as: "when the setup phase is completed, start the `main` pipeline, th
 | Event | Sent when | Put the handler on |
 |-------|-----------|--------------------|
 | `phase_completed` | The participant presses **Complete** at the end of a `stepper` phase | The phase |
+| `marked_asleep` | The participant presses the sleep button of a `sleep` activity | The sleep activity (or its phase) |
 | `marked_awake` | The participant presses the wake button of a `sleep` activity | The sleep activity (or its phase) |
 | `end_sleep` | The participant presses the end button of a `sleep` activity | The sleep activity (or its phase) |
 
