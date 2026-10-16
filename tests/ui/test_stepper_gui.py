@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -11,7 +11,6 @@ pytest.importorskip("nicegui")
 
 from nicegui import ui
 from nicegui.client import Client
-from nicegui.page import page
 
 from slumber.schemas.condition import Activity as ActivityConfig
 from slumber.schemas.study import StepperLayoutDefaults
@@ -61,14 +60,6 @@ class _Step(Activity):
         self.host = activity_host
         if self._finishes:
             activity_host.complete()
-
-
-@pytest.fixture
-def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[Client]:
-    # Scrolling the card to the top needs a connected browser.
-    monkeypatch.setattr(ui, "run_javascript", lambda *args, **kwargs: None)
-    with Client(page("/")) as client:
-        yield client
 
 
 def _mount(

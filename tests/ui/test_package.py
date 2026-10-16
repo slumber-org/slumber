@@ -12,6 +12,7 @@ from slumber.ui.activities.instruction import (
     InstructionActivity,
     InstructionSettings,
     load_instruction_content,
+    rewrite_image_paths,
 )
 from slumber.ui.activities.sleep import SleepActivity, SleepSettings
 from slumber.ui.builtins import BUILT_IN_LAYOUTS, BUILT_IN_UI
@@ -115,6 +116,249 @@ class TestInstructionActivity:
         activity = InstructionActivity(InstructionSettings(content="Hello"))
         activity.mount(Host())
         assert completed == ["ok"]
+
+
+class TestRewriteImagePaths:
+    """Image paths follow the study's path rules (relative to the study root)."""
+
+    @staticmethod
+    def _rewrite(markdown: str, root: Path) -> tuple[str, list[Path]]:
+        served: list[Path] = []
+
+        def resolve(text: str) -> Path:
+            text = text.replace("{assets_dir}", str(root / "assets"))
+            path = Path(text)
+            return path if path.is_absolute() else root / path
+
+        def serve(path: Path) -> str:
+            served.append(path)
+            return f"/static/{path.name}"
+
+        return rewrite_image_paths(markdown, resolve, serve), served
+
+    @staticmethod
+    def _image(root: Path, name: str = "band.png") -> Path:
+        path = root / "assets" / "instructions" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"x")
+        return path
+
+    def test_relative_path_is_relative_to_the_study_root(self, tmp_path: Path) -> None:
+        image = self._image(tmp_path)
+
+        text, served = self._rewrite(
+            "Look: ![The band](assets/instructions/band.png)", tmp_path
+        )
+
+        assert text == "Look: ![The band](/static/band.png)"
+        assert served == [image]
+
+    def test_placeholders_work(self, tmp_path: Path) -> None:
+        image = self._image(tmp_path)
+
+        text, served = self._rewrite(
+            "![a]({assets_dir}/instructions/band.png)", tmp_path
+        )
+
+        assert text == "![a](/static/band.png)"
+        assert served == [image]
+
+    def test_absolute_path_to_a_file_is_served(self, tmp_path: Path) -> None:
+        image = self._image(tmp_path)
+
+        text, served = self._rewrite(f"![a]({image})", tmp_path)
+
+        assert text == "![a](/static/band.png)"
+        assert served == [image]
+
+    def test_title_is_kept(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text, _ = self._rewrite(
+            '![a](assets/instructions/band.png "The band")', tmp_path
+        )
+
+        assert text == '![a](/static/band.png "The band")'
+
+    def test_encoded_spaces_in_the_path(self, tmp_path: Path) -> None:
+        image = self._image(tmp_path, "my band.png")
+
+        text, served = self._rewrite(
+            "![a](assets/instructions/my%20band.png)", tmp_path
+        )
+
+        assert text == "![a](/static/my band.png)"
+        assert served == [image]
+
+    @pytest.mark.parametrize(
+        "target",
+        [
+            "https://example.org/a.png",
+            "http://example.org/a.png",
+            "//example.org/a.png",
+            "data:image/png;base64,AAAA",
+            "#anchor",
+        ],
+    )
+    def test_web_addresses_are_left_alone(self, tmp_path: Path, target: str) -> None:
+        markdown = f"![a]({target})"
+
+        text, served = self._rewrite(markdown, tmp_path)
+
+        assert text == markdown
+        assert served == []
+
+    @pytest.mark.parametrize("target", ["assets/missing.png", "/static/a.png"])
+    def test_a_path_that_is_not_a_file_is_left_as_written(
+        self, tmp_path: Path, target: str
+    ) -> None:
+        markdown = f"![a]({target})"
+
+        text, served = self._rewrite(markdown, tmp_path)
+
+        assert text == markdown
+        assert served == []
+
+    def test_image_syntax_in_code_is_left_alone(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+        markdown = (
+            "Write `![a](assets/instructions/band.png){width=300}` like this:\n\n"
+            "```\n![a](assets/instructions/band.png)\n```\n"
+        )
+
+        text, served = self._rewrite(markdown, tmp_path)
+
+        assert text == markdown
+        assert served == []
+
+    def test_images_around_code_are_still_rewritten(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text, served = self._rewrite(
+            "![a](assets/instructions/band.png) and `code` and "
+            "![b](assets/instructions/band.png)",
+            tmp_path,
+        )
+
+        assert text == "![a](/static/band.png) and `code` and ![b](/static/band.png)"
+        assert len(served) == 2
+
+    def test_links_are_not_images(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text, served = self._rewrite("[a](assets/instructions/band.png)", tmp_path)
+
+        assert text == "[a](assets/instructions/band.png)"
+        assert served == []
+
+
+class TestImageOptions:
+    """``{width=... align=...}`` after an image sets its size and alignment."""
+
+    @staticmethod
+    def _rewrite(markdown: str, root: Path) -> str:
+        def resolve(text: str) -> Path:
+            return root / text
+
+        return rewrite_image_paths(
+            markdown, resolve, lambda path: f"/static/{path.name}"
+        )
+
+    @staticmethod
+    def _image(root: Path) -> None:
+        (root / "band.png").write_bytes(b"x")
+
+    def test_width_in_pixels(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text = self._rewrite("![a](band.png){width=300}", tmp_path)
+
+        assert text == '<img src="/static/band.png" alt="a" style="width: 300px">'
+
+    def test_width_as_a_percentage_or_with_a_unit(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        assert 'style="width: 50%"' in self._rewrite(
+            "![a](band.png){width=50%}", tmp_path
+        )
+        assert 'style="width: 120px"' in self._rewrite(
+            "![a](band.png){width=120px}", tmp_path
+        )
+
+    @pytest.mark.parametrize("align", ["left", "center", "right"])
+    def test_alignment(self, tmp_path: Path, align: str) -> None:
+        self._image(tmp_path)
+
+        text = self._rewrite(f"![a](band.png){{align={align}}}", tmp_path)
+
+        assert text == (
+            f'<img src="/static/band.png" alt="a" class="slumber-image-{align}">'
+        )
+
+    def test_options_title_and_separators_together(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text = self._rewrite(
+            '![a](band.png "The band"){width=300, align=center}', tmp_path
+        )
+
+        assert text == (
+            '<img src="/static/band.png" alt="a" title="The band" '
+            'class="slumber-image-center" style="width: 300px">'
+        )
+
+    def test_text_is_escaped(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text = self._rewrite('![a "b" <c>](band.png "x & y"){width=10}', tmp_path)
+
+        assert 'alt="a &quot;b&quot; &lt;c&gt;"' in text
+        assert 'title="x &amp; y"' in text
+
+    def test_invalid_options_are_ignored_and_the_braces_removed(
+        self, tmp_path: Path
+    ) -> None:
+        self._image(tmp_path)
+
+        text = self._rewrite(
+            "![a](band.png){width=wide align=middle colour=red}", tmp_path
+        )
+
+        assert text == '<img src="/static/band.png" alt="a">'
+
+    def test_web_images_take_options_too(self, tmp_path: Path) -> None:
+        text = self._rewrite("![a](https://example.org/a.png){width=200}", tmp_path)
+
+        assert (
+            text == '<img src="https://example.org/a.png" alt="a" style="width: 200px">'
+        )
+
+    def test_a_missing_file_keeps_its_path(self, tmp_path: Path) -> None:
+        text = self._rewrite("![a](missing.png){align=right}", tmp_path)
+
+        assert text == '<img src="missing.png" alt="a" class="slumber-image-right">'
+
+    def test_braces_further_away_are_ordinary_text(self, tmp_path: Path) -> None:
+        self._image(tmp_path)
+
+        text = self._rewrite("![a](band.png) {width=300}", tmp_path)
+
+        assert text == "![a](/static/band.png) {width=300}"
+
+
+class TestActivityHostPaths:
+    def test_hosts_resolve_paths_through_the_engine(self) -> None:
+        from types import SimpleNamespace
+
+        from slumber.ui.gui import _GuiActivityHost
+        from slumber.ui.headless import _HeadlessActivityHost
+
+        engine = SimpleNamespace(resolve_path=lambda text: Path("/study") / text)
+        gui_host = _GuiActivityHost(engine, "a", None, on_complete=lambda _: None)
+        headless_host = _HeadlessActivityHost(engine, "a", on_complete=lambda _: None)
+
+        assert gui_host.resolve_path("x.png") == Path("/study/x.png")
+        assert headless_host.resolve_path("x.png") == Path("/study/x.png")
 
 
 class TestSleepActivity:

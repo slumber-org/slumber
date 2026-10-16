@@ -16,6 +16,8 @@ from slumber.ui.backend import MountedActivity, UIBackend
 _SLEEP_END_SETTLE_S = 0.5
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from slumber.plugins.base import ConfiguredPlugin
     from slumber.run.engine import RunEngine
     from slumber.schemas.condition import Phase
@@ -50,6 +52,10 @@ class _HeadlessActivityHost:
     def emit(self, name: str) -> None:
         """Forward a study event to the engine."""
         self._engine.emit(name, source_activity_id=self._activity_id)
+
+    def resolve_path(self, path: str) -> Path:
+        """Resolve *path* against the study root (placeholders expanded)."""
+        return self._engine.resolve_path(path)
 
 
 class HeadlessBackend(UIBackend):

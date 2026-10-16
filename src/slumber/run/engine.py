@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
-from slumber.config.paths import resolve_settings, run_placeholders
+from slumber.config.paths import resolve_path, resolve_settings, run_placeholders
 from slumber.config.plugins import (
     PluginGroup,
     merge_frame_settings,
@@ -110,6 +110,20 @@ class RunEngine:
     def placeholders(self) -> dict[str, str]:
         """Expanded path placeholders for the active run."""
         return dict(self._placeholders)
+
+    def resolve_path(self, text: str) -> Path:
+        """Expand placeholders in *text* and resolve it against the study root.
+
+        Args:
+            text: A path, optionally with placeholders such as ``{assets_dir}``.
+                Absolute paths are returned unchanged.
+
+        Returns:
+            The resolved path (it may not exist).
+        """
+        return resolve_path(
+            text, study_root=self._study_dir, placeholders=self._placeholders
+        )
 
     @property
     def active_phase(self) -> Phase | None:

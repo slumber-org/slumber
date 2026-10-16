@@ -285,6 +285,31 @@ class TestFramePerPhase:
         assert calls[1][0]["header"] is False
 
 
+class TestResolvePath:
+    def test_expands_placeholders_and_uses_the_study_root(self, tmp_path: Path) -> None:
+        study_dir, _ = _make_study(tmp_path, _MINIMAL_CONDITION)
+        study = load_study(study_dir)
+        resolved: dict[str, Path] = {}
+        absolute = (tmp_path / "elsewhere" / "c.png").resolve()
+
+        class RecordingBackend(HeadlessBackend):
+            def mount_phase(self, phase, layout, activities) -> None:
+                engine = self._engine
+                resolved["placeholder"] = engine.resolve_path("{assets_dir}/a.png")
+                resolved["relative"] = engine.resolve_path("assets/b.png")
+                resolved["absolute"] = engine.resolve_path(str(absolute))
+                super().mount_phase(phase, layout, activities)
+
+        RunEngine(
+            study, study.conditions[0], _ctx(), study_dir, ui=RecordingBackend()
+        ).run()
+
+        root = study_dir.resolve()
+        assert resolved["placeholder"] == root / "assets" / "a.png"
+        assert resolved["relative"] == root / "assets" / "b.png"
+        assert resolved["absolute"] == absolute
+
+
 class TestRunEngineFlow:
     def test_instruction_phase_completes_and_ends(self, tmp_path: Path) -> None:
         study_dir, study = _make_study(tmp_path, _MINIMAL_CONDITION)
