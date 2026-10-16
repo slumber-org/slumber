@@ -82,8 +82,39 @@ Long content scrolls inside the activity card; the header, buttons and footer st
 
 | Activity | Behaviour |
 |----------|-----------|
-| `instruction` | Markdown/text from `settings.content` (path or string). Completes on mount. |
+| `instruction` | Markdown/text from `settings.content` (path or string), filling the activity area. Completes on mount. |
 | `sleep` | "I'm Awake" / "End Session" (labels configurable). Emits `marked_awake` / `end_sleep` only. |
+
+### Instruction
+
+`settings.content` is either the text itself or the path to a markdown file. The text fills the activity area, and long content scrolls inside it.
+
+| Markdown | Shown as |
+|----------|----------|
+| `# Heading`, `## Heading`, `### Heading` | Headings in the page's title sizes. |
+| Paragraphs, `-` and `1.` lists | Body text. |
+| `[text](https://example.org)` | A link. |
+| `> a note` | A highlighted callout box. |
+| `` `code` `` | A small highlighted chip. |
+| A fenced block (three backticks) | A highlighted code block that scrolls sideways. |
+| A table | A highlighted table that scrolls sideways when it is wide. |
+| `![alt](assets/band.png)` | An image, scaled down to fit. See below for size and alignment. |
+| `![alt](assets/band.png){width=300 align=center}` | An image with a set width and alignment. |
+
+Write images in the form `![alt](path)`. Image paths follow the same rules as other paths in a study: a relative path is relative to the study folder, `{assets_dir}` and the other placeholders work (`![alt]({assets_dir}/instructions/band.png)`), and an absolute path is used as it is. Web addresses are used as written. If an image file is missing, a warning is written to the run log and the image is left as written.
+
+An image can be followed by options in braces, with no space before them: `![alt](assets/band.png){width=300 align=center}`.
+
+| Option | Values |
+|--------|--------|
+| `width` | A size in pixels (`300` or `300px`) or a percentage of the text width (`50%`). The image is never wider than the text. |
+| `align` | `left`, `center` or `right`. Without it the image is shown where it is written. |
+
+Separate options with spaces or commas. An option that isn't recognised is ignored, with a warning in the run log.
+
+Empty content shows "No instruction content."
+
+### Sleep
 
 Example sleep phase (hidden chrome):
 

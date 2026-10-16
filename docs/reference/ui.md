@@ -79,7 +79,7 @@ Activities are layout-agnostic. They call host methods; they do not define what 
 
 | Key | Behaviour |
 |-----|-----------|
-| `instruction` | Renders markdown or text; calls `complete()` on mount. |
+| `instruction` | Renders markdown or text (image paths resolve like other study paths); calls `complete()` on mount. |
 | `sleep` | Wake / end buttons → `emit("marked_awake")` / `emit("end_sleep")`. Does not complete. |
 
 Open-ended activities (`sleep`) leave via `start_phase` / `end_run` actions, which unmount them.
