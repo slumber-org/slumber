@@ -12,6 +12,9 @@ wheels/
 # Virtual environments
 .venv
 
+# MkDocs build output
+site/
+
 # Slumber env files (secrets); .env.example at root is committed
 .env
 .env.*

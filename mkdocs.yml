@@ -1,11 +1,21 @@
 site_name: SLUMBER
 site_description: Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings
+site_url: https://slumber-org.github.io/slumber/
 
 repo_url: https://github.com/slumber-org/slumber
 repo_name: slumber-org/slumber
 edit_uri: edit/main/docs/
 
 copyright: Copyright &copy; Ali Saberi
+
+# Stable QR paths (/survey/, /updates/). Change destinations here only.
+extra:
+  redirects:
+    survey: "https://ipvs.informatik.uni-stuttgart.de/sc/limesurvey/index.php/654257?lang=en"
+    updates: "https://f3276afc.sibforms.com/serve/MUIFAKyj8ooJQyX9K5AyIgi7x0yfpoM7dk9nISy6cfL99TIoplHAe2vmrQFwzJXKeeOar-_OnLd6gG5-OLHNK_E4mlg9XFspv8jEO4NT1fGppj6cQwDmudPWrlqpE9jQ1crDHYSo47es_wkDZKLh6joWmvBTUdeGoaz59g68DRgmhuuJ40KCEPn57JkQ7nxYjiJRpkr_mP1jHTPGAA=="
+
+hooks:
+  - hooks/redirects.py
 
 plugins:
   - search
