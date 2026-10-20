@@ -1,61 +1,48 @@
 # Running a study
 
-`slumber study run` executes one condition from a study package on disk. It creates a run directory, configures logging, starts the UI (`gui` or `headless`), and drives phases and pipelines through the RunEngine until `end_run`.
+This page shows how to run a condition of your study, for a participant or to test it, and how to check the result.
 
-Local run does **not** require auth, scheduling, or a remote backend.
-
-## Quick start
+## Run a condition
 
 ```bash
-slumber study run --study-dir path/to/my-study --condition demo
-
-# Same condition, no browser (CI / headless)
-slumber study run --study-dir path/to/my-study --condition demo --ui headless
+slumber study run --study-dir path/to/my-study --condition relaxation
 ```
 
 `--condition` takes the condition's `name`. For all options, see the [CLI reference](../reference/cli.md#slumber-study-run).
 
-`run_id` is a new UUID. Set `PARTICIPANT_ID` only if your `runs.layout` uses `{participant_id}`.
+Every run gets its own new folder under `runs/`, so running the same condition again never overwrites an earlier run.
 
-## What happens during a run
+## GUI or headless
 
-1. **Study is loaded** — manifest and conditions validated; plugins resolved.
-2. **UI override applied** (optional) — `--ui` replaces `study.ui.type` (headless clears GUI-only settings).
-3. **Run directory is created** — from `study.runs.directory` + `study.runs.layout`.
-4. **`run.json` is written** with study/condition/run ids and `started_at`.
-5. **Run logging is applied** — handlers from `study.logging`.
-6. **UI starts** — GUI mounts AppFrame, or headless drives the same engine without a window.
-7. **`start_phase(entry)`** — layout + activities; events run `do` actions (`start_pipeline`, `start_phase`, `stop_pipeline`, `end_run`).
-8. **`end_run`** — stop pipelines, unmount, finalize logging.
+Whether a run opens the participant window depends on `ui.type` in `study.yaml`:
 
-## Demo walkthrough
+- **`gui`** opens the participant window in the browser. Use it for real sessions and to see what the participant sees. See [Participant UI](participant-ui.md).
+- **`headless`** runs without a window and finishes in seconds. Use it to check that a condition runs from start to finish after you change it.
 
-The repo ships `examples/demo/` (setup → clock pipeline → sleep → awakening loop → morning → `end_run`):
+To use the other one for a single run, add `--ui`:
 
 ```bash
-# GUI (requires slumber[nicegui]; study.yaml defaults to gui)
-uv run slumber study run --study-dir examples/demo --condition demo
-
-# Headless
-uv run slumber study run --study-dir examples/demo --condition demo --ui headless
+slumber study run --study-dir path/to/my-study --condition relaxation --ui headless
 ```
 
-Headless finishes without a browser; see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless) for how. Expect `runs/run-<uuid>/run.json` and `clock.jsonl`.
+For how the two differ, see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless).
 
-## First study from scratch
+## Stop a run early
 
-```bash
-# 1. Create the study folder
-slumber study init --base-dir . --study-id my-study --name "My Study"
+Press **Ctrl+C** in the terminal where the run started. The run stops immediately, including any recording, and everything recorded until then stays in the run folder.
 
-# 2. Write a condition in my-study/conditions/demo.yaml
-#    (see Writing conditions, or copy examples/demo/conditions/demo.yaml)
+## Check that the run succeeded
 
-# 3. Validate
-slumber study validate --study-dir my-study
+When a run ends normally, the terminal shows where it was saved:
 
-# 4. Run headless
-slumber study run --study-dir my-study --condition demo --ui headless
+```text
+Run complete: path/to/my-study/runs/run-<run id>
 ```
 
-See [Run output and logging](run-output-and-logging.md) and [Participant UI](participant-ui.md).
+If something goes wrong, it shows `Run failed:` and the reason instead.
+
+A run that failed or was stopped early still has a run folder, with `run.json` and whatever was recorded until then. If your study writes a log file into the run folder, you can tell these runs apart: only a complete run's log ends with a `Run completed` line.
+
+For what each file in the run folder contains, see [Run output and logging](run-output-and-logging.md).
+
+For what SLUMBER does step by step during a run, see [Run lifecycle](../concepts/run-lifecycle.md#from-start-to-finish).

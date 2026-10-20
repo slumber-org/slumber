@@ -1,0 +1,10 @@
+study_id: sleep-study
+study_name: Sleep Study
+
+ui:
+  type: gui
+
+logging:
+  level: INFO
+  handlers:
+    - sink: "{run_dir}/run.log"

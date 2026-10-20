@@ -23,6 +23,8 @@ For the GUI participant UI:
 uv sync --extra nicegui
 ```
 
+Each `uv sync` makes your installation match that exact command. Plain `uv sync` installs only the core packages, and uninstalls the GUI dependency if you added it before. So whenever you run `uv sync` again, for example after pulling new changes, include `--extra nicegui`.
+
 For a full CI-like install (all extras + dev):
 
 ```bash
@@ -47,28 +49,13 @@ Environment
 
 Dependencies
   ✓ ezmsg                        installed
-  — nicegui                      not installed (optional; ...)
+  ✓ nicegui                      installed
 
 ✓ No issues found.
 ```
 
 A `✗` next to a required check means that feature will not work until fixed. Optional skips (`—`) are fine unless you need that feature.
 
-## Quick start
+## Next steps
 
-```bash
-# Create a study folder
-uv run slumber study init --base-dir . --study-id my-study --name "My Study"
-
-# Or try the bundled demo
-uv run slumber study validate --study-dir examples/demo
-uv run slumber study run --study-dir examples/demo --condition demo --ui headless
-```
-
-From here:
-
-1. [Study Setup](../user-guide/study-setup.md) — add conditions and assets
-2. [Running a Study](../user-guide/running-a-study.md) — GUI or headless run
-3. [Configuration reference](../reference/configuration.md) — phases, pipelines, PluginSpec
-
-A remote backend is not required for local study run.
+Run an example study from start to finish in [Your first study](first-study.md).

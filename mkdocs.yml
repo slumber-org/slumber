@@ -72,6 +72,7 @@ nav:
 
   - Getting Started:
       - Installation: getting-started/installation.md
+      - Your First Study: getting-started/first-study.md
 
   - Concepts:
       - Overview: concepts/overview.md
