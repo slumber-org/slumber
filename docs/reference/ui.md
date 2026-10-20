@@ -35,6 +35,10 @@ ui:
         next_button: Next
         complete_button: Complete
         show_activity_list: true
+        show_progress_bar: true
+        show_step_count: true
+        show_step_name: false
+        number_steps: false
         allow_skip: false
 ```
 
@@ -56,8 +60,10 @@ Each phase selects a layout. Layouts fill the AppFrame body and host that phase'
 
 | `type` | Role |
 |--------|------|
-| `stepper` | Ordered activities: optional list + activity slot; prev/next/complete. |
-| `hub` | One activity, full bleed. |
+| `stepper` | Ordered activities: optional list + activity slot, progress bar, prev/next/complete. |
+| `hub` | One activity filling the body. |
+
+Stepper settings and the step states are described in the [user guide](../user-guide/nicegui-ui.md#stepper).
 
 Within a layout, only the activity slot remounts. A layout swap remounts the body. After every sequential activity has `complete()`d, the layout emits `phase_completed`.
 

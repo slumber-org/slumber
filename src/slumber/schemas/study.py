@@ -90,11 +90,40 @@ class StepperLayoutDefaults(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    previous_button: str = Field(default="Previous")
-    next_button: str = Field(default="Next")
-    complete_button: str = Field(default="Complete")
-    show_activity_list: bool = Field(default=True)
-    allow_skip: bool = Field(default=False)
+    previous_button: str = Field(
+        default="Previous", description="Label of the Previous button."
+    )
+    next_button: str = Field(default="Next", description="Label of the Next button.")
+    complete_button: str = Field(
+        default="Complete",
+        description="Label of the Complete button, shown on the last step.",
+    )
+    show_activity_list: bool = Field(
+        default=True,
+        description="Show the list of steps next to the activity (above it on "
+        "narrow windows).",
+    )
+    show_progress_bar: bool = Field(
+        default=True,
+        description="Show the progress bar between the Previous and Next buttons.",
+    )
+    show_step_count: bool = Field(
+        default=True,
+        description="Show 'Step x of y' above the progress bar (needs the bar).",
+    )
+    show_step_name: bool = Field(
+        default=False,
+        description="Show the current step's title above the progress bar "
+        "(needs the bar).",
+    )
+    number_steps: bool = Field(
+        default=False, description="Number the steps in the list."
+    )
+    allow_skip: bool = Field(
+        default=False,
+        description="Let the participant open any step and complete the phase "
+        "without finishing every step.",
+    )
 
 
 class LayoutDefaults(BaseModel):

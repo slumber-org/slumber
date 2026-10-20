@@ -8,6 +8,7 @@ from slumber.schemas import (
     LoggingConfig,
     PluginSpec,
     RunLayout,
+    StepperLayoutDefaults,
     Study,
 )
 
@@ -60,6 +61,19 @@ class TestGuiSettings:
         assert settings.layouts is not None
         assert settings.layouts.stepper is not None
         assert settings.layouts.stepper.allow_skip is True
+
+    def test_stepper_defaults(self) -> None:
+        stepper = StepperLayoutDefaults()
+        assert stepper.show_activity_list is True
+        assert stepper.show_progress_bar is True
+        assert stepper.show_step_count is True
+        assert stepper.show_step_name is False
+        assert stepper.number_steps is False
+        assert stepper.allow_skip is False
+
+    def test_stepper_rejects_unknown_setting(self) -> None:
+        with pytest.raises(ValidationError):
+            StepperLayoutDefaults(show_progress=True)  # type: ignore[call-arg]
 
     def test_frame_header_false(self) -> None:
         settings = GuiSettings(frame={"header": False, "footer": False})

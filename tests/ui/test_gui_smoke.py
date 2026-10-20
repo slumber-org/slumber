@@ -149,3 +149,49 @@ def test_app_frame_adds_its_css_and_applies_the_phase(
         frame.apply_frame({"header": False, "footer": False})
         assert not header.visible and not footer.visible
         assert study.text == "Demo Study"
+
+
+def test_gui_adds_the_layouts_css_when_mounting_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from types import SimpleNamespace
+
+    from slumber.ui import gui
+    from slumber.ui.layouts import Layout
+
+    added: list[str] = []
+    monkeypatch.setattr(gui, "add_component_css", lambda css, **_: added.append(css))
+
+    class _Frame:
+        mounted = True
+        body = SimpleNamespace(client=object())
+
+        def clear_body(self) -> None:
+            pass
+
+    class _Styled(Layout):
+        css = ".styled { color: red; }"
+
+        def mount(self, host, activities) -> None:
+            pass
+
+    class _Plain(Layout):
+        def mount(self, host, activities) -> None:
+            pass
+
+    backend = gui.GuiBackend()
+    backend._engine = object()  # type: ignore[assignment]
+    backend._frame = _Frame()  # type: ignore[assignment]
+    phase = SimpleNamespace(id="p")
+
+    backend.mount_phase(phase, _Styled(), [])  # type: ignore[arg-type]
+    backend.mount_phase(phase, _Plain(), [])  # type: ignore[arg-type]
+
+    assert added == [".styled { color: red; }"]
+
+
+def test_builtin_layouts_declare_their_css() -> None:
+    from slumber.ui.layouts import HubLayout, StepperLayout
+
+    assert ".slumber-hub" in HubLayout.css
+    assert ".slumber-stepper" in StepperLayout.css

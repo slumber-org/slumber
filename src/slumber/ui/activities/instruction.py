@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from slumber.ui.activities.base import Activity, ActivityHost
 from slumber.ui.theme import SECONDARY, TYPE_SCALE
-from slumber.ui.widgets import surface_card
 
 
 class InstructionSettings(BaseModel):
@@ -44,7 +43,7 @@ class InstructionActivity(Activity):
         if activity_host.container is not None:
             from nicegui import ui
 
-            with activity_host.container, surface_card():
+            with activity_host.container:
                 if body.strip():
                     ui.markdown(body).classes(TYPE_SCALE["body"])
                 else:

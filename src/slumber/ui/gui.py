@@ -14,6 +14,7 @@ from slumber.ui.backend import MountedActivity, UIBackend
 from slumber.ui.frame import AppFrame
 from slumber.ui.layouts.base import Layout
 from slumber.ui.theme import (
+    add_component_css,
     apply_theme,
     default_favicon_path,
     default_logo_path,
@@ -201,6 +202,8 @@ class GuiBackend(UIBackend):
             type(layout).__name__,
             [a.config.id for a in activities],
         )
+        if layout.css:
+            add_component_css(layout.css, client=self._frame.body.client)
         layout.mount(host, activities)
 
     def unmount_phase(self) -> None:
