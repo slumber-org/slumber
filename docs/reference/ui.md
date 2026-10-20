@@ -1,71 +1,64 @@
 # UI reference
 
-`study.ui` selects how a run is presented. 0.1 backends are a **built-in map** (`gui` | `headless`), not an entry-point group. Both drive the same RunEngine; they differ only in presentation.
+Lookup tables for the `ui` section of `study.yaml` and the built-in layouts and activities. For how to use them, see [Participant UI](../user-guide/participant-ui.md).
 
-```yaml
-ui:
-  type: gui   # or headless
-```
+## UI types
 
-| `type` | Role |
-|--------|------|
-| `gui` | Participant window (NiceGUI): AppFrame + layout + activities. |
-| `headless` | No window. Sequential activities auto-`complete()`. Sleep emits `end_sleep` on mount so the demo finishes without a browser. |
+Set with `ui.type`. Both use the same RunEngine; they only differ in presentation.
 
-Override for one run: `slumber study run --ui headless` (or `gui`). Switching to headless clears GUI-only settings.
+| `type` | Description |
+|--------|-------------|
+| `gui` | Participant window in the browser (NiceGUI): AppFrame, layouts and activities. Requires the `nicegui` extra. |
+| `headless` | No window. Used for testing; see [Headless behaviour](#headless-behaviour). Default for new studies. |
+
+`slumber study run --ui gui|headless` overrides `ui.type` for one run. `--ui headless` ignores all `ui.settings`.
 
 ## GUI settings
 
-Optional under `ui.settings` when `type` is `gui`:
+Under `ui.settings` when `ui.type` is `gui`. All are optional.
 
-```yaml
-ui:
-  type: gui
-  settings:
-    port: 8080
-    favicon: "{assets_dir}/favicon.png"
-    frame:
-      header:
-        logo: "{assets_dir}/logo.png"
-        title: "{study_name}"
-        show_phase_title: true
-    layouts:
-      stepper:
-        previous_button: Previous
-        next_button: Next
-        complete_button: Complete
-        show_activity_list: true
-        show_progress_bar: true
-        show_step_count: true
-        show_step_name: false
-        number_steps: false
-        allow_skip: false
-```
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `port` | integer | `8080` | Port the GUI runs on. |
+| `favicon` | path | SLUMBER favicon | Browser tab icon. |
+| `frame` | [Frame settings](#frame-settings) | header and footer shown | Default AppFrame for every phase. |
+| `layouts.stepper` | [Stepper settings](#stepper) | see table | Default settings for every `stepper` phase. |
 
-Phase `layout.settings` deep-merges over study `ui.settings.layouts.<type>`. Phase `frame` deep-merges over study `ui.settings.frame` (e.g. hide header/footer during sleep).
+## Frame settings
 
-Requires the NiceGUI optional dependency:
+Under `ui.settings.frame` (study default) or a phase's `frame` (override for that phase). A phase's `frame` is merged on top of the study's.
 
-```bash
-uv sync --extra nicegui
-```
-
-## AppFrame
-
-Chrome around the layout: header (logo and study title on the left, optional phase title centred), body, footer (caption on the right). Study frame is the default; `start_phase` merges the phase's optional frame override over it, expands placeholders in the header title and resolves the header logo path, then calls `UIBackend.apply_frame(frame, phase)`.
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `header` | `false` or mapping | shown | `false` hides the header. |
+| `header.logo` | path | SLUMBER logo | Logo in the header. |
+| `header.title` | string | `study_name` | Title in the header. |
+| `footer` | boolean | shown | `false` hides the footer. |
 
 ## Layouts
 
-Each phase selects a layout. Layouts fill the AppFrame body and host that phase's activities.
+Set with a phase's `layout.type`. A phase's `layout.settings` is merged on top of the study's `ui.settings.layouts.<type>`.
 
-| `type` | Role |
-|--------|------|
-| `stepper` | Ordered activities: optional list + activity slot, progress bar, prev/next/complete. |
-| `hub` | One activity filling the body. |
+| `type` | Description |
+|--------|-------------|
+| `stepper` | Ordered activities with **Previous**, **Next** and **Complete** buttons and an optional list of steps. |
+| `hub` | One activity, full screen, no navigation. |
 
-Stepper settings and the step states are described in the [user guide](../user-guide/nicegui-ui.md#stepper).
+For when each layout sends `phase_completed`, see [Run lifecycle](../concepts/run-lifecycle.md#when-a-phase-is-completed).
 
-Within a layout, only the activity slot remounts. A layout swap remounts the body. For when each layout sends `phase_completed`, see [Run lifecycle](../concepts/run-lifecycle.md#when-a-phase-is-completed).
+### Stepper
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| `previous_button` | string | `Previous` | Label of the button to the previous step. |
+| `next_button` | string | `Next` | Label of the button to the next step. |
+| `complete_button` | string | `Complete` | Label of the button on the last step, which completes the phase. |
+| `show_activity_list` | boolean | `true` | Show the list of steps. |
+| `allow_skip` | boolean | `false` | Let the participant move on before a step has finished. |
+
+### Hub
+
+No settings.
 
 ## Activities
 
@@ -73,7 +66,7 @@ Activities report back with `complete()` and `emit(name)`; see [How activities s
 
 | Key | Behaviour |
 |-----|-----------|
-| `instruction` | Renders markdown or text (image paths resolve like other study paths); calls `complete()` on mount. |
+| `instruction` | Renders markdown or text; calls `complete()` on mount. |
 | `sleep` | Wake / end buttons → `emit("marked_awake")` / `emit("end_sleep")`. Does not complete. |
 
 ### Activity settings
@@ -95,4 +88,4 @@ For how to use them in a condition, see [Writing conditions](../user-guide/writi
 | `instruction` | Completes on mount, as in the GUI. |
 | `sleep` | Emits `end_sleep` shortly after mounting. Never emits `marked_awake`. |
 
-For how headless runs a condition overall, see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless). See [Running a study](../user-guide/running-a-study.md) and the `examples/demo/` package in the repository.
+For how headless runs a condition overall, see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless).
