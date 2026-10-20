@@ -14,7 +14,7 @@ The window around every screen of a GUI run: a header with the logo, the study t
 
 ## Condition
 
-One version of the study protocol, for example *active* versus *control*. Each condition is one YAML file in `conditions/`, and each [run](#run) carries out one condition. See the [Configuration reference](../reference/configuration.md#condition-file-per-condition-yaml).
+One version of the study protocol, for example *active* versus *control*. Each condition is one YAML file in `conditions/`, and each [run](#run) carries out one condition. See [Writing conditions](../user-guide/writing-conditions.md).
 
 ## Entry phase
 

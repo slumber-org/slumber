@@ -76,6 +76,18 @@ Activities report back with `complete()` and `emit(name)`; see [How activities s
 | `instruction` | Renders markdown or text (image paths resolve like other study paths); calls `complete()` on mount. |
 | `sleep` | Wake / end buttons → `emit("marked_awake")` / `emit("end_sleep")`. Does not complete. |
 
+### Activity settings
+
+Set under the activity's `settings:`. All are optional.
+
+| Activity | Setting | Default | Description |
+|----------|---------|---------|-------------|
+| `instruction` | `content` | `""` | Markdown text, or a path to a Markdown file (usually `{assets_dir}/…`). If the value is not an existing file, it is shown as text. |
+| `sleep` | `wake_button` | `I'm Awake` | Label of the button that emits `marked_awake`. |
+| `sleep` | `end_button` | `End Session` | Label of the button that emits `end_sleep`. |
+
+For how to use them in a condition, see [Writing conditions](../user-guide/writing-conditions.md#add-activities).
+
 ## Headless behaviour
 
 | Key | Headless |

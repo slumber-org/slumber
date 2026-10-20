@@ -25,6 +25,7 @@ slumber study validate
 - Resolves the study folder from `--study-dir` or `STUDY_DIR`.
 - Loads and validates `study.yaml` against the Study schema.
 - Loads every `.yaml` / `.yml` file in `conditions_dir` and validates each as a Condition.
+- Checks that each condition's `name` matches its file name without the extension (see [File naming](writing-conditions.md#file-naming)).
 - Resolves plugins (`validate_study_plugins`): UI type, layouts, activities, units; unknown `entry`, phase/pipeline ids, and connection endpoints are errors.
 - On success: prints study name, study ID, and condition names.
 - On failure: prints a path-specific error and exits with code 1.

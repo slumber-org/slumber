@@ -13,7 +13,7 @@ slumber study run --study-dir path/to/my-study --condition demo
 slumber study run --study-dir path/to/my-study --condition demo --ui headless
 ```
 
-For all options, see the [CLI reference](../reference/cli.md#slumber-study-run).
+`--condition` takes the condition's `name`. For all options, see the [CLI reference](../reference/cli.md#slumber-study-run).
 
 `run_id` is a new UUID. Set `PARTICIPANT_ID` only if your `runs.layout` uses `{participant_id}`.
 
@@ -48,8 +48,8 @@ Headless finishes without a browser; see [gui and headless](../concepts/run-life
 # 1. Create the study folder
 slumber study init --base-dir . --study-id my-study --name "My Study"
 
-# 2. Add a condition (copy or adapt examples/demo/conditions/demo.yaml)
-#    under my-study/conditions/
+# 2. Write a condition in my-study/conditions/demo.yaml
+#    (see Writing conditions, or copy examples/demo/conditions/demo.yaml)
 
 # 3. Validate
 slumber study validate --study-dir my-study
