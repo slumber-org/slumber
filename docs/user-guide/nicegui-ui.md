@@ -34,12 +34,7 @@ AppFrame
   └── footer            ← "Powered by SLUMBER" caption
 ```
 
-1. Run starts → theme + AppFrame mount once.
-2. Engine `start_phase(entry)` → apply the phase's frame (study frame merged with the phase override) → mount layout + activities.
-3. Activities call `complete()` or `emit(...)`; handlers run `do` actions.
-4. `end_run` unmounts and finishes.
-
-Phases are started by actions (`start_phase`), not sequenced as a flat procedure list.
+The AppFrame is mounted once per run. Each phase applies its frame override and mounts its layout into the body. For how phases start and end, see [Run lifecycle](../concepts/run-lifecycle.md).
 
 ## AppFrame
 

@@ -105,18 +105,8 @@ Built-in units: `clock` (periodic samples at `settings.rate`), `jsonl_writer` (a
 
 **EventHandler**: `event` (string) + `do` (ordered list of actions).
 
-Handlers on the emitting activity are matched first, then handlers on the active phase. Layouts emit `phase_completed` when every sequential activity has `complete()`d. Activities may `emit` named study events (e.g. `marked_awake`, `end_sleep`).
+For when events fire, how handlers are matched, and the order actions run in, see [Run lifecycle](../concepts/run-lifecycle.md#events-handlers-and-actions).
 
 ## Path placeholders
 
-Placeholders expand first; then relative results resolve against the **study root**. Absolute paths stay absolute.
-
-| Placeholder | Expands to |
-|-------------|------------|
-| `{assets_dir}` | Study assets directory |
-| `{run_dir}` | This run's directory |
-| `{run_id}` | Run id |
-| `{study_name}` | Study display name |
-| `{study_id}` | Study id |
-
-Plus run-layout keys (`condition_id`, `participant_id`, `session_id`) where applicable.
+Settings and log sinks can use placeholders such as `{assets_dir}` and `{run_dir}`. For the full list and how paths resolve, see [Paths and placeholders](../user-guide/paths-and-placeholders.md).
