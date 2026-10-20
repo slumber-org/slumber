@@ -82,7 +82,7 @@ The button labels and other stepper settings come from the study's `ui.settings.
         allow_skip: true
 ```
 
-See [Participant UI](nicegui-ui.md) for the study-wide defaults and the [UI reference](../reference/ui.md) for every setting.
+See [Participant UI](participant-ui.md) for the study-wide defaults and the [UI reference](../reference/ui.md) for every setting.
 
 ## Add activities
 

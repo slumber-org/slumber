@@ -86,7 +86,7 @@ nav:
       - Validating a Study: user-guide/validating-a-study.md
       - Run Output and Logging: user-guide/run-output-and-logging.md
       - Running a Study: user-guide/running-a-study.md
-      - Participant UI: user-guide/nicegui-ui.md
+      - Participant UI: user-guide/participant-ui.md
 
   - Reference:
       - CLI: reference/cli.md

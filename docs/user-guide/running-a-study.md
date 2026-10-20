@@ -58,4 +58,4 @@ slumber study validate --study-dir my-study
 slumber study run --study-dir my-study --condition demo --ui headless
 ```
 
-See [Run output and logging](run-output-and-logging.md) and [Participant UI](nicegui-ui.md).
+See [Run output and logging](run-output-and-logging.md) and [Participant UI](participant-ui.md).

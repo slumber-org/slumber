@@ -8,7 +8,7 @@ This section describes how to work with SLUMBER from a researcher's perspective 
 - [Validating a Study](validating-a-study.md) — `slumber study validate`, error format
 - [Run Output and Logging](run-output-and-logging.md) — run directory layout, placeholders, loguru handlers
 - [Running a Study](running-a-study.md) — local run lifecycle and demo walkthrough
-- [Participant UI](nicegui-ui.md) — GUI AppFrame, layouts, and activities
+- [Participant UI](participant-ui.md) — GUI AppFrame, layouts, and activities
 - [CLI Reference](../reference/cli.md) — core commands and options
 
 Backend features (auth, scheduling, condition sync) belong in optional extensions and are not required for local `study run`.

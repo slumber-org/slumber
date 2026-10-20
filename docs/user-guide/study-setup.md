@@ -42,7 +42,7 @@ sleep-study/
 The generated manifest already validates. The fields you are most likely to change:
 
 - **`study_id`** and **`study_name`**: set by `init`. `study_name` is available as `{study_name}`, for example in the GUI header.
-- **`ui.type`**: `init` writes `headless`. Change it to `gui` to show the participant window. See [Participant UI](nicegui-ui.md).
+- **`ui.type`**: `init` writes `headless`. Change it to `gui` to show the participant window. See [Participant UI](participant-ui.md).
 - **`conditions_dir`** and **`assets_dir`**: only change these if you want different folder names.
 - **`runs`**: where run folders go and how they are named. See [Run output and logging](run-output-and-logging.md).
 - **`logging`**: log level and log files. See [Run output and logging](run-output-and-logging.md).
