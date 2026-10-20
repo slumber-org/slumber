@@ -79,8 +79,6 @@ slumber = { workspace = true }
 slumber-somnio = { workspace = true }
 slumber-audio = { workspace = true }
 slumber-supabase = { workspace = true }
-# TODO: Switch somnio back to PyPI (remove git source override).
-somnio = { git = "https://github.com/alitsaberi/somnio.git" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "extensions/slumber-supabase/tests"]

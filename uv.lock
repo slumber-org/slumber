@@ -499,7 +499,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -2464,7 +2464,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "slumber", editable = "." },
-    { name = "somnio", git = "https://github.com/alitsaberi/somnio.git" },
+    { name = "somnio", specifier = ">=0.2.0b4" },
 ]
 
 [package.metadata.requires-dev]
@@ -2521,11 +2521,15 @@ test = [{ name = "pytest", specifier = ">=9.0.2" }]
 
 [[package]]
 name = "somnio"
-version = "0.1.0"
-source = { git = "https://github.com/alitsaberi/somnio.git#0960eb5d21ed0b442dd74f8f1b9de4017cde2be8" }
+version = "0.2.0b4"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/17/96/c3a389272aa0e98ec56e9efc7c2c5279de421d9aa4a94bfe44f499255ee5/somnio-0.2.0b4.tar.gz", hash = "sha256:9bb5166c05544c25429d05b79bb0e9a628df89a9dec7c90c19bffd71088a1773", size = 58417, upload-time = "2026-09-04T10:14:46.141Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2e/02/cee9566a47a8c33284e624c1f894a637bb7cc16ab1231a830b7f6dc16eb2/somnio-0.2.0b4-py3-none-any.whl", hash = "sha256:fccddc089c650c326ce37f8844e2b6a3a68157028216a7f56c5c80c6ffe4b926", size = 83037, upload-time = "2026-09-04T10:14:45.103Z" },
 ]
 
 [[package]]
