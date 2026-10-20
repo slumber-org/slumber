@@ -85,9 +85,9 @@ nav:
       - Writing Conditions: user-guide/writing-conditions.md
       - Paths and Placeholders: user-guide/paths-and-placeholders.md
       - Validating a Study: user-guide/validating-a-study.md
-      - Run Output and Logging: user-guide/run-output-and-logging.md
       - Running a Study: user-guide/running-a-study.md
       - Participant UI: user-guide/participant-ui.md
+      - Run Output and Logging: user-guide/run-output-and-logging.md
 
   - Reference:
       - CLI: reference/cli.md

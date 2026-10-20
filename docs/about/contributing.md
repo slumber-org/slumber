@@ -125,29 +125,36 @@ uv run mkdocs serve
 
 ### Main documentation sections
 
-The documentation is organized into the following high-level sections:
+The documentation is organized into the following sections:
 
-- **Home**  
-  High-level introduction to SLUMBER and its purpose.
+- **Home**: what SLUMBER is, who it is for, and where to start.
+- **Getting started**: installing SLUMBER and running a first example study. Short and step by step.
+- **Concepts**: how SLUMBER works and what the terms mean. Explanation, no commands.
+- **User guide**: how to do a specific task with your own study. Task-focused how-tos.
+- **Reference**: every setting, command and plugin, as lookup tables.
+- **About**: contributing guidelines.
 
-- **Getting Started**  
-  Minimal steps required to install dependencies and run the project for the first time.
+### What goes where
 
-- **User Guide**  
-  Study packages, validation, local run, and participant UI.
+- Tables of options, settings and fields live **only in Reference**. Guides and concepts pages explain and link to the Reference instead of copying the tables.
+- Explain each topic in one place and link to it from elsewhere. If you find yourself writing the same explanation twice, move it to the page where it belongs and replace the copy with a link.
+- A guide says how to do something; the matching Concepts page says why it works that way. For example, [Running a study](../user-guide/running-a-study.md) links to [Run lifecycle](../concepts/run-lifecycle.md) for what happens during a run.
 
-- **Reference**  
-  Schemas, plugins, UI, and CLI for the 0.1 surface.
+### Before opening a PR
 
-- **About**  
-  Contributing guidelines.
+Build the docs with strict checks:
 
+```bash
+uv run mkdocs build --strict
+```
+
+This fails on broken links, missing pages and other warnings. CI runs the same check on every pull request that changes the docs.
 
 ### Docstrings
 
 All public modules, functions, classes, and methods should include docstrings. SLUMBER follows the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for docstring formatting.
 
-Where appropriate, API and reference documentation should be generated automatically using **MkDocstrings**. Auto-generated reference documentation is intended to complement narrative documentation, not replace it.
+Generating API and reference documentation from docstrings with **MkDocstrings** is planned. Generated reference pages will complement the guides and concepts pages, not replace them.
 
 ### Writing conventions
 
