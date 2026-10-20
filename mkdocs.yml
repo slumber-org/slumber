@@ -81,6 +81,7 @@ nav:
   - User Guide:
       - Overview: user-guide/index.md
       - Study Setup: user-guide/study-setup.md
+      - Writing Conditions: user-guide/writing-conditions.md
       - Paths and Placeholders: user-guide/paths-and-placeholders.md
       - Validating a Study: user-guide/validating-a-study.md
       - Run Output and Logging: user-guide/run-output-and-logging.md

@@ -1,67 +1,67 @@
-# Study folder structure and init
+# Study setup
 
-This page describes the standard study layout and how to create a new study with `slumber study init`.
+This page shows how to create a new study package with `slumber study init` and what goes where inside it.
 
-## Study folder structure
+## Create a study
 
-A study is a single folder identified by a **study ID** (the folder name). The **project root** is where you run `slumber study init`; it can contain one or more study folders.
-
-Standard layout:
-
-| Location | Path | Description |
-|----------|------|-------------|
-| **Study folder** | `<study_id>/study.yaml` | Study manifest: id, name, dirs, runs, logging, UI. Required. |
-| **Study folder** | `<study_id>/conditions/` | One YAML file per condition (phases + pipelines). |
-| **Study folder** | `<study_id>/assets/` | Optional assets (markdown, images) referenced via placeholders. |
-| **Study folder** | `<study_id>/runs/` | Run output (created by init; written by `study run`). |
-| **Study folder** | `<study_id>/.gitignore` | Ignores `.env` and `.env.*`. Created by init unless skipped. |
-
-Example:
-
-```text
-<project-root>/
-├── my-study/
-│   ├── study.yaml
-│   ├── conditions/
-│   │   ├── control.yaml
-│   │   └── treatment.yaml
-│   ├── assets/
-│   │   └── instructions/
-│   ├── runs/
-│   └── .gitignore
-```
-
-The manifest schema is described in the [Configuration reference](../reference/configuration.md).
-
-## Creating a new study: `slumber study init`
+Run the command and answer the prompts:
 
 ```bash
 slumber study init
 ```
 
-You will be prompted for:
+You are asked for:
 
-- **Base directory** — default: `.`
-- **Study ID** — folder name (default: `new_study`)
-- **Name** — human-readable study name (written as `study_name`)
+- **Base directory**: where the study folder is created (default: `.`)
+- **Study ID**: the folder name and `study_id` (default: `new_study`)
+- **Name**: the human-readable `study_name`
 
-The command creates `<base_dir>/<study_id>/` with:
-
-- A template `study.yaml` (`study_id`, `study_name`, default dirs, `ui.type: headless`)
-- Empty `conditions/`, `assets/`, and `runs/` directories
-- Optional `.env` and `.gitignore` inside the study folder
-
-To skip the prompts, pass the values as options (see the [CLI reference](../reference/cli.md#slumber-study-init) for all options):
+To skip the prompts, pass the values as options:
 
 ```bash
-slumber study init --base-dir . --study-id ld-2025 --name "Lucid Dreaming Pilot"
+slumber study init --base-dir . --study-id sleep-study --name "Sleep Study"
 ```
 
-### After init
+For all options, see the [CLI reference](../reference/cli.md#slumber-study-init).
 
-1. `cd` into the study folder.
-2. Add condition YAML files under `conditions/` (see [Configuration reference](../reference/configuration.md) and `examples/demo/`).
-3. Run `slumber study validate --study-dir .` (see [Validating a study](validating-a-study.md)).
-4. Run with `slumber study run --study-dir . --condition <name>` (see [Running a study](running-a-study.md)).
+## The study folder
 
-Local study run does not require a remote backend.
+`study init` creates `<base_dir>/<study_id>/`:
+
+```text
+sleep-study/
+├── study.yaml      # the study manifest
+├── conditions/     # one YAML file per condition (empty)
+├── assets/         # instruction texts, images, logo (empty)
+├── runs/           # one folder per run, written by `study run`
+└── .gitignore
+```
+
+## Fill in `study.yaml`
+
+The generated manifest already validates. The fields you are most likely to change:
+
+- **`study_id`** and **`study_name`**: set by `init`. `study_name` is available as `{study_name}`, for example in the GUI header.
+- **`ui.type`**: `init` writes `headless`. Change it to `gui` to show the participant window. See [Participant UI](nicegui-ui.md).
+- **`conditions_dir`** and **`assets_dir`**: only change these if you want different folder names.
+- **`runs`**: where run folders go and how they are named. See [Run output and logging](run-output-and-logging.md).
+- **`logging`**: log level and log files. See [Run output and logging](run-output-and-logging.md).
+
+For every field and its default, see the [Configuration reference](../reference/configuration.md#study-manifest-studyyaml).
+
+## Add assets
+
+Put files that conditions refer to, such as instruction texts, in `assets/`. Subfolders are fine:
+
+```text
+assets/
+└── instructions/
+    ├── intro.md
+    └── morning.md
+```
+
+Refer to them from YAML with the `{assets_dir}` placeholder, for example `"{assets_dir}/instructions/intro.md"`. See [Paths and placeholders](paths-and-placeholders.md).
+
+## Next: write a condition
+
+A study can't run until it has at least one condition. Continue with [Writing conditions](writing-conditions.md).

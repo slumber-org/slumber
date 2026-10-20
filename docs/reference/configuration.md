@@ -46,7 +46,7 @@ One condition = entry phase + phases + optional pipelines. Stored as `<study_dir
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Condition name (required). |
+| `name` | string | Condition name (required). Must match the file name without the extension. See [File naming](../user-guide/writing-conditions.md#file-naming). |
 | `entry` | string | Id of the phase to start (required). |
 | `phases` | list[Phase] | Named stages (at least one). |
 | `pipelines` | list[Pipeline] | Named processing graphs (optional). |
