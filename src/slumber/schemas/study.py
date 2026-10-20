@@ -56,6 +56,14 @@ class FrameHeaderSettings(BaseModel):
         default=None,
         description="Header title (e.g. '{study_name}').",
     )
+    show_phase_title: bool | None = Field(
+        default=None,
+        description=(
+            "Show the active phase's title centred in the header. Omit or leave "
+            "null so phase frame merges keep the study value; missing after merge "
+            "means off."
+        ),
+    )
 
 
 class FrameSettings(BaseModel):

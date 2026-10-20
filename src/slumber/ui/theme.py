@@ -7,6 +7,7 @@ Mulish is packaged under ``assets/fonts/`` (SIL OFL) for offline use.
 
 from __future__ import annotations
 
+import weakref
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +47,7 @@ COLORS = {
 # Logo heights; the width follows the image's own proportions.
 LOGO_SIZE = {
     "hero": "7rem",
-    "header": "2.25rem",
+    "header": "calc(var(--slumber-header-h) * 0.56)",
     "hub": "clamp(3.5rem, 11vh, 6rem)",
 }
 
@@ -65,6 +66,11 @@ FONT_FILES = {
     600: "mulish-latin-600-normal.woff2",
     700: "mulish-latin-700-normal.woff2",
 }
+
+# Component stylesheets already added, per page (see ``add_component_css``).
+_LOADED_COMPONENT_CSS: weakref.WeakKeyDictionary[Any, set[str]] = (
+    weakref.WeakKeyDictionary()
+)
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 FONTS_DIR = ASSETS_DIR / "fonts"
@@ -101,15 +107,20 @@ _THEME_CSS = f"""
   --slumber-fs: 17px;
   --slumber-h1: 30px;
   --slumber-h2: 22px;
+  --slumber-pad: 32px;
+  --slumber-header-h: 64px;
 }}
 @media (max-width: 1199px) {{
-  :root {{ --slumber-fs: 16px; --slumber-h1: 28px; --slumber-h2: 20px; }}
+  :root {{ --slumber-fs: 16px; --slumber-h1: 28px; --slumber-h2: 20px; --slumber-pad: 24px; }}
 }}
 @media (max-width: 799px) {{
   :root {{ --slumber-h1: 26px; }}
 }}
 @media (max-height: 760px) {{
-  :root {{ --slumber-h1: 26px; }}
+  :root {{ --slumber-h1: 26px; --slumber-pad: 24px; --slumber-header-h: 52px; }}
+}}
+@media (max-height: 640px) {{
+  :root {{ --slumber-header-h: 48px; }}
 }}
 body, .q-page, .nicegui-content {{
   font-family: var(--slumber-font) !important;
@@ -174,6 +185,29 @@ def apply_theme() -> None:
 
     ui.add_css(build_theme_css())
     ui.colors(**COLORS)
+
+
+def add_component_css(css: str, *, client: Any | None = None) -> None:
+    """Add a component's own CSS to a page, once per page.
+
+    Components keep their styles next to their code and style with the shared
+    ``--slumber-*`` variables from :func:`apply_theme`, never with raw colours.
+    Widgets call this while they build; a layout's ``css`` is added by the GUI
+    backend.
+
+    Args:
+        css: Stylesheet text.
+        client: The NiceGUI page to add it to. Defaults to the current one; pass
+            it when the current element may already have been removed.
+    """
+    from nicegui import context, ui
+
+    client = client or context.client
+    loaded = _LOADED_COMPONENT_CSS.setdefault(client, set())
+    if css not in loaded:
+        loaded.add(css)
+        with client:
+            ui.add_css(css)
 
 
 def default_logo_path() -> Path | None:

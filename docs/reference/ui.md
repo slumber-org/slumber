@@ -28,6 +28,7 @@ ui:
       header:
         logo: "{assets_dir}/logo.png"
         title: "{study_name}"
+        show_phase_title: true
     layouts:
       stepper:
         previous_button: Previous
@@ -47,7 +48,7 @@ uv sync --extra nicegui
 
 ## AppFrame
 
-One chrome shell per run: header (logo, title), body, footer. Study frame is the default; `start_phase` applies that phase's optional frame override.
+Chrome around the layout: header (logo and study title on the left, optional phase title centred), body, footer (caption on the right). Study frame is the default; `start_phase` merges the phase's optional frame override over it, expands placeholders in the header title and resolves the header logo path, then calls `UIBackend.apply_frame(frame, phase)`.
 
 ## Layouts
 

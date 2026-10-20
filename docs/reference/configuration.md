@@ -64,6 +64,8 @@ One condition = entry phase + phases + optional pipelines. Stored as `<study_dir
 
 `frame.header` / `frame.footer` may be `false` to hide chrome (typical during sleep).
 
+**FrameHeaderSettings** (`frame.header` as a mapping): `logo` (path), `title` (text, placeholders expanded), `show_phase_title` (show the phase `title` centred in the header; unset means off, so a phase override that omits it keeps the study default).
+
 ## Activity
 
 Extends PluginSpec with instance fields:

@@ -28,6 +28,15 @@ def test_theme_css_defines_button_variants() -> None:
         assert f".slumber-btn-{variant}" in css
 
 
+def test_theme_defines_the_shared_chrome_sizes() -> None:
+    from slumber.ui.theme import LOGO_SIZE, build_theme_css
+
+    css = build_theme_css()
+    assert "--slumber-pad" in css
+    assert "--slumber-header-h" in css
+    assert "--slumber-header-h" in LOGO_SIZE["header"]
+
+
 def test_widgets_importable() -> None:
     from slumber.ui.widgets import (
         confirm_dialog,
@@ -47,5 +56,96 @@ def test_widgets_importable() -> None:
 def test_app_frame_importable() -> None:
     from slumber.ui.frame import AppFrame
 
-    frame = AppFrame(study_name="Demo", logo_url=None, frame={"footer": False})
+    frame = AppFrame(study_name="Demo", logo_url=None)
     assert not frame.mounted
+
+
+def test_component_css_is_added_once_per_page(monkeypatch: pytest.MonkeyPatch) -> None:
+    from nicegui import ui
+    from nicegui.client import Client
+    from nicegui.page import page
+
+    from slumber.ui.theme import add_component_css
+
+    added: list[str] = []
+    monkeypatch.setattr(ui, "add_css", added.append)
+
+    with Client(page("/")):
+        add_component_css(".a { color: red; }")
+        add_component_css(".a { color: red; }")
+        add_component_css(".b { color: blue; }")
+    with Client(page("/")):
+        add_component_css(".a { color: red; }")
+
+    assert added == [".a { color: red; }", ".b { color: blue; }", ".a { color: red; }"]
+
+
+def test_component_css_can_be_added_after_the_current_element_was_deleted(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A phase change deletes the clicked button while its handler is running."""
+    import gc
+
+    from nicegui import ui
+    from nicegui.client import Client
+    from nicegui.page import page
+
+    from slumber.ui.theme import add_component_css
+
+    added: list[str] = []
+    monkeypatch.setattr(ui, "add_css", added.append)
+
+    def delete_button_keeping_its_slot() -> object:
+        button = ui.button("Complete")
+        slot = button.default_slot
+        button.delete()
+        return slot
+
+    with Client(page("/")) as client:
+        slot = delete_button_keeping_its_slot()
+        gc.collect()
+        with slot:
+            with pytest.raises(RuntimeError, match="has been deleted"):
+                add_component_css(".a { color: red; }")
+            add_component_css(".a { color: red; }", client=client)
+
+    assert added == [".a { color: red; }"]
+
+
+def _frame_elements(client: object, name: str) -> list:
+    return [e for e in client.elements.values() if name in e.classes]  # type: ignore[attr-defined]
+
+
+def test_app_frame_adds_its_css_and_applies_the_phase(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from nicegui.client import Client
+    from nicegui.page import page
+
+    from slumber.ui import frame as frame_module
+
+    added: list[str] = []
+    monkeypatch.setattr(frame_module, "add_component_css", added.append)
+
+    with Client(page("/")) as client:
+        frame = frame_module.AppFrame(study_name="Demo Study", logo_url=None)
+        frame.mount()
+        assert added == [frame_module.FRAME_CSS]
+
+        (study,) = _frame_elements(client, "slumber-frame-study")
+        (phase,) = _frame_elements(client, "slumber-frame-phase")
+        (header,) = _frame_elements(client, "slumber-frame-header")
+        (footer,) = _frame_elements(client, "slumber-frame-footer")
+        assert study.text == "Demo Study"
+        assert phase.text == ""
+
+        frame.apply_frame(
+            {"header": {"title": "Night", "show_phase_title": True}},
+            phase_title="Setup",
+        )
+        assert (study.text, phase.text) == ("Night", "Setup")
+        assert header.visible and footer.visible
+
+        frame.apply_frame({"header": False, "footer": False})
+        assert not header.visible and not footer.visible
+        assert study.text == "Demo Study"

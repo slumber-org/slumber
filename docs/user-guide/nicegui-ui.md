@@ -16,6 +16,7 @@ ui:
     frame:
       header:
         title: "{study_name}"
+        show_phase_title: true
     layouts:
       stepper:
         show_activity_list: true
@@ -26,18 +27,29 @@ ui:
 
 ```
 AppFrame
-  ├── header / footer   ← study frame; phase may hide them
-  └── body
-        └── layout (stepper | hub)
-              └── activity slot
+  ├── header            ← logo and study title on the left, phase title centred
+  ├── body
+  │     └── layout (stepper | hub)
+  │           └── activity slot
+  └── footer            ← "Powered by SLUMBER" caption
 ```
 
 1. Run starts → theme + AppFrame mount once.
-2. Engine `start_phase(entry)` → apply phase frame override → mount layout + activities.
+2. Engine `start_phase(entry)` → apply the phase's frame (study frame merged with the phase override) → mount layout + activities.
 3. Activities call `complete()` or `emit(...)`; handlers run `do` actions.
 4. `end_run` unmounts and finishes.
 
 Phases are started by actions (`start_phase`), not sequenced as a flat procedure list.
+
+## AppFrame
+
+| Setting (`frame.header`) | Effect |
+|--------------------------|--------|
+| `title` | Study title in the header. Placeholders such as `{study_name}` are expanded. Defaults to the study name. |
+| `logo` | Header logo path (relative to the study root, typically `{assets_dir}/…`). A phase can set its own. |
+| `show_phase_title` | Show the active phase's `title` centred in the header. Off unless set. |
+
+A phase's `frame` merges over the study's, so a phase only lists what it changes. `header: false` or `footer: false` hides that region (typical during sleep).
 
 ## Layouts
 
@@ -81,6 +93,6 @@ Example sleep phase (hidden chrome):
 
 ## Branding
 
-Fixed dark theme tokens load once at GUI start. Package defaults supply logo and favicon; override with `ui.settings.favicon` and `frame.header.logo` (paths relative to the study root, typically `{assets_dir}/…`).
+Fixed dark theme tokens load once at GUI start. Package defaults supply logo and favicon; override with `ui.settings.favicon` and `frame.header.logo` (paths relative to the study root, typically `{assets_dir}/…`). If a phase's logo file is missing, the header shows the study logo; if that is missing too, the packaged SLUMBER logo. A warning is written to the run log.
 
 See [UI reference](../reference/ui.md) and [Configuration reference](../reference/configuration.md).

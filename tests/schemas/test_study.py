@@ -67,6 +67,18 @@ class TestGuiSettings:
         assert settings.frame.header is False
         assert settings.frame.footer is False
 
+    def test_show_phase_title_unset_by_default(self) -> None:
+        settings = GuiSettings(frame={"header": {"title": "Study"}})
+        assert settings.frame is not None
+        assert settings.frame.header.show_phase_title is None
+        dumped = settings.frame.model_dump(exclude_none=True)
+        assert "show_phase_title" not in dumped["header"]
+
+    def test_show_phase_title_true(self) -> None:
+        settings = GuiSettings(frame={"header": {"show_phase_title": True}})
+        assert settings.frame is not None
+        assert settings.frame.header.show_phase_title is True
+
 
 class TestRunLayout:
     """Tests for RunLayout schema."""
