@@ -1,14 +1,11 @@
 # User guide
 
-This section describes how to work with SLUMBER from a researcher's perspective — creating a study package, validating configs, and running a condition locally.
+How to create, run and check your own study. If you haven't run a study yet, start with [Your first study](../getting-started/first-study.md).
 
-## Pages in this guide
-
-- [Study Setup](study-setup.md) — study folder layout and `slumber study init`
-- [Validating a Study](validating-a-study.md) — `slumber study validate`, error format
-- [Run Output and Logging](run-output-and-logging.md) — run directory layout, placeholders, loguru handlers
-- [Running a Study](running-a-study.md) — local run lifecycle and demo walkthrough
-- [Participant UI](participant-ui.md) — GUI AppFrame, layouts, and activities
-- [CLI Reference](../reference/cli.md) — core commands and options
-
-Backend features (auth, scheduling, condition sync) belong in optional extensions and are not required for local `study run`.
+- [Study setup](study-setup.md): create a study folder and fill in `study.yaml`.
+- [Writing conditions](writing-conditions.md): describe a condition's phases, activities, handlers and pipeline.
+- [Paths and placeholders](paths-and-placeholders.md): write paths in YAML that point to the right file.
+- [Validating a study](validating-a-study.md): check a study for mistakes and read the errors.
+- [Running a study](running-a-study.md): run a condition, choose GUI or headless, stop a run and check the result.
+- [Participant UI](participant-ui.md): configure what the participant sees in the GUI.
+- [Run output and logging](run-output-and-logging.md): where each run is saved and how to configure logging.
