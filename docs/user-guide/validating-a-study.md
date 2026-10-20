@@ -1,4 +1,4 @@
-# Config loading and validation
+# Validating a study
 
 This page describes how the framework discovers a study folder, loads the manifest and condition files, and how validation errors are reported.
 
@@ -29,9 +29,7 @@ slumber study validate
 - On success: prints study name, study ID, and condition names.
 - On failure: prints a path-specific error and exits with code 1.
 
-| Option | Description |
-|--------|-------------|
-| `--study-dir`, `-d` | Path to the study folder. Also read from `STUDY_DIR`. |
+For options, see the [CLI reference](../reference/cli.md#slumber-study-validate).
 
 ## Error format
 

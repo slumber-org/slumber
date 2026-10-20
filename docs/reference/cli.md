@@ -77,7 +77,7 @@ slumber study validate --study-dir path/to/my-study
 |--------|-------------|
 | `--study-dir`, `-d` | Study folder. Also read from `STUDY_DIR`. |
 
-Validates the manifest, conditions, and plugins. See [Config loading and validation](../user-guide/config-validation.md).
+Validates the manifest, conditions, and plugins. See [Validating a study](../user-guide/validating-a-study.md).
 
 ### slumber study run
 
@@ -92,4 +92,4 @@ slumber study run --study-dir path/to/my-study --condition demo --ui headless
 | `--condition`, `-c` | — | Condition name. Required. |
 | `--ui` | — | Override `study.ui.type` (`gui` or `headless`). |
 
-Local file-based run: new UUID `run_id`, no remote backend. See [Running a study](../user-guide/study-run.md).
+Local file-based run: new UUID `run_id`, no remote backend. See [Running a study](../user-guide/running-a-study.md).

@@ -1,4 +1,4 @@
-# Installation and Setup
+# Installation
 
 This guide walks you through installing SLUMBER so you can author a study package and run a condition locally.
 
@@ -68,7 +68,7 @@ uv run slumber study run --study-dir examples/demo --condition demo --ui headles
 From here:
 
 1. [Study Setup](../user-guide/study-setup.md) — add conditions and assets
-2. [Running a Study](../user-guide/study-run.md) — GUI or headless run
-3. [Schema reference](../reference/schemas.md) — phases, pipelines, PluginSpec
+2. [Running a Study](../user-guide/running-a-study.md) — GUI or headless run
+3. [Configuration reference](../reference/configuration.md) — phases, pipelines, PluginSpec
 
-A remote backend is not required for local study run. See [Backend](../reference/backend.md).
+A remote backend is not required for local study run.

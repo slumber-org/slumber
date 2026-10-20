@@ -83,4 +83,4 @@ Example sleep phase (hidden chrome):
 
 Fixed dark theme tokens load once at GUI start. Package defaults supply logo and favicon; override with `ui.settings.favicon` and `frame.header.logo` (paths relative to the study root, typically `{assets_dir}/…`).
 
-See [UI reference](../reference/ui-backends.md) and [Schema reference](../reference/schemas.md).
+See [UI reference](../reference/ui.md) and [Configuration reference](../reference/configuration.md).

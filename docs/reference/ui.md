@@ -1,4 +1,4 @@
-# UI
+# UI reference
 
 `study.ui` selects how a run is presented. 0.1 backends are a **built-in map** (`gui` | `headless`), not an entry-point group. Both drive the same RunEngine; they differ only in presentation.
 
@@ -85,4 +85,4 @@ Headless uses the same event → action path:
 - `sleep` emits `end_sleep` as soon as it mounts so setup → pipeline → morning → `end_run` can finish in CI without a browser.
 - GUI waits on the wake and end buttons.
 
-See [Running a study](../user-guide/study-run.md) and the `examples/demo/` package in the repository.
+See [Running a study](../user-guide/running-a-study.md) and the `examples/demo/` package in the repository.

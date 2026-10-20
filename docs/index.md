@@ -21,9 +21,9 @@ SLUMBER is intended for researchers who want to run controlled studies in natura
 
 ## Getting started
 
-1. [Installation and Setup](getting-started/installation-setup.md) — install and verify
+1. [Installation](getting-started/installation.md) — install and verify
 2. [Study Setup](user-guide/study-setup.md) — create a study folder
-3. [Running a Study](user-guide/study-run.md) — run a condition locally (try `examples/demo/`)
+3. [Running a Study](user-guide/running-a-study.md) — run a condition locally (try `examples/demo/`)
 
 ---
 
@@ -31,10 +31,10 @@ SLUMBER is intended for researchers who want to run controlled studies in natura
 
 | Section | Contents |
 |---------|----------|
-| [Getting Started](getting-started/installation-setup.md) | Install, doctor, first commands |
+| [Getting Started](getting-started/installation.md) | Install, doctor, first commands |
 | [User Guide](user-guide/index.md) | Study setup, validation, run layout, GUI |
-| [Reference — Schemas](reference/schemas.md) | `study.yaml`, condition, phase, pipeline |
+| [Reference — Configuration](reference/configuration.md) | `study.yaml`, condition, phase, pipeline |
 | [Reference — Plugins](reference/plugins.md) | Entry points, contracts, built-ins |
-| [Reference — UI](reference/ui-backends.md) | `gui` / `headless`, layouts, activities |
-| [Reference — CLI](reference/cli-reference.md) | `study` and `doctor` |
+| [Reference — UI](reference/ui.md) | `gui` / `headless`, layouts, activities |
+| [Reference — CLI](reference/cli.md) | `study` and `doctor` |
 | [Contributing](about/contributing.md) | Development setup and conventions |
