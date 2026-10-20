@@ -1,6 +1,4 @@
-<div style="text-align: center; margin-bottom: 1rem;">
-  <img src="assets/logo.png" alt="SLUMBER logo" width="160">
-</div>
+![SLUMBER logo](assets/logo.png)
 
 # Welcome to SLUMBER
 
@@ -29,12 +27,15 @@ SLUMBER is intended for researchers who want to run controlled studies in natura
 
 ## Documentation overview
 
-| Section | Contents |
-|---------|----------|
-| [Getting Started](getting-started/installation.md) | Install, doctor, first commands |
-| [User Guide](user-guide/index.md) | Study setup, validation, run layout, GUI |
+
+| Section                                                 | Contents                                 |
+| ------------------------------------------------------- | ---------------------------------------- |
+| [Getting Started](getting-started/installation.md)      | Install, doctor, first commands          |
+| [User Guide](user-guide/index.md)                       | Study setup, validation, run layout, GUI |
 | [Reference — Configuration](reference/configuration.md) | `study.yaml`, condition, phase, pipeline |
-| [Reference — Plugins](reference/plugins.md) | Entry points, contracts, built-ins |
-| [Reference — UI](reference/ui.md) | `gui` / `headless`, layouts, activities |
-| [Reference — CLI](reference/cli.md) | `study` and `doctor` |
-| [Contributing](about/contributing.md) | Development setup and conventions |
+| [Reference — Plugins](reference/plugins.md)             | Entry points, contracts, built-ins       |
+| [Reference — UI](reference/ui.md)                       | `gui` / `headless`, layouts, activities  |
+| [Reference — CLI](reference/cli.md)                     | `study` and `doctor`                     |
+| [Contributing](about/contributing.md)                   | Development setup and conventions        |
+
+

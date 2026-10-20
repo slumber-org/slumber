@@ -88,4 +88,5 @@ nav:
       - UI: reference/ui.md
 
   - About:
+      - Roadmap: about/roadmap.md
       - Contributing: about/contributing.md
