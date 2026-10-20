@@ -25,14 +25,14 @@ Every screen sits inside the same window, the [AppFrame](../concepts/glossary.md
 
 ```text
 AppFrame
-├── header   logo and title
+├── header   logo and title on the left, phase title in the middle (optional)
 ├── body     the current phase's layout and activities
-└── footer   "Powered by SLUMBER"
+└── footer   "Powered by SLUMBER" on the right
 ```
 
 The AppFrame stays the same for the whole run. When a new phase starts, only the body changes. The header and footer can be shown or hidden, depending on the phase. Everything you set under `ui.settings` in `study.yaml` is the default for every phase, but a phase can override parts of it, as shown below. For a list of every setting and its default, see the [UI reference](../reference/ui.md).
 
-## Hide the header and footer during a phase
+## Change the header and footer per phase
 
 During sleep, the screen should be dark, with as few distractions as possible. You can hide the header and footer for that phase with `frame`:
 
@@ -57,7 +57,18 @@ A phase can also change the header title:
         title: Good morning
 ```
 
-If you do this, also set the study's `ui.settings.frame.header.title` (see [below](#use-your-own-logo-favicon-and-title)). Otherwise the phase's title stays in the header after the phase ends.
+When the next phase starts, the header shows the study's title again.
+
+To also show the current phase's `title` in the middle of the header, turn on `show_phase_title` for the whole study:
+
+```yaml
+ui:
+  type: gui
+  settings:
+    frame:
+      header:
+        show_phase_title: true
+```
 
 ## Choose stepper or hub
 
@@ -94,7 +105,7 @@ To change a setting for one phase only, set it under that phase's `layout.settin
         allow_skip: true
 ```
 
-With `allow_skip: true`, the participant can move on before a step has finished.
+With `allow_skip: true`, the participant can open any step from the list and complete the phase without finishing every step. Without it, a step only becomes available once the steps before it are finished.
 
 ## Change the port
 

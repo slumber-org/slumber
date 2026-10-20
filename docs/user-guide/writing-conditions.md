@@ -104,6 +104,8 @@ Shows Markdown text. `content` is either a path to a Markdown file or the text i
 
 Put the files in the study's `assets/` folder and refer to them with `{assets_dir}/…`. A bare file name such as `content: intro.md` is **not** looked up anywhere: it is shown as the literal text "intro.md". See [Paths and placeholders](paths-and-placeholders.md#which-values-are-treated-as-paths).
 
+The Markdown can also contain images, for example `![Headband]({assets_dir}/images/headband.png)`. See [Images in instruction texts](../reference/ui.md#images-in-instruction-texts) for the options.
+
 An instruction counts as finished as soon as it is shown.
 
 ### `sleep`: the night screen
