@@ -56,6 +56,10 @@ class _GuiActivityHost:
         """Forward a study event to the engine."""
         self._engine.emit(name, source_activity_id=self._activity_id)
 
+    def resolve_path(self, path: str) -> Path:
+        """Resolve *path* against the study root (placeholders expanded)."""
+        return self._engine.resolve_path(path)
+
 
 class _GuiLayoutHost:
     """LayoutHost backed by the AppFrame body and RunEngine."""
@@ -202,8 +206,10 @@ class GuiBackend(UIBackend):
             type(layout).__name__,
             [a.config.id for a in activities],
         )
-        if layout.css:
-            add_component_css(layout.css, client=self._frame.body.client)
+        client = self._frame.body.client
+        for css in (layout.css, *(mounted.instance.css for mounted in activities)):
+            if css:
+                add_component_css(css, client=client)
         layout.mount(host, activities)
 
     def unmount_phase(self) -> None:

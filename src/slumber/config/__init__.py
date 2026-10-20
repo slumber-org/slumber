@@ -2,6 +2,7 @@
 
 from slumber.config.paths import (
     expand_placeholders,
+    resolve_path,
     resolve_settings,
     run_placeholders,
     study_root_placeholders,
@@ -22,6 +23,7 @@ __all__ = [
     "load_study",
     "merge_frame_settings",
     "merge_layout_settings",
+    "resolve_path",
     "resolve_plugin_spec",
     "resolve_settings",
     "resolve_study_dir",

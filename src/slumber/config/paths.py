@@ -100,6 +100,31 @@ def resolve_path_string(value: str, *, study_root: Path) -> str:
     return str((study_root / path).resolve())
 
 
+def resolve_path(
+    text: str,
+    *,
+    study_root: Path,
+    placeholders: Mapping[str, str],
+) -> Path:
+    """Resolve one path the way study settings are resolved.
+
+    Placeholders such as ``{assets_dir}`` expand first; then a relative result is
+    taken relative to the study root. Absolute paths are used as they are. Unlike
+    :func:`resolve_settings` this does not guess whether a string is a path: use it
+    where the caller knows it is one.
+
+    Args:
+        text: The path, optionally with placeholders.
+        study_root: Study package root for relative paths.
+        placeholders: Mapping of placeholder name -> expanded value.
+
+    Returns:
+        The resolved path (it may not exist).
+    """
+    expanded = expand_placeholders(text, placeholders)
+    return Path(resolve_path_string(expanded, study_root=study_root))
+
+
 def resolve_settings(
     settings: dict[str, Any],
     *,

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from slumber.config.paths import (
     expand_placeholders,
+    resolve_path,
     resolve_settings,
     run_placeholders,
     study_root_placeholders,
@@ -27,6 +28,36 @@ class TestExpandPlaceholders:
             expand_placeholders("{run_dir}/out.jsonl", {"assets_dir": "/a"})
             == "{run_dir}/out.jsonl"
         )
+
+
+class TestResolvePath:
+    def test_placeholders_expand_and_the_result_is_a_path(self, tmp_path: Path) -> None:
+        resolved = resolve_path(
+            "{assets_dir}/a.png",
+            study_root=tmp_path,
+            placeholders={"assets_dir": str(tmp_path / "assets")},
+        )
+
+        assert resolved == tmp_path / "assets" / "a.png"
+
+    def test_relative_path_is_relative_to_the_study_root(self, tmp_path: Path) -> None:
+        resolved = resolve_path("assets/a.png", study_root=tmp_path, placeholders={})
+
+        assert resolved == (tmp_path / "assets" / "a.png").resolve()
+
+    def test_absolute_path_is_unchanged(self, tmp_path: Path) -> None:
+        absolute = tmp_path / "elsewhere" / "a.png"
+
+        resolved = resolve_path(
+            str(absolute), study_root=tmp_path / "study", placeholders={}
+        )
+
+        assert resolved == absolute
+
+    def test_any_text_is_treated_as_a_path(self, tmp_path: Path) -> None:
+        resolved = resolve_path("Next", study_root=tmp_path, placeholders={})
+
+        assert resolved == (tmp_path / "Next").resolve()
 
 
 class TestResolveSettings:
