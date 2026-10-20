@@ -9,7 +9,7 @@ When you run `slumber study run --condition <name>`:
 1. **The study is loaded and validated:** the manifest, every condition file, and every plugin `type` it uses.
 2. **The run folder is created** from `runs.directory` and `runs.layout`, and `run.json` is written into it with the study, condition and run ids and the start time.
 3. **Logging starts** with the handlers from `study.logging`.
-4. **The UI starts** (`gui` or `headless`). The GUI applies the theme and mounts the AppFrame once for the whole run.
+4. **The UI starts**: `gui` or `headless`, from `ui.type` in `study.yaml` or from `--ui` if you passed it. With `--ui headless`, all GUI settings are ignored. The GUI applies the theme and mounts the AppFrame once for the whole run.
 5. **The entry phase starts.** From here on, the run is driven by events and actions.
 6. **The run ends** when an `end_run` action runs: pipelines are stopped, the current phase is unmounted, and the UI shuts down. If the UI stops on its own before that (for example, headless has nothing left to do), the engine ends the run the same way.
 

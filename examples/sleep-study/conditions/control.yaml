@@ -1,0 +1,80 @@
+name: control
+entry: evening
+
+phases:
+  - id: evening
+    title: Evening
+    layout:
+      type: stepper
+    activities:
+      - id: welcome
+        title: Welcome
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/welcome.md" }
+      - id: before-sleep
+        title: Before you sleep
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/before-sleep.md" }
+    on:
+      - event: phase_completed
+        do:
+          - start_pipeline: recording
+          - start_phase: sleep
+
+  - id: sleep
+    title: Sleep
+    frame:
+      header: false
+      footer: false
+    layout:
+      type: hub
+    activities:
+      - id: sleep
+        type: sleep
+        on:
+          - event: marked_awake
+            do: [{ start_phase: awakening }]
+          - event: end_sleep
+            do:
+              - stop_pipeline: recording
+              - start_phase: morning
+
+  - id: awakening
+    title: Awakening
+    layout:
+      type: stepper
+    activities:
+      - id: awake
+        title: You're awake
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/awakening.md" }
+    on:
+      - event: phase_completed
+        do: [{ start_phase: sleep }]
+
+  - id: morning
+    title: Morning
+    layout:
+      type: stepper
+    activities:
+      - id: morning
+        title: Good morning
+        type: instruction
+        settings: { content: "{assets_dir}/instructions/morning.md" }
+    on:
+      - event: phase_completed
+        do: [{ end_run }]
+
+# Simulated recording: `clock` produces one sample per second and `store`
+# writes them to the run folder. A real study would use a device unit here.
+pipelines:
+  - id: recording
+    units:
+      - id: clock
+        type: clock
+        settings: { rate: 1.0 }
+      - id: store
+        type: jsonl_writer
+        settings: { path: "{run_dir}/recording.jsonl" }
+    connections:
+      - [clock/OUTPUT, store/INPUT]
