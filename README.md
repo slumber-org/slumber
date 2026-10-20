@@ -10,7 +10,7 @@ SLUMBER is an open-source, Python-based framework for conducting **home-based sl
 
 - **Docs site**: [https://slumber-org.github.io/slumber/](https://slumber-org.github.io/slumber/)
 - **Design (0.1)**: `docs/design/0.1-base.md`
-- **Legacy reference**: `docs/about/legacy-reference.md`
+- **Legacy reference**: see [Legacy project](#legacy-project-reference-only) below
 
 Serve docs locally:
 

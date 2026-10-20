@@ -43,7 +43,7 @@ slumber doctor
 | Package | Required | Notes |
 |---------|----------|-------|
 | `ezmsg` | Yes | Processing backbone. |
-| `nicegui` | No | GUI participant UI (`pip install slumber[nicegui]` or `uv sync --extra nicegui`). |
+| `nicegui` | No | GUI participant UI (`uv sync --extra nicegui`). |
 
 Exit `0` if all required checks pass; `1` otherwise.
 
