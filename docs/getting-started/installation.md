@@ -1,6 +1,6 @@
 # Installation
 
-This guide walks you through installing SLUMBER so you can author a study package and run a condition locally.
+This guide walks you through installing SLUMBER so you can create a study and run it locally.
 
 ## System requirements
 

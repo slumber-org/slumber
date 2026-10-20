@@ -40,7 +40,7 @@ uv run slumber study run --study-dir examples/demo --condition demo
 uv run slumber study run --study-dir examples/demo --condition demo --ui headless
 ```
 
-Headless completes without a browser: instruction activities auto-complete; sleep emits `end_sleep` on mount. Expect `runs/run-<uuid>/run.json` and `clock.jsonl`.
+Headless finishes without a browser; see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless) for how. Expect `runs/run-<uuid>/run.json` and `clock.jsonl`.
 
 ## First study from scratch
 

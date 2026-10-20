@@ -65,31 +65,22 @@ Each phase selects a layout. Layouts fill the AppFrame body and host that phase'
 
 Stepper settings and the step states are described in the [user guide](../user-guide/nicegui-ui.md#stepper).
 
-Within a layout, only the activity slot remounts. A layout swap remounts the body. After every sequential activity has `complete()`d, the layout emits `phase_completed`.
+Within a layout, only the activity slot remounts. A layout swap remounts the body. For when each layout sends `phase_completed`, see [Run lifecycle](../concepts/run-lifecycle.md#when-a-phase-is-completed).
 
 ## Activities
 
-Activities are layout-agnostic. They call host methods; they do not define what completion means for the study.
-
-| Call | Audience | Meaning |
-|------|----------|---------|
-| `complete()` | Layout | This mounted instance finished as a step |
-| `emit(name)` | RunEngine | A named study event happened |
-| `phase_completed` | RunEngine (from layout) | Layout decided the phase is done |
+Activities report back with `complete()` and `emit(name)`; see [How activities signal](../concepts/run-lifecycle.md#how-activities-signal).
 
 | Key | Behaviour |
 |-----|-----------|
 | `instruction` | Renders markdown or text (image paths resolve like other study paths); calls `complete()` on mount. |
 | `sleep` | Wake / end buttons → `emit("marked_awake")` / `emit("end_sleep")`. Does not complete. |
 
-Open-ended activities (`sleep`) leave via `start_phase` / `end_run` actions, which unmount them.
-
 ## Headless behaviour
 
-Headless uses the same event → action path:
+| Key | Headless |
+|-----|----------|
+| `instruction` | Completes on mount, as in the GUI. |
+| `sleep` | Emits `end_sleep` shortly after mounting. Never emits `marked_awake`. |
 
-- Activities that finish on mount auto-`complete()` (e.g. `instruction`).
-- `sleep` emits `end_sleep` as soon as it mounts so setup → pipeline → morning → `end_run` can finish in CI without a browser.
-- GUI waits on the wake and end buttons.
-
-See [Running a study](../user-guide/running-a-study.md) and the `examples/demo/` package in the repository.
+For how headless runs a condition overall, see [gui and headless](../concepts/run-lifecycle.md#gui-and-headless). See [Running a study](../user-guide/running-a-study.md) and the `examples/demo/` package in the repository.
