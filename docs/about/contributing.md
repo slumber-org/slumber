@@ -60,6 +60,7 @@ This project follows [GitHub Flow](https://docs.github.com/en/get-started/using-
 - Make PR titles/descriptions clear and request review from the appropriate reviewer(s).
 - Address review feedback with follow-up commits (e.g. `Address review feedback (round 2)`) and push updates to the same branch.
 - Keep PRs focused; avoid bundling unrelated changes.
+- Prefer a PR small enough that **one commit** tells the whole story. If you need multiple commits before review, keep them **independent**: each is a self-contained logical unit that does not fix or rewrite an earlier commit on the same branch (no pre-review "fix previous commit" stacks). Review follow-up commits are fine.
 
 ## Linting and Formatting
 
