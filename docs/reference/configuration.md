@@ -1,4 +1,4 @@
-# Schema reference
+# Configuration reference
 
 Core Pydantic schemas for study manifests and conditions. All live under `slumber.schemas` and validate **shape only** — they do not import the plugin registry or resolve implementations.
 
@@ -27,7 +27,7 @@ Shared reference used by UI, layouts, activities, and units:
 
 **LoggingConfig**: `level` (default `INFO`), `handlers` (list of handler configs). Sink paths may use placeholders (e.g. `run_id`, `run_dir`) substituted at run start.
 
-**UI (`PluginSpec`)**: `type` is `gui` or `headless`. For `gui`, optional `settings` may include `port`, `favicon`, `frame`, and `layouts` (stepper defaults). See [UI](ui-backends.md).
+**UI (`PluginSpec`)**: `type` is `gui` or `headless`. For `gui`, optional `settings` may include `port`, `favicon`, `frame`, and `layouts` (stepper defaults). See [UI](ui.md).
 
 Extra keys in the manifest are forbidden.
 

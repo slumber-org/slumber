@@ -71,23 +71,21 @@ nav:
   - Home: index.md
 
   - Getting Started:
-      - Installation and Setup: getting-started/installation-setup.md
+      - Installation: getting-started/installation.md
 
   - User Guide:
       - Overview: user-guide/index.md
       - Study Setup: user-guide/study-setup.md
-      - Config Validation: user-guide/config-validation.md
-      - Run Layout and Logging: user-guide/run-layout-logging.md
-      - Running a Study: user-guide/study-run.md
+      - Validating a Study: user-guide/validating-a-study.md
+      - Run Output and Logging: user-guide/run-output-and-logging.md
+      - Running a Study: user-guide/running-a-study.md
       - Participant UI: user-guide/nicegui-ui.md
-      - Backend features (extension): user-guide/condition-sync.md
 
   - Reference:
-      - CLI: reference/cli-reference.md
-      - Schemas: reference/schemas.md
+      - CLI: reference/cli.md
+      - Configuration: reference/configuration.md
       - Plugins: reference/plugins.md
-      - UI: reference/ui-backends.md
-      - Backend: reference/backend.md
+      - UI: reference/ui.md
 
   - About:
       - Contributing: about/contributing.md

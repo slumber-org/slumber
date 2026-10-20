@@ -13,13 +13,7 @@ slumber study run --study-dir path/to/my-study --condition demo
 slumber study run --study-dir path/to/my-study --condition demo --ui headless
 ```
 
-## Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--study-dir`, `-d` | — | Path to the study folder. Also read from `STUDY_DIR`. |
-| `--condition`, `-c` | — | Condition name (from loaded YAML). Required. |
-| `--ui` | — | Override `study.ui.type` for this run (`gui` or `headless`). |
+For all options, see the [CLI reference](../reference/cli.md#slumber-study-run).
 
 `run_id` is a new UUID. Set `PARTICIPANT_ID` only if your `runs.layout` uses `{participant_id}`.
 
@@ -64,4 +58,4 @@ slumber study validate --study-dir my-study
 slumber study run --study-dir my-study --condition demo --ui headless
 ```
 
-See [Run layout and logging](run-layout-logging.md) and [Participant UI](nicegui-ui.md).
+See [Run output and logging](run-output-and-logging.md) and [Participant UI](nicegui-ui.md).

@@ -1,4 +1,4 @@
-# Run directory layout and logging
+# Run output and logging
 
 Each run produces a dedicated output directory. SLUMBER creates it from `study.runs`, writes `run.json`, then configures loguru handlers from `study.logging`.
 
@@ -22,32 +22,7 @@ my-study/runs/run-<uuid>/
 └── (artifacts and log files)
 ```
 
-### Supported placeholders (`runs.layout`)
-
-| Placeholder | Description |
-|-------------|-------------|
-| `{study_id}` | Study identifier from `study.yaml`. |
-| `{run_id}` | Unique run identifier (UUID for local runs). |
-| `{condition_id}` | Condition name for this run. |
-| `{participant_id}` | Optional; set `PARTICIPANT_ID` if your layout uses it. |
-| `{session_id}` | Optional; unused by local core runs. |
-
-### Python API
-
-```python
-from slumber.run import RunContext, resolve_run_dir, create_run_dir
-from slumber.config import load_study
-
-study = load_study(study_dir)
-ctx = RunContext(
-    study_id=study.study_id,
-    run_id="…",
-    condition_id="demo",
-)
-
-run_dir = resolve_run_dir(study, ctx, study_dir)
-run_dir = create_run_dir(study, ctx, study_dir)
-```
+For the placeholders allowed in `runs.layout`, see the [Configuration reference](../reference/configuration.md#study-manifest-studyyaml).
 
 ## Run logging
 
@@ -75,19 +50,5 @@ Run-context keys plus `{run_dir}` (absolute run directory). Relative sinks resol
 | `"{run_id}.log"` | `<study_dir>/<run_id>.log` |
 | `"errors.log"` | `<study_dir>/errors.log` |
 | `"{run_dir}/out.log"` | `<run_dir>/out.log` |
-
-### Python API
-
-```python
-from slumber.run import configure_run_logging
-from loguru import logger
-
-handler_ids = configure_run_logging(
-    study, ctx, run_dir, study_dir=study_dir, placeholders=…
-)
-
-for hid in handler_ids:
-    logger.remove(hid)
-```
 
 Any sink type loguru supports can appear in YAML when serialisable (file path strings are typical).

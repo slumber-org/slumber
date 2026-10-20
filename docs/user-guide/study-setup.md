@@ -31,7 +31,7 @@ Example:
 │   └── .gitignore
 ```
 
-The manifest schema is described in the [Schema reference](../reference/schemas.md).
+The manifest schema is described in the [Configuration reference](../reference/configuration.md).
 
 ## Creating a new study: `slumber study init`
 
@@ -51,15 +51,7 @@ The command creates `<base_dir>/<study_id>/` with:
 - Empty `conditions/`, `assets/`, and `runs/` directories
 - Optional `.env` and `.gitignore` inside the study folder
 
-### Options
-
-| Option | Description |
-|--------|-------------|
-| `--base-dir`, `-b` | Parent directory; study folder is `<base-dir>/<study-id>/`. Default: `.`. |
-| `--study-id`, `-s` | Study identifier (folder name). |
-| `--name`, `-n` | Human-readable study name; used as `study_name` in `study.yaml`. |
-| `--no-env-example` | Do not create `.env` inside the study folder. |
-| `--no-gitignore` | Do not create `.gitignore` inside the study folder. |
+To skip the prompts, pass the values as options (see the [CLI reference](../reference/cli.md#slumber-study-init) for all options):
 
 ```bash
 slumber study init --base-dir . --study-id ld-2025 --name "Lucid Dreaming Pilot"
@@ -68,8 +60,8 @@ slumber study init --base-dir . --study-id ld-2025 --name "Lucid Dreaming Pilot"
 ### After init
 
 1. `cd` into the study folder.
-2. Add condition YAML files under `conditions/` (see [Schema reference](../reference/schemas.md) and `examples/demo/`).
-3. Run `slumber study validate --study-dir .` (see [Config loading and validation](config-validation.md)).
-4. Run with `slumber study run --study-dir . --condition <name>` (see [Running a study](study-run.md)).
+2. Add condition YAML files under `conditions/` (see [Configuration reference](../reference/configuration.md) and `examples/demo/`).
+3. Run `slumber study validate --study-dir .` (see [Validating a study](validating-a-study.md)).
+4. Run with `slumber study run --study-dir . --condition <name>` (see [Running a study](running-a-study.md)).
 
 Local study run does not require a remote backend.

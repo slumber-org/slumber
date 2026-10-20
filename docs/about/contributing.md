@@ -151,7 +151,7 @@ Where appropriate, API and reference documentation should be generated automatic
 
 ### Writing conventions
 
-- Use **kebab-case** for file names (e.g., `installation-setup.md`)
+- Use **kebab-case** for file names (e.g., `running-a-study.md`)
 - Place files in the appropriate subfolder under `docs/`
 - Use a single top-level heading (`#`) per page
 - Use `##`, `###`, etc. for subsections
