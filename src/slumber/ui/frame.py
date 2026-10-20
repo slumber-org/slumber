@@ -32,6 +32,8 @@ class AppFrame:
         self._study_name = study_name
         self._logo_url = logo_url
         self._default_frame = dict(frame or {})
+        # TODO: [refactor] type NiceGUI slots via TYPE_CHECKING (Element / Label), like
+        # widgets/buttons.py — keep runtime imports lazy for optional nicegui.
         self._header: Any | None = None
         self._title_label: Any | None = None
         self._body: Any | None = None
