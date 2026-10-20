@@ -25,7 +25,7 @@ cd slumber
 2\. Install dependencies
 
 ```bash
-uv sync
+uv sync --all-extras --dev
 ```
 
 3\. Set up pre-commit hooks
@@ -104,7 +104,7 @@ uv run pytest
 
 ### Test conventions
 
-- **Location**: Put tests in `tests/`. Prefer mirroring the source layout (e.g., `src/slumber/foo.py` → `tests/test_foo.py`).
+- **Location**: Mirror the package layout with one subfolder per package: `tests/cli/` → `slumber.cli`, `tests/config/` → `slumber.config`, `tests/schemas/` → `slumber.schemas`, and so on (e.g., `src/slumber/config/paths.py` → `tests/config/test_paths.py`). Use top-level `tests/` only for cross-cutting smoke or integration tests (e.g., `tests/test_smoke.py`).
 - **Naming**: Use `test_*.py` files and `test_*` functions. Name tests by behavior (`test_parses_empty_file`) rather than implementation.
 - **Structure**: Use **Arrange–Act–Assert** and keep each test focused on one behavior.
 - **Fixtures**: Prefer `pytest` fixtures for setup/teardown (and reuse). Avoid shared global state between tests.
@@ -140,7 +140,7 @@ The documentation is organized into the following high-level sections:
   Schemas, plugins, UI, and CLI for the 0.1 surface.
 
 - **About**  
-  Project background, contributing guidelines, release notes, citation information, and references.
+  Contributing guidelines.
 
 
 ### Docstrings

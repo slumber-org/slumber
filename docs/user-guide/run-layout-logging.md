@@ -57,7 +57,7 @@ run_dir = create_run_dir(study, ctx, study_dir)
 logging:
   level: INFO
   handlers:
-    - sink: "{run_id}.log"
+    - sink: "{run_dir}/{run_id}.log"
       level: DEBUG
       rotation: "10 MB"
     - sink: "{run_dir}/errors.log"
@@ -68,12 +68,12 @@ Each `handlers` entry is kwargs for `loguru.logger.add()`. If a handler omits `l
 
 ### Sink path placeholders
 
-Run-context keys plus `{run_dir}` (absolute run directory). Relative sinks resolve under the run directory; absolute paths are used as-is.
+Run-context keys plus `{run_dir}` (absolute run directory). Relative sinks resolve against the study root; absolute paths are used as-is. Use `{run_dir}/…` to write logs inside the run directory.
 
 | Example sink | Resolved path |
 |---|---|
-| `"{run_id}.log"` | `<run_dir>/<run_id>.log` |
-| `"errors.log"` | `<run_dir>/errors.log` |
+| `"{run_id}.log"` | `<study_dir>/<run_id>.log` |
+| `"errors.log"` | `<study_dir>/errors.log` |
 | `"{run_dir}/out.log"` | `<run_dir>/out.log` |
 
 ### Python API
@@ -82,7 +82,9 @@ Run-context keys plus `{run_dir}` (absolute run directory). Relative sinks resol
 from slumber.run import configure_run_logging
 from loguru import logger
 
-handler_ids = configure_run_logging(study, ctx, run_dir, placeholders=…)
+handler_ids = configure_run_logging(
+    study, ctx, run_dir, study_dir=study_dir, placeholders=…
+)
 
 for hid in handler_ids:
     logger.remove(hid)

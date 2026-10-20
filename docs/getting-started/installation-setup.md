@@ -9,7 +9,7 @@ This guide walks you through installing SLUMBER so you can author a study packag
 
 ## Installing SLUMBER
 
-### From source (recommended for development)
+### From source
 
 ```bash
 git clone https://github.com/slumber-org/slumber.git
@@ -29,13 +29,8 @@ For a full CI-like install (all extras + dev):
 uv sync --all-extras --dev
 ```
 
-### From PyPI
-
-```bash
-pip install slumber
-# or with uv:
-uv pip install slumber
-```
+!!! warning "Not published on PyPI yet"
+    The `slumber` package currently on PyPI is an unrelated project, so do not `pip install slumber`.
 
 ## Verify the installation
 
