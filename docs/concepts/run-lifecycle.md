@@ -46,7 +46,7 @@ Activity → host.emit(name)  → RunEngine
 
 **Why `complete()` is not just another event:** finishing a step is the layout's business. If every finished step were a study event, `on:` handlers would fire for each step, and "the phase is complete" would be ambiguous. Keeping `complete()` with the layout means the RunEngine only hears about the phase as a whole (`phase_completed`) and about events that matter to the study (`emit`).
 
-Activities decide *when* to call these, not what they mean for the study. For example, `instruction` calls `complete()` as soon as it is shown, and `sleep` only emits `marked_awake` or `end_sleep` when the participant presses a button.
+Activities decide *when* to call these, not what they mean for the study. For example, `instruction` calls `complete()` as soon as it is shown, and `sleep` only emits `marked_asleep`, `marked_awake` or `end_sleep` when the participant presses a button.
 
 ## When a phase is completed
 
@@ -88,7 +88,7 @@ Because actions run in order, `[stop_pipeline: main, start_phase: morning]` stop
 
 ## Open-ended activities
 
-Some activities never call `complete()`, so a phase built around them is normally left through events instead of `phase_completed`. `sleep` is the example in 0.1: it stays on screen until the participant presses **I'm Awake** (which emits `marked_awake`) or **End Session** (which emits `end_sleep`). The phase is left through handlers for those events: a `start_phase` or `end_run` action unmounts the sleep activity and moves on.
+Some activities never call `complete()`, so a phase built around them is normally left through events instead of `phase_completed`. `sleep` is the example in 0.1: it stays on screen until a handler leaves the phase. Its buttons emit `marked_asleep` (**Going to Sleep**), `marked_awake` (**I'm Awake**) and `end_sleep` (**End Session**). The phase is left through handlers for those events: a `start_phase` or `end_run` action unmounts the sleep activity and moves on.
 
 For example, a sleep phase with a wake-up loop:
 
@@ -127,4 +127,4 @@ Both UIs use the same RunEngine, handlers and actions. They differ in how activi
 
 Mounting an activity means calling its `mount()` method, not only drawing it. In headless, every activity in the phase is still mounted, one after another, but its host has no screen area to draw into. The activity skips the drawing and runs the rest of its logic: `instruction` still loads its content file and calls `complete()`.
 
-So a headless run walks the main path of a condition without anyone at the keyboard, which is what makes it useful for testing and CI. It never emits `marked_awake`, so branches that depend on the participant waking up are only exercised in the GUI.
+So a headless run walks the main path of a condition without anyone at the keyboard, which is what makes it useful for testing and CI. It never emits `marked_asleep` or `marked_awake`, so branches that depend on the participant waking up are only exercised in the GUI.

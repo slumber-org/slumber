@@ -30,8 +30,10 @@ phases:
       - id: sleep
         type: sleep
         settings:
-          wake_button: "I'm Awake"
-          end_button: "End Session"
+          message: "Press a button when you go to bed, wake up or finish."
+          sleep_button: "Going to Bed"
+          wake_button: "I Woke Up"
+          end_button: "Finish Night"
         on:
           - event: marked_awake
             do: [{ start_phase: awakening }]

@@ -74,9 +74,9 @@ uv run slumber study run --study-dir examples/sleep-study --condition relaxation
 A browser window opens. Go through the night:
 
 1. **Evening:** read the three steps with **Next**, then press **Complete**.
-2. **Sleep:** the header and footer disappear and the sleep screen appears. Wait a few seconds, then press **I'm Awake**.
+2. **Sleep:** the header and footer disappear and the sleep screen appears. Press **Going to Sleep**, wait a few seconds, then press **I'm Awake**.
 3. **You're awake:** press **Complete** to go back to sleep.
-4. **Sleep:** press **End Session**.
+4. **Sleep:** press **End Session** and confirm.
 5. **Good morning:** press **Complete**.
 
 The run ends. Near the end of the terminal output, this line shows where the run was saved:

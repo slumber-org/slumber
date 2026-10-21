@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from slumber.schemas.condition import Activity as ActivityConfig
 from slumber.schemas.study import GuiSettings, StepperLayoutDefaults
@@ -39,6 +40,11 @@ from slumber.ui.theme import (
     TYPE_SCALE,
     default_favicon_path,
     default_logo_path,
+)
+from slumber.ui.widgets import (
+    ButtonSettings,
+    ConfirmSettings,
+    merge_button_defaults,
 )
 
 
@@ -359,6 +365,158 @@ class TestActivityHostPaths:
 
         assert gui_host.resolve_path("x.png") == Path("/study/x.png")
         assert headless_host.resolve_path("x.png") == Path("/study/x.png")
+
+
+class TestSleepSettings:
+    def test_default_is_the_wake_and_end_buttons(self) -> None:
+        settings = SleepSettings()
+
+        assert settings.title == "Sleep well"
+        assert settings.message is None
+        assert settings.wake_button == ButtonSettings(
+            label="I'm Awake", style="primary", confirm=False
+        )
+        assert settings.end_button == ButtonSettings(
+            label="End Session", style="attention", confirm=True
+        )
+
+    def test_the_sleep_button_defaults_to_going_to_sleep(self) -> None:
+        assert SleepSettings().sleep_button == ButtonSettings(
+            label="Going to Sleep", style="primary", confirm=False
+        )
+
+    def test_only_the_end_button_asks_by_default(self) -> None:
+        settings = SleepSettings()
+
+        assert settings.sleep_button.confirmation() is None
+        assert settings.wake_button.confirmation() is None
+        assert settings.end_button.confirmation() is not None
+
+    def test_a_label_does_not_change_whether_a_button_asks(self) -> None:
+        settings = SleepSettings(sleep_button="Bedtime", end_button="Stop")
+
+        assert settings.sleep_button.confirm is False
+        assert settings.end_button.confirm is True
+
+    def test_a_label_keeps_the_default_look(self) -> None:
+        settings = SleepSettings(wake_button="Wake up", end_button="Stop")
+
+        assert (settings.wake_button.label, settings.wake_button.style) == (
+            "Wake up",
+            "primary",
+        )
+        assert (settings.end_button.label, settings.end_button.style) == (
+            "Stop",
+            "attention",
+        )
+
+    def test_a_partial_mapping_keeps_the_rest_of_the_default(self) -> None:
+        settings = SleepSettings(end_button={"confirm": False})
+
+        assert settings.end_button == ButtonSettings(
+            label="End Session", style="attention", confirm=False
+        )
+
+    def test_title_may_be_false_but_not_true(self) -> None:
+        assert SleepSettings(title=False).title is False
+        with pytest.raises(ValidationError):
+            SleepSettings(title=True)
+
+    @pytest.mark.parametrize(
+        "settings",
+        [
+            {"wake_button": ""},
+            {"wake_button": {"label": ""}},
+            {"end_button": {"style": "danger"}},
+            {"wake_button": False},
+            {"end_button": True},
+            {"end_button": 3},
+        ],
+    )
+    def test_invalid_values_are_rejected(self, settings: dict) -> None:
+        with pytest.raises(ValidationError):
+            SleepSettings(**settings)
+
+
+class TestButtonSettings:
+    def test_defaults(self) -> None:
+        button = ButtonSettings(label="Go")
+
+        assert (button.style, button.confirm) == ("primary", True)
+
+    def test_a_label_alone_is_enough(self) -> None:
+        assert ButtonSettings.model_validate("Go") == ButtonSettings(label="Go")
+
+    def test_confirm_accepts_a_flag_a_text_or_a_mapping(self) -> None:
+        assert ButtonSettings(label="a", confirm=False).confirm is False
+        assert ButtonSettings(label="a", confirm="Sure?").confirm == "Sure?"
+        mapped = ButtonSettings(
+            label="a", confirm={"message": "Sure?", "cancel_label": "No"}
+        )
+        assert isinstance(mapped.confirm, ConfirmSettings)
+
+    @pytest.mark.parametrize(
+        "value",
+        ["", {"label": ""}, {"label": "a", "style": "danger"}, {"style": "primary"}, 3],
+    )
+    def test_invalid_values_are_rejected(self, value: object) -> None:
+        with pytest.raises(ValidationError):
+            ButtonSettings.model_validate(value)
+
+
+_BUTTON_DEFAULTS = {"label": "Stop", "style": "attention"}
+
+
+class TestMergeButtonDefaults:
+    def test_a_label_keeps_the_other_defaults(self) -> None:
+        assert merge_button_defaults("Halt", _BUTTON_DEFAULTS) == {
+            "label": "Halt",
+            "style": "attention",
+        }
+
+    def test_a_mapping_overrides_only_what_it_sets(self) -> None:
+        merged = merge_button_defaults({"confirm": False}, _BUTTON_DEFAULTS)
+
+        assert merged == {"label": "Stop", "style": "attention", "confirm": False}
+
+    def test_anything_else_is_left_for_validation(self) -> None:
+        assert merge_button_defaults(3, _BUTTON_DEFAULTS) == 3
+
+
+class TestButtonConfirmation:
+    @staticmethod
+    def _confirmation(confirm: object) -> ConfirmSettings | None:
+        return ButtonSettings(label="Stop", confirm=confirm).confirmation()
+
+    def test_true_gives_a_standard_question(self) -> None:
+        confirmation = self._confirmation(True)
+
+        assert confirmation is not None
+        assert confirmation.title == "Stop?"
+        assert confirmation.message == "Are you sure?"
+        assert (confirmation.confirm_label, confirmation.cancel_label) == (
+            "Confirm",
+            "Cancel",
+        )
+
+    def test_false_gives_no_question(self) -> None:
+        assert self._confirmation(False) is None
+
+    def test_a_text_is_the_message(self) -> None:
+        confirmation = self._confirmation("End the night?")
+
+        assert confirmation is not None
+        assert (confirmation.title, confirmation.message) == ("Stop?", "End the night?")
+
+    def test_a_mapping_can_set_everything(self) -> None:
+        settings = {
+            "title": "Sure?",
+            "message": "m",
+            "confirm_label": "Yes",
+            "cancel_label": "No",
+        }
+
+        assert self._confirmation(settings) == ConfirmSettings(**settings)
 
 
 class TestSleepActivity:
