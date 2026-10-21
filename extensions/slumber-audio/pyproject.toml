@@ -3,6 +3,7 @@ name = "slumber-audio"
 version = "0.1.0"
 description = "SLUMBER extension for audio playback"
 readme = "README.md"
+license = "LGPL-3.0-only"
 authors = [
   { name = "Ali Saberi", email = "ali.saberi96@gmail.com" },
 ]
