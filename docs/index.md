@@ -1,4 +1,4 @@
-![SLUMBER logo](assets/logo.png)
+![SLUMBER logo](assets/logo.png){width=200}
 
 # Welcome to SLUMBER
 
