@@ -3,6 +3,8 @@ name = "slumber"
 version = "0.1.0"
 description = "Sleep Logging and Unsupervised Monitoring through BioElectrical Recordings"
 readme = "README.md"
+license = "LGPL-3.0-only"
+license-files = ["LICENSE"]
 authors = [
     { name = "Ali Saberi", email = "ali.saberi96@gmail.com" },
     { name = "Tinke van Buijtene", email = "tinke@kpnmail.nl"}
