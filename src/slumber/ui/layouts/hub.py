@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
@@ -43,7 +43,6 @@ class HubLayout(Layout):
 
     def __init__(self, settings: HubLayoutSettings | None = None) -> None:
         super().__init__(settings or HubLayoutSettings())
-        self._mounted_instance: Any | None = None
 
     def mount(self, host: LayoutHost, activities: list[MountedActivity]) -> None:
         """Mount the first (only) activity into the body."""
@@ -65,16 +64,4 @@ class HubLayout(Layout):
         def on_complete(activity_id: str) -> None:
             del activity_id  # hub does not advance on complete
 
-        activity_host = host.make_activity_host(
-            mounted.config.id,
-            slot,
-            on_complete=on_complete,
-        )
-        self._mounted_instance = mounted.instance
-        mounted.instance.mount(activity_host)
-
-    def unmount(self) -> None:
-        """Unmount the hub activity."""
-        if self._mounted_instance is not None:
-            self._mounted_instance.unmount()
-            self._mounted_instance = None
+        self.mount_activity(host, mounted, slot, on_complete=on_complete)
