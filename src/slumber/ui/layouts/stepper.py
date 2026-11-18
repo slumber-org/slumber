@@ -248,7 +248,6 @@ class StepperLayout(Layout):
         self._complete_button: Any | None = None
         self._list_container: Any | None = None
         self._progress_container: Any | None = None
-        self._mounted_instance: Any | None = None
 
     @property
     def _cfg(self) -> StepperLayoutDefaults:
@@ -261,7 +260,6 @@ class StepperLayout(Layout):
 
         self._host = host
         self._activities = list(activities)
-        self._mounted_instance = None
 
         if not activities:
             logger.warning("StepperLayout mounted with no activities.")
@@ -310,7 +308,7 @@ class StepperLayout(Layout):
 
     def unmount(self) -> None:
         """Unmount the active activity plugin."""
-        self._unmount_current()
+        super().unmount()
         self._host = None
         self._activities = []
         self._progress = None
@@ -389,7 +387,7 @@ class StepperLayout(Layout):
         assert self._host is not None
         assert self._progress is not None
         assert self._slot is not None
-        self._unmount_current()
+        self.unmount_activity()
         self._slot.clear()
 
         index = self._progress.current
@@ -402,19 +400,8 @@ class StepperLayout(Layout):
             self._progress.mark_done(index)
             self._refresh()
 
-        host = self._host.make_activity_host(
-            mounted.config.id,
-            self._slot,
-            on_complete=on_complete,
-        )
-        self._mounted_instance = mounted.instance
-        mounted.instance.mount(host)
+        self.mount_activity(self._host, mounted, self._slot, on_complete=on_complete)
         self._refresh()
-
-    def _unmount_current(self) -> None:
-        if self._mounted_instance is not None:
-            self._mounted_instance.unmount()
-            self._mounted_instance = None
 
     def _refresh(self) -> None:
         """Bring the buttons, step list and progress bar up to date."""
